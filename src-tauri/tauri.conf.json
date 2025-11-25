@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "TauriSkeleton",
+  "productName": "Hollywood Animal Save Editor",
   "version": "0.1.0",
   "identifier": "com.yourname.tauri-skeleton",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Base App",
+        "title": "Hollywood Animal Save Editor",
         "width": 1024,
         "height": 768,
         "resizable": true,
@@ -21,7 +21,27 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": [
+        {
+          "identifier": "main-capability",
+          "windows": ["main"],
+          "permissions": [
+            "core:default",
+            "dialog:allow-open",
+            "dialog:allow-save",
+            "fs:allow-read-text-file",
+            {
+              "identifier": "fs:scope",
+              "allow": [
+                {
+                  "path": "$DRIVE:\\**"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   },
   "bundle": {
