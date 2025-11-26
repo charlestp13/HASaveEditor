@@ -16,7 +16,7 @@ export const PersonFilters = {
   applyAll(
     persons: Person[], 
     filters: FilterConfig,
-    getTranslatedName: (person: Person) => string
+    nameStrings?: string[]
   ): Person[] {
     let filtered = persons;
 
@@ -42,7 +42,7 @@ export const PersonFilters = {
     if (filters.search) {
       const lowerSearch = filters.search.toLowerCase();
       filtered = filtered.filter(person =>
-        getTranslatedName(person).toLowerCase().includes(lowerSearch)
+        PersonUtils.getDisplayName(person, nameStrings).toLowerCase().includes(lowerSearch)
       );
     }
 
@@ -60,9 +60,9 @@ export const PersonFilters = {
     };
   },
 
-  sortByName(persons: Person[], getTranslatedName: (person: Person) => string): Person[] {
+  sortByName(persons: Person[], nameStrings?: string[]): Person[] {
     return [...persons].sort((a, b) => 
-      getTranslatedName(a).localeCompare(getTranslatedName(b))
+      PersonUtils.getDisplayName(a, nameStrings).localeCompare(PersonUtils.getDisplayName(b, nameStrings))
     );
   }
 };

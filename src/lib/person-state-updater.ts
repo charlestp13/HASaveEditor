@@ -31,38 +31,30 @@ export const PersonStateUpdater = {
       default:
         if (field.startsWith('whiteTag:')) {
           const tagId = field.split(':')[1];
-          this.updateWhiteTag(updated, tagId, value);
+          updated.whiteTagsNEW = this.getUpdatedWhiteTags(updated, tagId, value);
         }
     }
 
     return updated;
   },
 
-  updateWhiteTag(person: Person, tagId: string, value: number | null): void {
-    // Remove whiteTag
+  getUpdatedWhiteTags(person: Person, tagId: string, value: number | null): Record<string, any> | undefined {
     if (value === null) {
-      if (person.whiteTagsNEW && typeof person.whiteTagsNEW === 'object') {
-        const newTags = { ...person.whiteTagsNEW };
-        delete newTags[tagId];
-        person.whiteTagsNEW = newTags;
-      }
-      return;
+      if (!person.whiteTagsNEW) return undefined;
+      const newTags = { ...person.whiteTagsNEW };
+      delete newTags[tagId];
+      return Object.keys(newTags).length > 0 ? newTags : undefined;
     }
 
-    // Add or update whiteTag
-    const newTags = person.whiteTagsNEW && typeof person.whiteTagsNEW === 'object' 
-      ? { ...person.whiteTagsNEW }
-      : {};
-
+    const newTags = person.whiteTagsNEW ? { ...person.whiteTagsNEW } : {};
+    
     if (newTags[tagId]) {
-      // Update existing
-      newTags[tagId] = { ...newTags[tagId], value };
+      newTags[tagId] = { ...newTags[tagId], value: value.toFixed(3) };
     } else {
-      // Create new
       newTags[tagId] = createWhiteTag(tagId, value);
     }
 
-    person.whiteTagsNEW = newTags;
+    return newTags;
   },
 
   addTrait(person: Person, trait: string): Person {

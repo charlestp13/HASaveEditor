@@ -71,7 +71,7 @@ export function ProfessionTab({
   const handleError = useCallback((err: unknown, fallback: string) => 
     setError(err instanceof Error ? err.message : fallback), []);
 
-  const { nameStrings, getTranslatedName, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
+  const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
   
   const savePerson = useCallback(
     (personId: string, field: string, value: number | null) => {
@@ -153,80 +153,73 @@ export function ProfessionTab({
     let filtered = PersonFilters.applyAll(
       allPersons, 
       { ...filterConfig, search }, 
-      getTranslatedName
+      nameStrings.length > 0 ? nameStrings : undefined
     );
 
-    // Apply gender filter
-    if (genderFilter !== 'all') {
+    // Apply gender and shady filters in single pass
+    if (genderFilter !== 'all' || shadyFilter !== 'all') {
       filtered = filtered.filter(person => {
-        const personGender = person.gender === 1 ? 'female' : 'male';
-        return personGender === genderFilter;
-      });
-    }
-
-    // Apply shady filter
-    if (shadyFilter !== 'all') {
-      filtered = filtered.filter(person => {
-        const isShady = person.isShady === true;
-        if (shadyFilter === 'shady') return isShady;
-        if (shadyFilter === 'notShady') return !isShady;
+        if (genderFilter !== 'all') {
+          const personGender = person.gender === 1 ? 'female' : 'male';
+          if (personGender !== genderFilter) return false;
+        }
+        
+        if (shadyFilter !== 'all') {
+          const isShady = person.isShady === true;
+          if (shadyFilter === 'shady' && !isShady) return false;
+          if (shadyFilter === 'notShady' && isShady) return false;
+        }
+        
         return true;
       });
     }
 
-    // Apply sorting
-    const sorted = [...filtered];
-    sorted.sort((a, b) => {
-      let aValue: number;
-      let bValue: number;
+    // Schwartzian transform: pre-compute sort values, sort, then extract
+    const withSortValues = filtered.map(person => {
+      let sortValue: number;
 
       switch (sortField) {
         case 'skill': {
-          const aProf = a.professions ? Object.values(a.professions)[0] : '0';
-          const bProf = b.professions ? Object.values(b.professions)[0] : '0';
-          aValue = parseFloat(aProf);
-          bValue = parseFloat(bProf);
+          const prof = person.professions ? Object.values(person.professions)[0] : '0';
+          sortValue = parseFloat(prof);
           break;
         }
         case 'selfEsteem': {
-          aValue = parseFloat(a.selfEsteem || '0');
-          bValue = parseFloat(b.selfEsteem || '0');
+          sortValue = parseFloat(person.selfEsteem || '0');
           break;
         }
         case 'age': {
-          if (!a.birthDate || !b.birthDate || !currentDate) {
-            aValue = 0;
-            bValue = 0;
+          if (!person.birthDate || !currentDate) {
+            sortValue = 0;
           } else {
-            aValue = calculateAge(a.birthDate, currentDate) || 0;
-            bValue = calculateAge(b.birthDate, currentDate) || 0;
+            sortValue = calculateAge(person.birthDate, currentDate) || 0;
           }
           break;
         }
         case 'art': {
-          const aArt = a.whiteTagsNEW?.['ART'];
-          const bArt = b.whiteTagsNEW?.['ART'];
-          aValue = aArt ? parseFloat(aArt.value) : 0;
-          bValue = bArt ? parseFloat(bArt.value) : 0;
+          const art = person.whiteTagsNEW?.['ART'];
+          sortValue = art ? parseFloat(art.value) : 0;
           break;
         }
         case 'com': {
-          const aCom = a.whiteTagsNEW?.['COM'];
-          const bCom = b.whiteTagsNEW?.['COM'];
-          aValue = aCom ? parseFloat(aCom.value) : 0;
-          bValue = bCom ? parseFloat(bCom.value) : 0;
+          const com = person.whiteTagsNEW?.['COM'];
+          sortValue = com ? parseFloat(com.value) : 0;
           break;
         }
         default:
-          return 0;
+          sortValue = 0;
       }
 
-      const comparison = aValue - bValue;
+      return { person, sortValue };
+    });
+
+    withSortValues.sort((a, b) => {
+      const comparison = a.sortValue - b.sortValue;
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-    return sorted;
-  }, [allPersons, search, selectedFilters, getTranslatedName, genderFilter, shadyFilter, sortField, sortOrder, currentDate]);
+    return withSortValues.map(item => item.person);
+  }, [allPersons, search, selectedFilters, nameStrings, genderFilter, shadyFilter, sortField, sortOrder, currentDate]);
 
   const handlePersonUpdate = useCallback((personId: string | number, field: string, value: number | null) => {
     setAllPersons(prev => prev.map(p => 

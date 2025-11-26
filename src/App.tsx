@@ -158,7 +158,7 @@ export default function App() {
 
           <main className="container mx-auto px-4 py-6">
             <ProfessionTab
-              key={`${activeTabConfig.profession}-${fileKey}`}
+              key={`${activeTabConfig.profession}-${fileKey}-${selectedLanguage}`}
               profession={activeTabConfig.profession}
               selectedLanguage={selectedLanguage}
               saveInfo={saveInfo}
