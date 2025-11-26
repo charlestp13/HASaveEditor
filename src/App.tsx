@@ -44,6 +44,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('actors');
   const [selectedLanguage, setSelectedLanguage] = useState<typeof LANGUAGES[number]>('ENG');
   const [fileKey, setFileKey] = useState<string | null>(null);
+  const [globalFilters, setGlobalFilters] = useState<string[]>(['Dead', 'Locked']);
   const { loading, error, execute, clearError } = useAsyncAction();
 
   const handleOpenFile = () => execute(async () => {
@@ -156,6 +157,8 @@ export default function App() {
               profession={activeTabConfig.profession}
               selectedLanguage={selectedLanguage}
               saveInfo={saveInfo}
+              selectedFilters={globalFilters}
+              onFiltersChange={setGlobalFilters}
             />
           </main>
         </>

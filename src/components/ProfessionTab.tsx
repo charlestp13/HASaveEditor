@@ -18,15 +18,22 @@ interface ProfessionTabProps {
   profession: string;
   selectedLanguage: string;
   saveInfo: SaveInfo | null;
+  selectedFilters: string[];
+  onFiltersChange: (filters: string[]) => void;
 }
 
-export function ProfessionTab({ profession, selectedLanguage, saveInfo }: ProfessionTabProps) {
+export function ProfessionTab({ 
+  profession, 
+  selectedLanguage, 
+  saveInfo,
+  selectedFilters,
+  onFiltersChange 
+}: ProfessionTabProps) {
   const [allPersons, setAllPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<string>('');
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(['Dead', 'Locked']);
 
   const professionLower = profession.toLowerCase();
   
@@ -188,7 +195,7 @@ export function ProfessionTab({ profession, selectedLanguage, saveInfo }: Profes
           playerLogoId={saveInfo.studio_logo_id}
           availableStudios={availableStudios}
           selectedFilters={selectedFilters}
-          onFilterChange={setSelectedFilters}
+          onFilterChange={onFiltersChange}
           className="ml-auto"
         />
       </div>
