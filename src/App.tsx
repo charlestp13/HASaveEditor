@@ -38,7 +38,6 @@ const TABS = [
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
-type CountKey = typeof TABS[number]['countKey'];
 
 export default function App() {
   const [saveInfo, setSaveInfo] = useState<SaveInfo | null>(null);
@@ -134,7 +133,7 @@ export default function App() {
 
       {saveManager.isLoaded() && (
         <>
-          <nav className="border-b">
+          <nav className="border-b sticky top-0 z-30 bg-background">
             <div className="container mx-auto px-4">
               <div className="flex gap-1 flex-wrap">
                 {TABS.map(tab => (
@@ -142,14 +141,9 @@ export default function App() {
                     key={tab.id}
                     variant={activeTab === tab.id ? 'default' : 'ghost'}
                     onClick={() => setActiveTab(tab.id)}
-                    className="rounded-b-none"
+                    className="rounded-b-none h-9 px-3 text-sm"
                   >
                     {tab.label}
-                    {saveInfo && (
-                      <span className="ml-2 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs">
-                        {saveInfo[tab.countKey as CountKey]}
-                      </span>
-                    )}
                   </Button>
                 ))}
               </div>

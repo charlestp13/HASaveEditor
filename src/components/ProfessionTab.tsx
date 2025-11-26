@@ -7,7 +7,7 @@ import { PersonFilters } from '@/lib/person-filters';
 import { Input } from '@/components/ui/input';
 import { FilterPopover } from '@/components/FilterPopover';
 import { SortPopover } from '@/components/SortPopover';
-import { CharacterCard } from '@/components/CharacterCard';
+import { CharacterList } from '@/components/CharacterList';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorState } from '@/components/ErrorState';
 import { EmptyState } from '@/components/EmptyState';
@@ -148,7 +148,7 @@ export function ProfessionTab({
     return Array.from(studios).sort();
   }, [allPersons]);
 
-  const persons = useMemo(() => {
+  const filteredPersons = useMemo(() => {
     const filterConfig = PersonFilters.parseSelectedFilters(selectedFilters);
     let filtered = PersonFilters.applyAll(
       allPersons, 
@@ -174,8 +174,12 @@ export function ProfessionTab({
       });
     }
 
+    return filtered;
+  }, [allPersons, search, selectedFilters, nameStrings, genderFilter, shadyFilter]);
+
+  const persons = useMemo(() => {
     // Schwartzian transform: pre-compute sort values, sort, then extract
-    const withSortValues = filtered.map(person => {
+    const withSortValues = filteredPersons.map(person => {
       let sortValue: number;
 
       switch (sortField) {
@@ -219,7 +223,7 @@ export function ProfessionTab({
     });
 
     return withSortValues.map(item => item.person);
-  }, [allPersons, search, selectedFilters, nameStrings, genderFilter, shadyFilter, sortField, sortOrder, currentDate]);
+  }, [filteredPersons, sortField, sortOrder, currentDate]);
 
   const handlePersonUpdate = useCallback((personId: string | number, field: string, value: number | null) => {
     setAllPersons(prev => prev.map(p => 
@@ -249,8 +253,13 @@ export function ProfessionTab({
                           displayError?.includes('Browse for Game Folder') ||
                           displayError?.includes('verify the game installation path');
 
-  if (loading) {
-    return <LoadingSpinner message={`Loading ${professionLower}s...`} />;
+  const hasFilters = search || selectedFilters.length > 0;
+  const emptyMessage = hasFilters
+    ? `No ${professionLower}s found${search ? ` matching "${search}"` : ''}`
+    : `No ${professionLower}s in this save file`;
+
+  if (!saveInfo) {
+    return <EmptyState message="No save file loaded" />;
   }
 
   if (displayError) {
@@ -265,15 +274,6 @@ export function ProfessionTab({
     );
   }
 
-  const hasFilters = search || selectedFilters.length > 0;
-  const emptyMessage = hasFilters
-    ? `No ${professionLower}s found${search ? ` matching "${search}"` : ''}`
-    : `No ${professionLower}s in this save file`;
-
-  if (!saveInfo) {
-    return <EmptyState message="No save file loaded" />;
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -283,7 +283,15 @@ export function ProfessionTab({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
+          disabled={loading}
         />
+        <div className="text-sm text-muted-foreground">
+          {loading ? (
+            <>Loading...</>
+          ) : (
+            <>Found: <span className="font-semibold text-foreground">{persons.length}</span> {professionLower}{persons.length !== 1 ? 's' : ''}</>
+          )}
+        </div>
         <div className="ml-auto flex gap-2">
           <SortPopover
             sortField={sortField}
@@ -304,22 +312,21 @@ export function ProfessionTab({
         </div>
       </div>
 
-      {persons.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <LoadingSpinner message={`Loading ${professionLower}s...`} />
+        </div>
+      ) : persons.length === 0 ? (
         <EmptyState message={emptyMessage} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {persons.map((person) => (
-            <CharacterCard
-              key={person.id}
-              character={person}
-              currentDate={currentDate}
-              nameStrings={nameStrings}
-              onUpdate={(field, value) => handlePersonUpdate(person.id, field, value)}
-              onTraitAdd={(trait) => handleTraitAdd(person.id, trait)}
-              onTraitRemove={(trait) => handleTraitRemove(person.id, trait)}
-            />
-          ))}
-        </div>
+        <CharacterList
+          persons={persons}
+          currentDate={currentDate}
+          nameStrings={nameStrings}
+          onUpdate={handlePersonUpdate}
+          onTraitAdd={handleTraitAdd}
+          onTraitRemove={handleTraitRemove}
+        />
       )}
     </div>
   );

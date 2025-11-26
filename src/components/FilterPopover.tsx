@@ -179,7 +179,7 @@ export const FilterPopover = memo(function FilterPopover({
           </Button>
         </PopoverTrigger>
         {activeCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground z-50">
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
             {activeCount}
           </span>
         )}
