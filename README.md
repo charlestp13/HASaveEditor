@@ -10,7 +10,7 @@ Edit character stats, statuses, traits, and genres across all professions (actor
 
 - **Edit**: Happiness, Loyalty, Skill, Limit, Traits, Genres
 - **Edit (Actors/Directors)**: Public Image (ART/COM)
-- **Edit (Cinematographers)**: INDOOR/OUTDOOR settings
+- **Edit (Cinematographers)**: Setting Specialty (INDOOR/OUTDOOR)
 - **Filter**: Studio, Gender, Dead/Locked, Shady status
 - **Sort**: Skill, Self-Esteem, Age, Artistic Value, Commercial Value
 
