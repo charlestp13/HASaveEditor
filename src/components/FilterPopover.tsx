@@ -1,12 +1,17 @@
 import { useState, useMemo, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Filter } from 'lucide-react';
 import { toTitleCase } from '@/lib/utils';
 import { OPPONENT_STUDIOS, getPlayerLogoIcon, ALL_COMPETITORS_ICON } from '@/lib/studio-data';
 import deadIcon from '@/assets/DEAD.png';
 import unemployedIcon from '@/assets/UN.png';
 import lockedIcon from '@/assets/LOCK.png';
+import maleIcon from '@/assets/MALE.png';
+import femaleIcon from '@/assets/FEMALE.png';
+import shadyIcon from '@/assets/SHADY.png';
+import noShadyIcon from '@/assets/NOSHADY.png';
 
 const SELECTED_BORDER_COLOR = '#ff71a9';
 
@@ -40,8 +45,49 @@ interface FilterPopoverProps {
   availableStudios: string[];
   selectedFilters: string[];
   onFilterChange: (filters: string[]) => void;
+  genderFilter: 'all' | 'male' | 'female';
+  onGenderFilterChange: (filter: 'all' | 'male' | 'female') => void;
+  shadyFilter: 'all' | 'shady' | 'notShady';
+  onShadyFilterChange: (filter: 'all' | 'shady' | 'notShady') => void;
   className?: string;
 }
+
+interface ToggleFilterSectionProps {
+  title: string;
+  value: string;
+  onValueChange: (value: string) => void;
+  options: Array<{ value: string; label: string; icon?: string }>;
+}
+
+const ToggleFilterSection = memo(function ToggleFilterSection({ 
+  title, 
+  value, 
+  onValueChange, 
+  options 
+}: ToggleFilterSectionProps) {
+  return (
+    <div>
+      <div className="pb-1 px-2 text-xs font-semibold text-primary uppercase tracking-wide">{title}</div>
+      <ToggleGroup
+        type="single"
+        value={value}
+        onValueChange={onValueChange}
+        className="justify-start px-2"
+      >
+        {options.map((option) => (
+          <ToggleGroupItem 
+            key={option.value} 
+            value={option.value} 
+            className={option.value === 'all' ? 'flex-1' : 'gap-2'}
+          >
+            {option.icon && <img src={option.icon} alt={option.label} className="w-4 h-4" />}
+            {option.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+    </div>
+  );
+});
 
 export const FilterPopover = memo(function FilterPopover({
   playerStudioName,
@@ -49,6 +95,10 @@ export const FilterPopover = memo(function FilterPopover({
   availableStudios,
   selectedFilters,
   onFilterChange,
+  genderFilter,
+  onGenderFilterChange,
+  shadyFilter,
+  onShadyFilterChange,
   className,
 }: FilterPopoverProps) {
   const [open, setOpen] = useState(false);
@@ -56,6 +106,11 @@ export const FilterPopover = memo(function FilterPopover({
   const opponentStudios = useMemo(() => 
     OPPONENT_STUDIOS.filter(studio => availableStudios.includes(studio.id)),
     [availableStudios]
+  );
+
+  const competitorIds = useMemo(() => 
+    opponentStudios.map(s => s.id),
+    [opponentStudios]
   );
 
   const studioOptions = useMemo((): FilterOption[] => {
@@ -83,7 +138,6 @@ export const FilterPopover = memo(function FilterPopover({
 
   const toggleFilter = (filterId: string) => {
     if (filterId === 'ALL_COMPETITORS') {
-      const competitorIds = opponentStudios.map(s => s.id);
       const allSelected = competitorIds.every(id => selectedFilters.includes(id));
       
       if (allSelected) {
@@ -106,15 +160,17 @@ export const FilterPopover = memo(function FilterPopover({
     }
   };
 
-  const isAllCompetitorsSelected = useMemo(() => {
-    const competitorIds = opponentStudios.map(s => s.id);
-    return competitorIds.length > 0 && competitorIds.every(id => selectedFilters.includes(id));
-  }, [opponentStudios, selectedFilters]);
+  const isAllCompetitorsSelected = useMemo(() => 
+    competitorIds.length > 0 && competitorIds.every(id => selectedFilters.includes(id)),
+    [competitorIds, selectedFilters]
+  );
 
-  const activeCount = selectedFilters.length;
+  const activeCount = selectedFilters.length + 
+    (genderFilter !== 'all' ? 1 : 0) + 
+    (shadyFilter !== 'all' ? 1 : 0);
 
   return (
-    <div className={`${className} relative`}>
+    <div className={className ? `${className} relative` : 'relative'}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
@@ -130,6 +186,7 @@ export const FilterPopover = memo(function FilterPopover({
         <PopoverContent className="w-auto min-w-[240px] max-w-sm" align="end">
         <div className="space-y-1">
           <div className="pb-2 font-medium text-sm">Hide Characters</div>
+          
           {allItems.map((item, index) => {
             if ('type' in item) {
               if (item.type === 'header') {
@@ -138,7 +195,8 @@ export const FilterPopover = memo(function FilterPopover({
                     {item.label}
                   </div>
                 );
-              } else {
+              }
+              if (item.type === 'separator') {
                 return <div key={`sep-${index}`} className="my-2 border-t border-border" />;
               }
             }
@@ -151,6 +209,32 @@ export const FilterPopover = memo(function FilterPopover({
               />
             );
           })}
+
+          <div className="my-2 border-t border-border" />
+
+          <div className="pb-2 font-medium text-sm">Show Characters</div>
+
+          <ToggleFilterSection
+            title="Gender"
+            value={genderFilter}
+            onValueChange={(value) => onGenderFilterChange(value as typeof genderFilter)}
+            options={[
+              { value: 'male', label: 'Male', icon: maleIcon },
+              { value: 'all', label: 'All' },
+              { value: 'female', label: 'Female', icon: femaleIcon },
+            ]}
+          />
+
+          <ToggleFilterSection
+            title="Shady"
+            value={shadyFilter}
+            onValueChange={(value) => onShadyFilterChange(value as typeof shadyFilter)}
+            options={[
+              { value: 'shady', label: 'Shady', icon: shadyIcon },
+              { value: 'all', label: 'All' },
+              { value: 'notShady', label: 'Clean', icon: noShadyIcon },
+            ]}
+          />
         </div>
       </PopoverContent>
     </Popover>

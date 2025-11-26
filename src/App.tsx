@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SaveInfo } from '@/lib/types';
+import type { SortField, SortOrder } from '@/components/SortPopover';
 
 const LANGUAGES = ['ENG', 'SPA', 'GER', 'FRE', 'PTB', 'RUS', 'CHN', 'JAP', 'BEL', 'UKR'] as const;
 
@@ -45,6 +46,10 @@ export default function App() {
   const [selectedLanguage, setSelectedLanguage] = useState<typeof LANGUAGES[number]>('ENG');
   const [fileKey, setFileKey] = useState<string | null>(null);
   const [globalFilters, setGlobalFilters] = useState<string[]>(['Dead', 'Locked']);
+  const [sortField, setSortField] = useState<SortField>('skill');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
+  const [shadyFilter, setShadyFilter] = useState<'all' | 'shady' | 'notShady'>('all');
   const { loading, error, execute, clearError } = useAsyncAction();
 
   const handleOpenFile = () => execute(async () => {
@@ -159,6 +164,16 @@ export default function App() {
               saveInfo={saveInfo}
               selectedFilters={globalFilters}
               onFiltersChange={setGlobalFilters}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSortChange={(field, order) => {
+                setSortField(field);
+                setSortOrder(order);
+              }}
+              genderFilter={genderFilter}
+              onGenderFilterChange={setGenderFilter}
+              shadyFilter={shadyFilter}
+              onShadyFilterChange={setShadyFilter}
             />
           </main>
         </>

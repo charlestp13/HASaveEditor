@@ -3,7 +3,7 @@ import { PersonUtils } from '@/lib/utils';
 import type { GameDate } from '@/lib/utils';
 
 interface InfoSectionProps {
-  studioId: string | number | null | undefined;
+  studioId: string | null | undefined;
   state: number | undefined;
   isBusy: boolean;
   gender: number | undefined;

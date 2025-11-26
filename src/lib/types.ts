@@ -1,26 +1,26 @@
 export interface Person {
-  id: string | number;
-  firstNameId?: number;
-  lastNameId?: number;
-  customName?: string;
+  id: number;
+  firstNameId?: string;
+  lastNameId?: string;
+  customName?: string | null;
   birthDate?: string;
   deathDate?: string;
   causeOfDeath?: number;
   gender?: number;
-  studioId?: string;
+  studioId?: string | null;
+  portraitBaseId?: number;
   mood?: number;
   attitude?: number;
-  selfEsteem?: number;
+  selfEsteem?: string;
   readiness?: number;
+  limit?: number;
+  Limit?: number;
   state?: number;
   professions?: {
     [key: string]: string;
   };
   skill?: number;
-  limit?: number;
-  Limit?: number;
   whiteTagsNEW?: Record<string, WhiteTag>;
-  portraitBaseId?: number;
   contract?: {
     contractType: number;
     amount: number;
@@ -32,19 +32,23 @@ export interface Person {
   };
   labels?: string[];
   aSins?: string[];
-  activeOrPlannedMovies?: any[];
+  activeOrPlannedMovies?: any;
+  isShady?: boolean;
+  isOnTheHook?: boolean;
+  mayHaveSins?: boolean | null;
+  prefIlGift?: number;
 }
 
 export interface OverallValue {
   movieId: number;
   sourceType: number;
-  value: number;
+  value: string;
   dateAdded: string;
 }
 
 export interface WhiteTag {
   id: string;
-  value: number;
+  value: string;
   dateAdded: string;
   movieId: number;
   IsOverall: boolean;
@@ -105,7 +109,7 @@ export interface SaveInfo {
 export interface PersonUpdate {
   customName?: string;
   gender?: number;
-  studioId?: string;
+  studioId?: string | null;
   mood?: number;
   attitude?: number;
   selfEsteem?: number;

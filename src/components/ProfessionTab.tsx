@@ -6,6 +6,7 @@ import { PersonStateUpdater } from '@/lib/person-state-updater';
 import { PersonFilters } from '@/lib/person-filters';
 import { Input } from '@/components/ui/input';
 import { FilterPopover } from '@/components/FilterPopover';
+import { SortPopover } from '@/components/SortPopover';
 import { CharacterCard } from '@/components/CharacterCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorState } from '@/components/ErrorState';
@@ -13,6 +14,22 @@ import { EmptyState } from '@/components/EmptyState';
 import { useNameTranslation } from '@/hooks/useNameTranslation';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import type { Person, SaveInfo } from '@/lib/types';
+import type { SortField, SortOrder } from '@/components/SortPopover';
+
+function calculateAge(birthDate: string, currentDate: string): number | null {
+  try {
+    const [birthDay, birthMonth, birthYear] = birthDate.split('-').map(Number);
+    const [currentDay, currentMonth, currentYear] = currentDate.split('-').map(Number);
+    
+    let age = currentYear - birthYear;
+    if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
+      age--;
+    }
+    return age;
+  } catch {
+    return null;
+  }
+}
 
 interface ProfessionTabProps {
   profession: string;
@@ -20,6 +37,13 @@ interface ProfessionTabProps {
   saveInfo: SaveInfo | null;
   selectedFilters: string[];
   onFiltersChange: (filters: string[]) => void;
+  sortField: SortField;
+  sortOrder: SortOrder;
+  onSortChange: (field: SortField, order: SortOrder) => void;
+  genderFilter: 'all' | 'male' | 'female';
+  onGenderFilterChange: (filter: 'all' | 'male' | 'female') => void;
+  shadyFilter: 'all' | 'shady' | 'notShady';
+  onShadyFilterChange: (filter: 'all' | 'shady' | 'notShady') => void;
 }
 
 export function ProfessionTab({ 
@@ -27,7 +51,14 @@ export function ProfessionTab({
   selectedLanguage, 
   saveInfo,
   selectedFilters,
-  onFiltersChange 
+  onFiltersChange,
+  sortField,
+  sortOrder,
+  onSortChange,
+  genderFilter,
+  onGenderFilterChange,
+  shadyFilter,
+  onShadyFilterChange
 }: ProfessionTabProps) {
   const [allPersons, setAllPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
@@ -119,13 +150,83 @@ export function ProfessionTab({
 
   const persons = useMemo(() => {
     const filterConfig = PersonFilters.parseSelectedFilters(selectedFilters);
-    const filtered = PersonFilters.applyAll(
+    let filtered = PersonFilters.applyAll(
       allPersons, 
       { ...filterConfig, search }, 
       getTranslatedName
     );
-    return PersonFilters.sortByName(filtered, getTranslatedName);
-  }, [allPersons, search, selectedFilters, getTranslatedName]);
+
+    // Apply gender filter
+    if (genderFilter !== 'all') {
+      filtered = filtered.filter(person => {
+        const personGender = person.gender === 1 ? 'female' : 'male';
+        return personGender === genderFilter;
+      });
+    }
+
+    // Apply shady filter
+    if (shadyFilter !== 'all') {
+      filtered = filtered.filter(person => {
+        const isShady = person.isShady === true;
+        if (shadyFilter === 'shady') return isShady;
+        if (shadyFilter === 'notShady') return !isShady;
+        return true;
+      });
+    }
+
+    // Apply sorting
+    const sorted = [...filtered];
+    sorted.sort((a, b) => {
+      let aValue: number;
+      let bValue: number;
+
+      switch (sortField) {
+        case 'skill': {
+          const aProf = a.professions ? Object.values(a.professions)[0] : '0';
+          const bProf = b.professions ? Object.values(b.professions)[0] : '0';
+          aValue = parseFloat(aProf);
+          bValue = parseFloat(bProf);
+          break;
+        }
+        case 'selfEsteem': {
+          aValue = parseFloat(a.selfEsteem || '0');
+          bValue = parseFloat(b.selfEsteem || '0');
+          break;
+        }
+        case 'age': {
+          if (!a.birthDate || !b.birthDate || !currentDate) {
+            aValue = 0;
+            bValue = 0;
+          } else {
+            aValue = calculateAge(a.birthDate, currentDate) || 0;
+            bValue = calculateAge(b.birthDate, currentDate) || 0;
+          }
+          break;
+        }
+        case 'art': {
+          const aArt = a.whiteTagsNEW?.['ART'];
+          const bArt = b.whiteTagsNEW?.['ART'];
+          aValue = aArt ? parseFloat(aArt.value) : 0;
+          bValue = bArt ? parseFloat(bArt.value) : 0;
+          break;
+        }
+        case 'com': {
+          const aCom = a.whiteTagsNEW?.['COM'];
+          const bCom = b.whiteTagsNEW?.['COM'];
+          aValue = aCom ? parseFloat(aCom.value) : 0;
+          bValue = bCom ? parseFloat(bCom.value) : 0;
+          break;
+        }
+        default:
+          return 0;
+      }
+
+      const comparison = aValue - bValue;
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return sorted;
+  }, [allPersons, search, selectedFilters, getTranslatedName, genderFilter, shadyFilter, sortField, sortOrder, currentDate]);
 
   const handlePersonUpdate = useCallback((personId: string | number, field: string, value: number | null) => {
     setAllPersons(prev => prev.map(p => 
@@ -190,14 +291,24 @@ export function ProfessionTab({
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
-        <FilterPopover
-          playerStudioName={saveInfo.player_studio_name}
-          playerLogoId={saveInfo.studio_logo_id}
-          availableStudios={availableStudios}
-          selectedFilters={selectedFilters}
-          onFilterChange={onFiltersChange}
-          className="ml-auto"
-        />
+        <div className="ml-auto flex gap-2">
+          <SortPopover
+            sortField={sortField}
+            sortOrder={sortOrder}
+            onSortChange={onSortChange}
+          />
+          <FilterPopover
+            playerStudioName={saveInfo.player_studio_name}
+            playerLogoId={saveInfo.studio_logo_id}
+            availableStudios={availableStudios}
+            selectedFilters={selectedFilters}
+            onFilterChange={onFiltersChange}
+            genderFilter={genderFilter}
+            onGenderFilterChange={onGenderFilterChange}
+            shadyFilter={shadyFilter}
+            onShadyFilterChange={onShadyFilterChange}
+          />
+        </div>
       </div>
 
       {persons.length === 0 ? (

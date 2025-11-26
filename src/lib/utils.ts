@@ -48,8 +48,8 @@ export class PersonUtils {
     if (person.customName) return person.customName;
     
     if (nameStrings && person.firstNameId && person.lastNameId) {
-      const firstName = nameStrings[person.firstNameId] || person.firstNameId.toString();
-      const lastName = nameStrings[person.lastNameId] || person.lastNameId.toString();
+      const firstName = nameStrings[parseInt(person.firstNameId, 10)] || person.firstNameId;
+      const lastName = nameStrings[parseInt(person.lastNameId, 10)] || person.lastNameId;
       return `${firstName} ${lastName}`;
     }
     
@@ -69,7 +69,7 @@ export class PersonUtils {
     return typeof value === 'string' ? parseFloat(value) : value;
   }
 
-  static getStudioDisplay(studioId: string | undefined): string {
+  static getStudioDisplay(studioId: string | null | undefined): string {
     if (!studioId || studioId === 'NONE') return 'N/A';
     if (studioId === 'PL') return 'Player';
     
@@ -241,16 +241,17 @@ export class GameDate {
 }
 
 export function createWhiteTag(tagId: string, value: number): WhiteTag {
+  const valueStr = value.toFixed(3);
   return {
     id: tagId,
-    value,
+    value: valueStr,
     dateAdded: GameDate.GAME_START_DATE,
     movieId: 0,
     IsOverall: false,
     overallValues: [{
       movieId: 0,
       sourceType: 0,
-      value,
+      value: valueStr,
       dateAdded: GameDate.GAME_START_DATE
     }]
   };
