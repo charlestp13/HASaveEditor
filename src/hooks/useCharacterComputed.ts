@@ -21,8 +21,11 @@ export function useCharacterComputed(character: Person) {
     const indoor = PersonUtils.getWhiteTagValue(character, 'INDOOR');
     const outdoor = PersonUtils.getWhiteTagValue(character, 'OUTDOOR');
     
-    const isActorOrDirector = professionName === 'Actor' || professionName === 'Director';
-    const isCinematographer = professionName === 'Cinematographer';
+    // Determine which sections can be edited
+    const canEditStatus = professionName === 'Actor' || professionName === 'Director';
+    const canEditSettings = professionName === 'Cinematographer';
+    const canEditGenres = ['Scriptwriter', 'Producer', 'Director', 'Actor'].includes(professionName);
+    const canEditTraits = professionName !== 'Agent' && professionName !== 'Executive';
     
     // Pre-compute genres (filter once instead of 3 times in CharacterCard)
     const genres = PersonUtils.getSkillEntries(character)
@@ -31,8 +34,6 @@ export function useCharacterComputed(character: Person) {
         id: s.id,
         value: typeof s.value === 'string' ? parseFloat(s.value) : s.value
       }));
-    
-    const canEditTraits = professionName !== 'Agent' && professionName !== 'Executive';
 
     return {
       isDead,
@@ -44,10 +45,11 @@ export function useCharacterComputed(character: Person) {
       com,
       indoor,
       outdoor,
-      isActorOrDirector,
-      isCinematographer,
-      genres,
+      canEditStatus,
+      canEditSettings,
+      canEditGenres,
       canEditTraits,
+      genres,
     };
   }, [
     character.deathDate,

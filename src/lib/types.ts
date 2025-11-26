@@ -25,9 +25,9 @@ export interface Person {
     contractType: number;
     amount: number;
     startAmount: number;
-    initialFee: number;
-    monthlySalary: number;
-    weightToSalary: number;
+    initialFee: string;
+    monthlySalary: string;
+    weightToSalary: string;
     dateOfSigning: string;
   };
   labels?: string[];

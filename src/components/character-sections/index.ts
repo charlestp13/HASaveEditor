@@ -1,0 +1,8 @@
+export { StatsSection } from './StatsSection';
+export { InfoSection } from './InfoSection';
+export { TraitsSection } from './TraitsSection';
+export { StatusSection } from './StatusSection';
+export { SettingsSection } from './SettingsSection';
+export { GenresSection } from './GenresSection';
+export { ContractSection } from './ContractSection';
+export { SinsSection } from './SinsSection';

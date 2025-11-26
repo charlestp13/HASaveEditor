@@ -1,19 +1,18 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { PortraitCarousel } from '@/components/PortraitCarousel';
-import { TraitBadge } from '@/components/TraitBadge';
-import { SimpleBadge } from '@/components/SimpleBadge';
-import { GenreBadge } from '@/components/GenreBadge';
-import { TraitAdjuster } from '@/components/TraitAdjuster';
-import { GenreAdjuster } from '@/components/GenreAdjuster';
-import { StatAdjuster } from '@/components/StatAdjuster';
-import { SkillAdjuster } from '@/components/SkillAdjuster';
-import { StatusAdjuster } from '@/components/StatusAdjuster';
-import { SettingsAdjuster } from '@/components/SettingsAdjuster';
-import { CardSection } from '@/components/CardSection';
-import { PersonUtils, GameDate } from '@/lib/utils';
+import { PersonUtils } from '@/lib/utils';
 import { useCharacterDates } from '@/hooks/useCharacterDates';
 import { useCharacterComputed } from '@/hooks/useCharacterComputed';
+import {
+  StatsSection,
+  InfoSection,
+  TraitsSection,
+  StatusSection,
+  SettingsSection,
+  GenresSection,
+  ContractSection,
+  SinsSection,
+} from '@/components/character-sections';
 import type { Person } from '@/lib/types';
 
 interface CharacterCardProps {
@@ -26,11 +25,6 @@ interface CharacterCardProps {
   onTraitAdd?: (trait: string) => void;
   onTraitRemove?: (trait: string) => void;
 }
-
-const PUBLIC_IMAGE_STATS = [
-  { type: 'ART' as const, label: 'Artistic Status' },
-  { type: 'COM' as const, label: 'Commercial Status' },
-] as const;
 
 export const CharacterCard = memo(function CharacterCard({ 
   character, 
@@ -51,12 +45,13 @@ export const CharacterCard = memo(function CharacterCard({
     displayableTraits,
     art,
     com,
-    isActorOrDirector,
-    isCinematographer,
     indoor,
     outdoor,
-    genres,
+    canEditStatus,
+    canEditSettings,
+    canEditGenres,
     canEditTraits,
+    genres,
   } = useCharacterComputed(character);
 
   return (
@@ -80,193 +75,65 @@ export const CharacterCard = memo(function CharacterCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <StatAdjuster
-            label="Happiness"
-            value={Number(character.mood ?? 0)}
-            onChange={(v) => onUpdate?.('mood', v)}
-          />
-          <StatAdjuster
-            label="Loyalty"
-            value={Number(character.attitude ?? 0)}
-            onChange={(v) => onUpdate?.('attitude', v)}
-          />
-          <SkillAdjuster
-            skillValue={professionValue}
-            limitValue={Number(character.limit ?? 1)}
-            onSkillChange={(v) => onUpdate?.('skill', v)}
-            onLimitChange={(v) => onUpdate?.('limit', v)}
-          />
-        </div>
+        <StatsSection
+          mood={Number(character.mood ?? 0)}
+          attitude={Number(character.attitude ?? 0)}
+          professionValue={professionValue}
+          limit={Number(character.limit ?? 1)}
+          onUpdate={onUpdate}
+        />
 
-        <div className="flex gap-3 items-start">
-          <div className="flex-1 space-y-1">
-            <div className="text-sm">
-              <span className="text-muted-foreground">Studio: </span>
-              <span className="font-medium">
-                {PersonUtils.getStudioDisplay(character.studioId)}
-              </span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              State: {PersonUtils.getStateLabel(character.state)}
-              {isBusy && ' (On Job)'}
-            </div>
-            {character.gender !== undefined && (
-              <div className="text-xs text-muted-foreground">
-                Gender: {character.gender === 1 ? 'Female' : 'Male'}
-              </div>
-            )}
-          </div>
-          
-          <PortraitCarousel 
-            professions={character.professions || {}}
-            gender={character.gender}
-            portraitBaseId={character.portraitBaseId}
-          />
-        </div>
-
-        {birthParsed && (
-          <div className="space-y-1 text-xs">
-            <div>
-              <span className="text-muted-foreground">Birth: </span>
-              <span className="font-mono">{birthParsed.format()}</span>
-            </div>
-            {isDead && deathParsed && (
-              <div className="text-destructive">
-                <span className="text-muted-foreground">Death: </span>
-                <span className="font-mono">{deathParsed.format()}</span>
-                <span className="ml-2">(Cause: {character.causeOfDeath})</span>
-              </div>
-            )}
-          </div>
-        )}
+        <InfoSection
+          studioId={character.studioId}
+          state={character.state}
+          isBusy={isBusy}
+          gender={character.gender}
+          birthParsed={birthParsed}
+          isDead={isDead}
+          deathParsed={deathParsed}
+          professions={character.professions || {}}
+          portraitBaseId={character.portraitBaseId}
+        />
 
         {canEditTraits && (
-          <CardSection title="Traits" action={
-            <TraitAdjuster
-              traits={character.labels || []}
-              onAdd={(trait) => onTraitAdd?.(trait)}
-              onRemove={(trait) => onTraitRemove?.(trait)}
-            />
-          }>
-            {displayableTraits.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {displayableTraits.map((trait) => (
-                  <TraitBadge key={trait} trait={trait} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground">No traits</div>
-            )}
-          </CardSection>
+          <TraitsSection
+            labels={character.labels}
+            displayableTraits={displayableTraits}
+            onTraitAdd={onTraitAdd}
+            onTraitRemove={onTraitRemove}
+          />
         )}
 
-        {isActorOrDirector && (
-          <CardSection title="Public Image">
-            <div className="space-y-2">
-              {PUBLIC_IMAGE_STATS.map(({ type, label }) => {
-                const value = type === 'ART' ? art : com;
-                return (
-                  <StatusAdjuster
-                    key={type}
-                    type={type}
-                    value={value > 0 ? value : null}
-                    label={label}
-                    profession={professionName as 'Actor' | 'Director'}
-                    onChange={(v) => onUpdate?.(`whiteTag:${type}`, v)}
-                  />
-                );
-              })}
-            </div>
-          </CardSection>
+        {canEditStatus && (
+          <StatusSection
+            art={art}
+            com={com}
+            professionName={professionName}
+            onUpdate={onUpdate}
+          />
         )}
 
-        {isCinematographer && (
-          <CardSection title="Settings">
-            <SettingsAdjuster
-              outdoorValue={outdoor || 0}
-              indoorValue={indoor || 0}
-              onOutdoorChange={(v) => onUpdate?.('whiteTag:OUTDOOR', v)}
-              onIndoorChange={(v) => onUpdate?.('whiteTag:INDOOR', v)}
-            />
-          </CardSection>
+        {canEditSettings && (
+          <SettingsSection
+            indoor={indoor || 0}
+            outdoor={outdoor || 0}
+            onUpdate={onUpdate}
+          />
         )}
 
-        {['Scriptwriter', 'Producer', 'Director', 'Actor'].includes(professionName) && (
-          <CardSection 
-            title="Genres" 
-            action={
-              <GenreAdjuster
-                genres={genres}
-                onToggle={(genre, shouldAdd) => {
-                  onUpdate?.(`whiteTag:${genre}`, shouldAdd ? 12.0 : null);
-                }}
-              />
-            }
-            collapsible 
-            defaultCollapsed
-          >
-            {genres.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {genres.map((genre) => (
-                  <GenreBadge 
-                    key={genre.id} 
-                    genre={genre.id}
-                    value={genre.value} 
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground">No genres</div>
-            )}
-          </CardSection>
+        {canEditGenres && (
+          <GenresSection genres={genres} onUpdate={onUpdate} />
         )}
 
         {character.contract && (
-          <CardSection title="Contract" collapsible defaultCollapsed>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <div className="text-muted-foreground">Years</div>
-                <div className="font-mono">{character.contract.amount}</div>
-              </div>
-              <div>
-                <div className="text-muted-foreground">Days Left</div>
-                <div className="font-mono">
-                  {character.contract.contractType === 2 
-                    ? '∞' 
-                    : contractDaysLeft}
-                </div>
-              </div>
-              <div>
-                <div className="text-muted-foreground">Initial Fee</div>
-                <div className="font-mono">${character.contract.initialFee}</div>
-              </div>
-              <div>
-                <div className="text-muted-foreground">Monthly</div>
-                <div className="font-mono">${character.contract.monthlySalary}</div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <div className="text-muted-foreground">Signed</div>
-                <div className="font-mono text-xs">{GameDate.fromDate(new Date(character.contract.dateOfSigning)).format()}</div>
-              </div>
-              <div>
-                <div className="text-muted-foreground">Weight/Salary</div>
-                <div className="font-mono">{character.contract.weightToSalary}</div>
-              </div>
-            </div>
-          </CardSection>
+          <ContractSection
+            contract={character.contract}
+            contractDaysLeft={contractDaysLeft}
+          />
         )}
 
         {character.aSins && character.aSins.length > 0 && (
-          <CardSection title="Advanced Sins" collapsible defaultCollapsed>
-            <div className="flex flex-wrap gap-1">
-              {character.aSins.map((sin) => (
-                <SimpleBadge key={sin} label={sin} />
-              ))}
-            </div>
-          </CardSection>
+          <SinsSection aSins={character.aSins} />
         )}
       </CardContent>
     </Card>
