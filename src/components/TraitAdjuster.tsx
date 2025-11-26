@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,6 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { EditButton } from '@/components/EditButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DISPLAYABLE_TRAITS, TRAIT_CONFLICTS, type DisplayableTrait } from '@/lib/character-traits';
 import { toTitleCase } from '@/lib/utils';
@@ -72,7 +72,7 @@ export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Edit Traits</Button>
+        <EditButton>Traits</EditButton>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>

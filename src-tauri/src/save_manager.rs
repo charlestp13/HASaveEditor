@@ -140,6 +140,10 @@ pub struct PersonUpdate {
     pub add_trait: Option<String>,
     #[serde(rename = "removeTrait")]
     pub remove_trait: Option<String>,
+    #[serde(rename = "addGenre")]
+    pub add_genre: Option<String>,
+    #[serde(rename = "removeGenre")]
+    pub remove_genre: Option<String>,
 }
 
 fn json_id_matches(value: &Value, target: &str) -> bool {
@@ -262,7 +266,7 @@ pub fn load_save_file(path: String, state: State<AppState>) -> Result<SaveInfo, 
 #[tauri::command]
 pub fn save_save_file(path: String, state: State<AppState>) -> Result<(), String> {
     state.with_save_data(|data| {
-        let json = serde_json::to_string_pretty(data).map_err(|e| e.to_string())?;
+        let json = serde_json::to_string(data).map_err(|e| e.to_string())?;
         let content = format!("\u{feff}{}", json); // Restore UTF-8 BOM
         fs::write(&path, content).map_err(|e| e.to_string())
     })
@@ -349,6 +353,12 @@ fn apply_updates(person: &mut Value, profession: &str, update: &PersonUpdate) {
     if let Some(label) = &update.add_trait {
         add_label(person, label);
     }
+    if let Some(genre) = &update.remove_genre {
+        remove_white_tag(person, genre);
+    }
+    if let Some(genre) = &update.add_genre {
+        upsert_white_tag(person, genre, 12.0);
+    }
 }
 
 fn apply_white_tag_update(person: &mut Value, tag_id: &str, value: &Value) {
@@ -374,6 +384,12 @@ fn add_label(person: &mut Value, label: &str) {
 fn remove_label(person: &mut Value, label: &str) {
     if let Some(labels) = person.get_mut("labels").and_then(|l| l.as_array_mut()) {
         labels.retain(|t| t.as_str() != Some(label));
+    }
+}
+
+fn remove_white_tag(person: &mut Value, tag_id: &str) {
+    if let Some(tags) = person.get_mut("whiteTagsNEW").and_then(|w| w.as_object_mut()) {
+        tags.remove(tag_id);
     }
 }
 

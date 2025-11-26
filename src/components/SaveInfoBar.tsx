@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Input } from '@/components/ui/input';
 import budgetIcon from '@/assets/BUDGET.png';
 import cashIcon from '@/assets/CASH.png';
@@ -19,7 +19,7 @@ interface SaveInfoBarProps {
   onUpdate?: (field: 'budget' | 'cash' | 'reputation' | 'influence', value: number) => void;
 }
 
-export function SaveInfoBar({ 
+export const SaveInfoBar = memo(function SaveInfoBar({ 
   currentDate, 
   studioName, 
   budget, 
@@ -77,7 +77,7 @@ export function SaveInfoBar({
       </div>
     </div>
   );
-}
+});
 
 interface CurrencyInputProps {
   icon: string;
@@ -88,7 +88,14 @@ interface CurrencyInputProps {
   integer?: boolean;
 }
 
-function CurrencyInput({ icon, alt, value, onChange, formatDisplay, integer = false }: CurrencyInputProps) {
+const CurrencyInput = memo(function CurrencyInput({ 
+  icon, 
+  alt, 
+  value, 
+  onChange, 
+  formatDisplay, 
+  integer = false 
+}: CurrencyInputProps) {
   const [localValue, setLocalValue] = useState(formatDisplay(value));
   const [isFocused, setIsFocused] = useState(false);
 
@@ -126,4 +133,4 @@ function CurrencyInput({ icon, alt, value, onChange, formatDisplay, integer = fa
       />
     </div>
   );
-}
+});

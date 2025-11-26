@@ -3,16 +3,17 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PortraitCarousel } from '@/components/PortraitCarousel';
 import { TraitBadge } from '@/components/TraitBadge';
 import { SimpleBadge } from '@/components/SimpleBadge';
+import { GenreBadge } from '@/components/GenreBadge';
 import { TraitAdjuster } from '@/components/TraitAdjuster';
+import { GenreAdjuster } from '@/components/GenreAdjuster';
 import { StatAdjuster } from '@/components/StatAdjuster';
 import { SkillAdjuster } from '@/components/SkillAdjuster';
 import { StatusAdjuster } from '@/components/StatusAdjuster';
 import { CardSection } from '@/components/CardSection';
-import { 
-  PersonUtils, 
-  GameDate
-} from '@/lib/utils';
-import { DISPLAYABLE_TRAITS } from '@/lib/character-traits';
+import { PersonUtils, GameDate } from '@/lib/utils';
+import { GENRES } from '@/lib/character-genres';
+import { useCharacterDates } from '@/hooks/useCharacterDates';
+import { useCharacterComputed } from '@/hooks/useCharacterComputed';
 import type { Person } from '@/lib/types';
 
 interface CharacterCardProps {
@@ -26,6 +27,11 @@ interface CharacterCardProps {
   onTraitRemove?: (trait: string) => void;
 }
 
+const PUBLIC_IMAGE_STATS = [
+  { type: 'ART' as const, label: 'Artistic Status' },
+  { type: 'COM' as const, label: 'Commercial Status' },
+] as const;
+
 export const CharacterCard = memo(function CharacterCard({ 
   character, 
   currentDate, 
@@ -36,54 +42,19 @@ export const CharacterCard = memo(function CharacterCard({
   onTraitAdd,
   onTraitRemove
 }: CharacterCardProps) {
-  const calculateAge = (): number | null => {
-    if (!character.birthDate || !currentDate) return null;
-    
-    const birth = GameDate.fromDDMMYYYY(character.birthDate);
-    const current = GameDate.parse(currentDate);
-    if (!birth || !current) return null;
-    
-    return birth.ageTo(current);
-  };
-
-  const calculateContractDaysLeft = (): number | null => {
-    if (!character.contract || !currentDate) return null;
-    
-    const current = GameDate.parse(currentDate);
-    if (!current) return null;
-    
-    const signing = new Date(character.contract.dateOfSigning);
-    const ending = new Date(signing);
-    ending.setFullYear(ending.getFullYear() + character.contract.amount);
-    
-    return current.daysUntil(GameDate.fromDate(ending));
-  };
-
-  const isDead = PersonUtils.isDead(character);
-  const isBusy = PersonUtils.isBusy(character);
-  const age = calculateAge();
-  const professionName = PersonUtils.getProfessionName(character);
-  const professionValue = PersonUtils.getProfessionValue(character);
-  const contractDaysLeft = calculateContractDaysLeft();
-  
-  const displayableTraits = character.labels?.filter(
-    trait => DISPLAYABLE_TRAITS.includes(trait as typeof DISPLAYABLE_TRAITS[number])
-  ) || [];
-  
-  const art = PersonUtils.getArt(character);
-  const com = PersonUtils.getCom(character);
-  const isActorOrDirector = professionName === 'Actor' || professionName === 'Director';
-  
-  const skillEntries = PersonUtils.getSkillEntries(character).filter(s => s.id !== 'ART' && s.id !== 'COM');
-  const canEditTraits = professionName !== 'Agent' && professionName !== 'Executive';
-
-  const birthParsed = character.birthDate ? GameDate.fromDDMMYYYY(character.birthDate) : null;
-  const deathParsed = character.deathDate ? GameDate.fromDDMMYYYY(character.deathDate) : null;
-
-  const publicImageStats = [
-    { type: 'ART' as const, value: art > 0 ? art : null, label: 'Artistic Status' },
-    { type: 'COM' as const, value: com > 0 ? com : null, label: 'Commercial Status' },
-  ];
+  const { age, birthParsed, deathParsed, contractDaysLeft } = useCharacterDates(character, currentDate);
+  const {
+    isDead,
+    isBusy,
+    professionName,
+    professionValue,
+    displayableTraits,
+    art,
+    com,
+    isActorOrDirector,
+    skillEntries,
+    canEditTraits,
+  } = useCharacterComputed(character);
 
   return (
     <Card 
@@ -125,22 +96,36 @@ export const CharacterCard = memo(function CharacterCard({
           />
         </div>
 
+        <div className="space-y-2">
+          <div className="text-sm">
+            <span className="text-muted-foreground">Studio: </span>
+            <span className="font-medium">
+              {PersonUtils.getStudioDisplay(character.studioId)}
+            </span>
+          </div>
+        </div>
+
         <div className="flex gap-3 items-start">
           <div className="flex-1 space-y-1">
-            <div className="text-sm">
-              <span className="text-muted-foreground">Studio: </span>
-              <span className="font-medium">
-                {PersonUtils.getStudioDisplay(character.studioId)}
-              </span>
-            </div>
             <div className="text-xs text-muted-foreground">
               State: {PersonUtils.getStateLabel(character.state)}
               {isBusy && ' (On Job)'}
-              {isDead && ' (Dead)'}
             </div>
             {character.gender !== undefined && (
               <div className="text-xs text-muted-foreground">
                 Gender: {character.gender === 1 ? 'Female' : 'Male'}
+              </div>
+            )}
+            {birthParsed && (
+              <div className="text-xs">
+                <span className="text-muted-foreground">Birth: </span>
+                <span className="text-muted-foreground">{birthParsed.format()}</span>
+              </div>
+            )}
+            {isDead && deathParsed && (
+              <div className="text-xs">
+                <span className="text-muted-foreground">Death: </span>
+                <span className="text-destructive">{deathParsed.format()}</span>
               </div>
             )}
           </div>
@@ -152,35 +137,24 @@ export const CharacterCard = memo(function CharacterCard({
           />
         </div>
 
-        {birthParsed && (
-          <div className="space-y-1 text-xs">
-            <div>
-              <span className="text-muted-foreground">Birth: </span>
-              <span className="font-mono">{birthParsed.format()}</span>
-            </div>
-            {isDead && deathParsed && (
-              <div className="text-destructive">
-                <span className="text-muted-foreground">Death: </span>
-                <span className="font-mono">{deathParsed.format()}</span>
-                <span className="ml-2">(Cause: {character.causeOfDeath})</span>
-              </div>
-            )}
-          </div>
-        )}
+        
 
         {isActorOrDirector && (
           <CardSection title="Public Image">
             <div className="space-y-2">
-              {publicImageStats.map(({ type, value, label }) => (
-                <StatusAdjuster
-                  key={type}
-                  type={type}
-                  value={value}
-                  label={label}
-                  profession={professionName as 'Actor' | 'Director'}
-                  onChange={(v) => onUpdate?.(`whiteTag:${type}`, v)}
-                />
-              ))}
+              {PUBLIC_IMAGE_STATS.map(({ type, label }) => {
+                const value = type === 'ART' ? art : com;
+                return (
+                  <StatusAdjuster
+                    key={type}
+                    type={type}
+                    value={value > 0 ? value : null}
+                    label={label}
+                    profession={professionName as 'Actor' | 'Director'}
+                    onChange={(v) => onUpdate?.(`whiteTag:${type}`, v)}
+                  />
+                );
+              })}
             </div>
           </CardSection>
         )}
@@ -205,17 +179,40 @@ export const CharacterCard = memo(function CharacterCard({
           </CardSection>
         )}
 
-        {skillEntries.length > 0 && (
-          <CardSection title="Skills" collapsible defaultCollapsed>
-            <div className="flex flex-wrap gap-1">
-              {skillEntries.map((skill) => (
-                <SimpleBadge 
-                  key={skill.id} 
-                  label={skill.id} 
-                  value={typeof skill.value === 'string' ? parseFloat(skill.value) : skill.value} 
-                />
-              ))}
-            </div>
+        {['Scriptwriter', 'Producer', 'Director', 'Actor'].includes(professionName) && (
+          <CardSection 
+            title="Genres" 
+            action={
+              <GenreAdjuster
+                genres={skillEntries
+                  .filter(s => (GENRES as readonly string[]).includes(s.id))
+                  .map(s => ({
+                    id: s.id,
+                    value: typeof s.value === 'string' ? parseFloat(s.value) : s.value
+                  }))}
+                onToggle={(genre, shouldAdd) => {
+                  onUpdate?.(`whiteTag:${genre}`, shouldAdd ? 12.0 : null);
+                }}
+              />
+            }
+            collapsible 
+            defaultCollapsed
+          >
+            {skillEntries.filter(s => (GENRES as readonly string[]).includes(s.id)).length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {skillEntries
+                  .filter(s => (GENRES as readonly string[]).includes(s.id))
+                  .map((genre) => (
+                    <GenreBadge 
+                      key={genre.id} 
+                      genre={genre.id}
+                      value={typeof genre.value === 'string' ? parseFloat(genre.value) : genre.value} 
+                    />
+                  ))}
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground">No genres</div>
+            )}
           </CardSection>
         )}
 
@@ -282,13 +279,10 @@ export const CharacterCard = memo(function CharacterCard({
   const nProf = n.professions ? Object.values(n.professions)[0] : null;
   if (pProf !== nProf) return false;
   
-  const pArt = p.whiteTagsNEW?.['ART']?.value;
-  const nArt = n.whiteTagsNEW?.['ART']?.value;
-  if (pArt !== nArt) return false;
-  
-  const pCom = p.whiteTagsNEW?.['COM']?.value;
-  const nCom = n.whiteTagsNEW?.['COM']?.value;
-  if (pCom !== nCom) return false;
+  // Check all whiteTagsNEW (ART, COM, and all genres)
+  const pTags = JSON.stringify(p.whiteTagsNEW);
+  const nTags = JSON.stringify(n.whiteTagsNEW);
+  if (pTags !== nTags) return false;
   
   const pLabels = p.labels?.join(',') ?? '';
   const nLabels = n.labels?.join(',') ?? '';

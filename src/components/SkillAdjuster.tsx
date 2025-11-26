@@ -1,4 +1,5 @@
 import { Adjuster } from '@/components/Adjuster';
+import { ValueSteppers } from '@/lib/value-steppers';
 import starIcon from '@/assets/STAR.png';
 import starGlowIcon from '@/assets/STAR_GLOW.png';
 
@@ -9,6 +10,12 @@ interface SkillAdjusterProps {
   onLimitChange: (value: number) => void;
 }
 
+const STAR_FILTERS = {
+  gold: 'sepia(100%) saturate(300%) brightness(1.1) hue-rotate(-10deg)',
+  gray: 'grayscale(100%) brightness(0.4) opacity(0.6)',
+  red: 'grayscale(100%) brightness(0.3) sepia(100%) hue-rotate(-50deg) saturate(300%) opacity(0.7)',
+} as const;
+
 export function SkillAdjuster({ 
   skillValue, 
   limitValue, 
@@ -18,37 +25,20 @@ export function SkillAdjuster({
   const skillStars = Math.floor(skillValue * 10);
   const limitStars = Math.floor(limitValue * 10);
 
-  const formatValue = (val: number) => {
-    const scaled = val * 10;
-    return scaled % 1 === 0 ? scaled.toFixed(0) : scaled.toFixed(1);
-  };
-
-  const snapUp = (val: number, max: number): number => {
-    const current = Math.round(val * 100);
-    if (current % 10 === 0) return Math.min((current + 10) / 100, max);
-    return Math.min(Math.ceil(current / 10) * 10 / 100, max);
-  };
-
-  const snapDown = (val: number): number => {
-    const current = Math.round(val * 100);
-    if (current % 10 === 0) return Math.max((current - 10) / 100, 0);
-    return Math.max(Math.floor(current / 10) * 10 / 100, 0);
-  };
-
   const handleSkillIncrease = () => {
-    onSkillChange(snapUp(skillValue, limitValue));
+    onSkillChange(ValueSteppers.snapUp(skillValue, 10, limitValue));
   };
 
   const handleSkillDecrease = () => {
-    onSkillChange(snapDown(skillValue));
+    onSkillChange(ValueSteppers.snapDown(skillValue, 10));
   };
 
   const handleLimitIncrease = () => {
-    onLimitChange(snapUp(limitValue, 1));
+    onLimitChange(ValueSteppers.snapUp(limitValue, 10, 1));
   };
 
   const handleLimitDecrease = () => {
-    const newLimit = snapDown(limitValue);
+    const newLimit = ValueSteppers.snapDown(limitValue, 10);
     onLimitChange(newLimit);
     if (skillValue > newLimit) {
       onSkillChange(newLimit);
@@ -56,36 +46,27 @@ export function SkillAdjuster({
   };
 
   const renderStars = () => {
-    const starElements = [];
+    const stars = [];
     
     for (let i = 0; i < 10; i++) {
       const isGold = i < skillStars;
       const isGray = i >= skillStars && i < limitStars;
-      const isRed = i >= limitStars;
 
       const imgSrc = isGold ? starGlowIcon : starIcon;
-      
-      let filterStyle = '';
-      if (isGold) {
-        filterStyle = 'sepia(100%) saturate(300%) brightness(1.1) hue-rotate(-10deg)';
-      } else if (isGray) {
-        filterStyle = 'grayscale(100%) brightness(0.4) opacity(0.6)';
-      } else if (isRed) {
-        filterStyle = 'grayscale(100%) brightness(0.3) sepia(100%) hue-rotate(-50deg) saturate(300%) opacity(0.7)';
-      }
+      const filter = isGold ? STAR_FILTERS.gold : isGray ? STAR_FILTERS.gray : STAR_FILTERS.red;
 
-      starElements.push(
+      stars.push(
         <img
           key={i}
           src={imgSrc}
           alt=""
           className="w-4 h-4"
-          style={{ filter: filterStyle }}
+          style={{ filter }}
         />
       );
     }
     
-    return starElements;
+    return stars;
   };
 
   return (
@@ -93,7 +74,7 @@ export function SkillAdjuster({
       <div className="flex items-center justify-between">
         <div className="text-muted-foreground text-sm">Skill Level</div>
         <Adjuster
-          value={formatValue(skillValue)}
+          value={ValueSteppers.formatScaled(skillValue, 10)}
           onDecreaseClick={handleSkillDecrease}
           onIncreaseClick={handleSkillIncrease}
           decreaseDisabled={skillValue <= 0}
@@ -108,7 +89,7 @@ export function SkillAdjuster({
       <div className="flex items-center justify-between">
         <div className="text-muted-foreground text-sm">Skill Limit</div>
         <Adjuster
-          value={formatValue(limitValue)}
+          value={ValueSteppers.formatScaled(limitValue, 10)}
           onDecreaseClick={handleLimitDecrease}
           onIncreaseClick={handleLimitIncrease}
           decreaseDisabled={limitValue <= 0}

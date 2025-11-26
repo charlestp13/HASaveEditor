@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { saveManager } from '@/lib/tauri-api';
-import { normalizeStudioId, createWhiteTag, PersonUtils } from '@/lib/utils';
+import { normalizeStudioId } from '@/lib/utils';
+import { PersonStateUpdater } from '@/lib/person-state-updater';
+import { PersonFilters } from '@/lib/person-filters';
 import { Input } from '@/components/ui/input';
 import { FilterPopover } from '@/components/FilterPopover';
 import { CharacterCard } from '@/components/CharacterCard';
@@ -34,9 +36,18 @@ export function ProfessionTab({ profession, selectedLanguage, saveInfo }: Profes
   
   const savePerson = useCallback(
     (personId: string, field: string, value: number | null) => {
-      let updateField = field;
-      if (field === 'whiteTag:ART') updateField = 'art';
-      else if (field === 'whiteTag:COM') updateField = 'com';
+      // Handle genres specially - convert whiteTag:GENRE to addGenre/removeGenre
+      if (field.startsWith('whiteTag:') && field !== 'whiteTag:ART' && field !== 'whiteTag:COM') {
+        const genre = field.substring(9); // Strip "whiteTag:" prefix
+        if (value === null) {
+          return saveManager.updatePerson(profession, personId, { removeGenre: genre });
+        } else {
+          return saveManager.updatePerson(profession, personId, { addGenre: genre });
+        }
+      }
+      
+      // Handle normal fields (ART, COM, etc.)
+      const updateField = PersonStateUpdater.normalizeFieldName(field);
       return saveManager.updatePerson(profession, personId, { [updateField]: value });
     },
     [profession]
@@ -63,7 +74,7 @@ export function ProfessionTab({ profession, selectedLanguage, saveInfo }: Profes
     } finally {
       setLoading(false);
     }
-  }, [profession, handleError]);
+  }, [profession, professionLower, handleError]);
 
   useEffect(() => {
     loadAllPersons();
@@ -100,107 +111,37 @@ export function ProfessionTab({ profession, selectedLanguage, saveInfo }: Profes
   }, [allPersons]);
 
   const persons = useMemo(() => {
-    let filtered = allPersons;
-
-    // Filter by studios
-    const studioFilters = selectedFilters.filter(f => ['PL', 'GB', 'EM', 'SU', 'HE', 'MA'].includes(f));
-    if (studioFilters.length > 0) {
-      filtered = filtered.filter(person => {
-        const studioId = normalizeStudioId(person.studioId);
-        return !studioFilters.includes(studioId);
-      });
-    }
-
-    // Filter by status
-    if (selectedFilters.includes('Dead')) {
-      filtered = filtered.filter(person => !PersonUtils.isDead(person));
-    }
-
-    if (selectedFilters.includes('Locked')) {
-      filtered = filtered.filter(person => !PersonUtils.isLocked(person));
-    }
-
-    if (selectedFilters.includes('Unemployed')) {
-      filtered = filtered.filter(person => normalizeStudioId(person.studioId) !== 'N/A');
-    }
-
-    // Search filter
-    if (search) {
-      const lowerSearch = search.toLowerCase();
-      filtered = filtered.filter(person =>
-        getTranslatedName(person).toLowerCase().includes(lowerSearch)
-      );
-    }
-
-    return [...filtered].sort((a, b) => 
-      getTranslatedName(a).localeCompare(getTranslatedName(b))
+    const filterConfig = PersonFilters.parseSelectedFilters(selectedFilters);
+    const filtered = PersonFilters.applyAll(
+      allPersons, 
+      { ...filterConfig, search }, 
+      getTranslatedName
     );
+    return PersonFilters.sortByName(filtered, getTranslatedName);
   }, [allPersons, search, selectedFilters, getTranslatedName]);
 
-  const handlePersonUpdate = (personId: string | number, field: string, value: number | null) => {
-    setAllPersons(prev => prev.map(p => {
-      if (p.id !== personId) return p;
-
-      const updated = { ...p };
-      if (field === 'mood') updated.mood = value ?? 0;
-      else if (field === 'attitude') updated.attitude = value ?? 0;
-      else if (field === 'skill' && updated.professions) {
-        const profName = Object.keys(updated.professions)[0];
-        if (profName) {
-          updated.professions = { ...updated.professions, [profName]: String(value ?? 0) };
-        }
-      }
-      else if (field === 'limit') {
-        updated.limit = value ?? 0;
-        updated.Limit = value ?? 0;
-      }
-      else if (field.startsWith('whiteTag:')) {
-        const tagId = field.split(':')[1];
-        if (value === null) {
-          if (updated.whiteTagsNEW && typeof updated.whiteTagsNEW === 'object') {
-            updated.whiteTagsNEW = { ...updated.whiteTagsNEW };
-            delete updated.whiteTagsNEW[tagId];
-          }
-        } else {
-          if (!updated.whiteTagsNEW || typeof updated.whiteTagsNEW !== 'object') {
-            updated.whiteTagsNEW = {};
-          }
-          updated.whiteTagsNEW = { ...updated.whiteTagsNEW };
-          if (updated.whiteTagsNEW[tagId]) {
-            updated.whiteTagsNEW[tagId] = { ...updated.whiteTagsNEW[tagId], value };
-          } else {
-            updated.whiteTagsNEW[tagId] = createWhiteTag(tagId, value);
-          }
-        }
-      }
-      return updated;
-    }));
-
+  const handlePersonUpdate = useCallback((personId: string | number, field: string, value: number | null) => {
+    setAllPersons(prev => prev.map(p => 
+      p.id === personId ? PersonStateUpdater.updateField(p, field, value) : p
+    ));
     debouncedSave(`${personId}-${field}`, String(personId), field, value);
-  };
+  }, [debouncedSave]);
 
-  const handleTraitAdd = (personId: string | number, trait: string) => {
-    setAllPersons(prev => prev.map(p => {
-      if (p.id !== personId) return p;
-      const currentLabels = p.labels || [];
-      if (currentLabels.includes(trait)) return p;
-      return { ...p, labels: [trait, ...currentLabels] };
-    }));
-
+  const handleTraitAdd = useCallback((personId: string | number, trait: string) => {
+    setAllPersons(prev => prev.map(p => 
+      p.id === personId ? PersonStateUpdater.addTrait(p, trait) : p
+    ));
     saveManager.updatePerson(profession, String(personId), { addTrait: trait })
       .catch(err => handleError(err, 'Failed to add trait'));
-  };
+  }, [profession, handleError]);
 
-  const handleTraitRemove = (personId: string | number, trait: string) => {
-    setAllPersons(prev => prev.map(p => {
-      if (p.id !== personId) return p;
-      const currentLabels = p.labels || [];
-      return { ...p, labels: currentLabels.filter(t => t !== trait) };
-    }));
-
+  const handleTraitRemove = useCallback((personId: string | number, trait: string) => {
+    setAllPersons(prev => prev.map(p => 
+      p.id === personId ? PersonStateUpdater.removeTrait(p, trait) : p
+    ));
     saveManager.updatePerson(profession, String(personId), { removeTrait: trait })
       .catch(err => handleError(err, 'Failed to remove trait'));
-  };
+  }, [profession, handleError]);
 
   const displayError = error || nameError;
   const isGamePathError = displayError?.includes('Game installation not found') ||

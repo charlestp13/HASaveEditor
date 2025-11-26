@@ -7,7 +7,7 @@ export interface Person {
   deathDate?: string;
   causeOfDeath?: number;
   gender?: number;
-  studioId?: number | string;
+  studioId?: string;
   mood?: number;
   attitude?: number;
   selfEsteem?: number;
@@ -105,7 +105,7 @@ export interface SaveInfo {
 export interface PersonUpdate {
   customName?: string;
   gender?: number;
-  studioId?: number;
+  studioId?: string;
   mood?: number;
   attitude?: number;
   selfEsteem?: number;
@@ -117,6 +117,8 @@ export interface PersonUpdate {
   com?: number | null;
   addTrait?: string;
   removeTrait?: string;
+  addGenre?: string;
+  removeGenre?: string;
 }
 
 export interface StudioUpdate {

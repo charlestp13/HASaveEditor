@@ -1,22 +1,9 @@
 import { StatusBadge } from '@/components/StatusBadge';
 import { Adjuster } from '@/components/Adjuster';
+import { ValueSteppers } from '@/lib/value-steppers';
 
-const STATUS_LEVELS = [0.01, 0.15, 0.30, 0.70, 1.00];
+const STATUS_LEVELS = [0.01, 0.15, 0.30, 0.70, 1.00] as const;
 const STATUS_BUTTON_COLOR = "#A6AEBF";
-
-const getNextStatusLevel = (current: number): number => {
-  for (const level of STATUS_LEVELS) {
-    if (level > current) return level;
-  }
-  return current;
-};
-
-const getPrevStatusLevel = (current: number): number => {
-  for (let i = STATUS_LEVELS.length - 1; i >= 0; i--) {
-    if (STATUS_LEVELS[i] < current) return STATUS_LEVELS[i];
-  }
-  return 0;
-};
 
 interface StatusAdjusterProps {
   type: 'ART' | 'COM';
@@ -75,7 +62,7 @@ export function StatusAdjuster({ type, value, label, profession, onChange }: Sta
           <Adjuster
             value={value.toFixed(2)}
             onDecreaseClick={() => onChange?.(null)}
-            onIncreaseClick={() => onChange?.(getNextStatusLevel(value))}
+            onIncreaseClick={() => onChange?.(ValueSteppers.findNextLevel(value, STATUS_LEVELS))}
             decreaseDisabled={false}
             increaseDisabled={value >= 1}
           />
@@ -90,8 +77,8 @@ export function StatusAdjuster({ type, value, label, profession, onChange }: Sta
         </div>
         <Adjuster
           value={value.toFixed(2)}
-          onDecreaseClick={() => onChange?.(getPrevStatusLevel(value))}
-          onIncreaseClick={() => onChange?.(getNextStatusLevel(value))}
+          onDecreaseClick={() => onChange?.(ValueSteppers.findPrevLevel(value, STATUS_LEVELS))}
+          onIncreaseClick={() => onChange?.(ValueSteppers.findNextLevel(value, STATUS_LEVELS))}
           decreaseDisabled={value <= 0.01}
           increaseDisabled={value >= 1}
         />

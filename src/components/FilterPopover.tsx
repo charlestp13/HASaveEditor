@@ -1,20 +1,18 @@
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Filter } from 'lucide-react';
 import { toTitleCase } from '@/lib/utils';
+import { OPPONENT_STUDIOS } from '@/lib/studio-data';
 import deadIcon from '@/assets/DEAD.png';
 import unemployedIcon from '@/assets/UN.png';
 import lockedIcon from '@/assets/LOCK.png';
 
 const SELECTED_BORDER_COLOR = '#ff71a9';
 
-const OPPONENT_STUDIOS = [
-  { id: 'GB', name: 'Gerstein Brothers', icon: 'GB.png' },
-  { id: 'EM', name: 'Evergreen Movies', icon: 'EM.png' },
-  { id: 'SU', name: 'Supreme', icon: 'SU.png' },
-  { id: 'HE', name: 'Hephaestus', icon: 'HE.png' },
-  { id: 'MA', name: 'Marginese', icon: 'MA.png' },
+const STATUS_OPTIONS = [
+  { id: 'Dead', label: 'Deceased', icon: deadIcon },
+  { id: 'Locked', label: 'Locked', icon: lockedIcon },
 ];
 
 interface FilterOption {
@@ -22,6 +20,7 @@ interface FilterOption {
   label: string;
   icon: string;
   isDynamic?: boolean;
+  isSpecial?: boolean;
 }
 
 interface SectionHeader {
@@ -44,7 +43,7 @@ interface FilterPopoverProps {
   className?: string;
 }
 
-export function FilterPopover({
+export const FilterPopover = memo(function FilterPopover({
   playerStudioName,
   playerLogoId,
   availableStudios,
@@ -54,40 +53,63 @@ export function FilterPopover({
 }: FilterPopoverProps) {
   const [open, setOpen] = useState(false);
 
-  const playerIcon = `/src/assets/PL${playerLogoId}.png`;
+  const opponentStudios = useMemo(() => 
+    OPPONENT_STUDIOS.filter(studio => availableStudios.includes(studio.id)),
+    [availableStudios]
+  );
 
-  const studioOptions: FilterOption[] = [
-    { id: 'PL', label: toTitleCase(playerStudioName), icon: playerIcon, isDynamic: true },
-    ...OPPONENT_STUDIOS
-      .filter(studio => availableStudios.includes(studio.id))
-      .map(studio => ({
+  const studioOptions = useMemo((): FilterOption[] => {
+    const playerIcon = `/src/assets/PL${playerLogoId}.png`;
+    
+    return [
+      { id: 'PL', label: toTitleCase(playerStudioName), icon: playerIcon, isDynamic: true },
+      { id: 'Unemployed', label: 'Unemployed', icon: unemployedIcon },
+      { id: 'ALL_COMPETITORS', label: 'All Competitors', icon: '/src/assets/ALL.png', isSpecial: true },
+      ...opponentStudios.map(studio => ({
         id: studio.id,
         label: studio.name,
         icon: `/src/assets/${studio.icon}`,
       })),
-    { id: 'Unemployed', label: 'Unemployed', icon: unemployedIcon },
-  ];
+    ];
+  }, [playerStudioName, playerLogoId, opponentStudios]);
 
-  const statusOptions: FilterOption[] = [
-    { id: 'Dead', label: 'Deceased', icon: deadIcon },
-    { id: 'Locked', label: 'Locked', icon: lockedIcon },
-  ];
-
-  const allItems: FilterItem[] = [
+  const allItems = useMemo((): FilterItem[] => [
     { type: 'header', label: 'Studio' },
     ...studioOptions,
     { type: 'separator' },
     { type: 'header', label: 'Status' },
-    ...statusOptions,
-  ];
+    ...STATUS_OPTIONS,
+  ], [studioOptions]);
 
   const toggleFilter = (filterId: string) => {
-    if (selectedFilters.includes(filterId)) {
-      onFilterChange(selectedFilters.filter(f => f !== filterId));
+    if (filterId === 'ALL_COMPETITORS') {
+      const competitorIds = opponentStudios.map(s => s.id);
+      const allSelected = competitorIds.every(id => selectedFilters.includes(id));
+      
+      if (allSelected) {
+        onFilterChange(selectedFilters.filter(f => !competitorIds.includes(f)));
+      } else {
+        const newFilters = [...selectedFilters];
+        competitorIds.forEach(id => {
+          if (!newFilters.includes(id)) {
+            newFilters.push(id);
+          }
+        });
+        onFilterChange(newFilters);
+      }
     } else {
-      onFilterChange([...selectedFilters, filterId]);
+      if (selectedFilters.includes(filterId)) {
+        onFilterChange(selectedFilters.filter(f => f !== filterId));
+      } else {
+        onFilterChange([...selectedFilters, filterId]);
+      }
     }
   };
+
+  const isAllCompetitorsSelected = useMemo(() => {
+    const competitorIds = opponentStudios.map(s => s.id);
+    return competitorIds.length > 0 && competitorIds.every(id => selectedFilters.includes(id));
+  }, [opponentStudios, selectedFilters]);
 
   const activeCount = selectedFilters.length;
 
@@ -124,7 +146,7 @@ export function FilterPopover({
               <FilterOptionItem
                 key={item.id}
                 option={item}
-                isSelected={selectedFilters.includes(item.id)}
+                isSelected={item.isSpecial ? isAllCompetitorsSelected : selectedFilters.includes(item.id)}
                 onToggle={() => toggleFilter(item.id)}
               />
             );
@@ -134,7 +156,7 @@ export function FilterPopover({
     </Popover>
     </div>
   );
-}
+});
 
 interface FilterOptionItemProps {
   option: FilterOption;
@@ -142,7 +164,7 @@ interface FilterOptionItemProps {
   onToggle: () => void;
 }
 
-function FilterOptionItem({ option, isSelected, onToggle }: FilterOptionItemProps) {
+const FilterOptionItem = memo(function FilterOptionItem({ option, isSelected, onToggle }: FilterOptionItemProps) {
   return (
     <button
       onClick={onToggle}
@@ -167,4 +189,4 @@ function FilterOptionItem({ option, isSelected, onToggle }: FilterOptionItemProp
       <span className="flex-1 text-left text-sm">{option.label}</span>
     </button>
   );
-}
+});

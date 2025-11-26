@@ -1,5 +1,6 @@
 import { ACTOR_LABELS, DIRECTOR_LABELS, getRank, getStatusColor } from '@/lib/character-status';
 import { toTitleCase } from '@/lib/utils';
+import { IconBadge } from '@/components/IconBadge';
 
 interface StatusBadgeProps {
   type: 'ART' | 'COM';
@@ -17,21 +18,10 @@ export function StatusBadge({ type, value, profession }: StatusBadgeProps) {
   const label = toTitleCase(labels[type][rank - 1]);
 
   return (
-    <div 
-      className="flex items-center gap-2 px-3 py-1 rounded-full border w-fit"
-      style={{ borderColor: color, backgroundColor: `${color}20` }}
-    >
-      <img 
-        src={`/status/${type}.png`} 
-        alt={type} 
-        className="w-4 h-4 object-contain"
-      />
-      <span 
-        className="text-xs font-medium"
-        style={{ color }}
-      >
-        {label}
-      </span>
-    </div>
+    <IconBadge
+      iconPath={`/status/${type}.png`}
+      text={label}
+      color={color}
+    />
   );
 }

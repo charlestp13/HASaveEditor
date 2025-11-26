@@ -1,4 +1,5 @@
 import type { Person, WhiteTag } from './types';
+import { getStudioName } from './studio-data';
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -7,10 +8,42 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function toTitleCase(str: string): string {
-  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  return str.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
 export class PersonUtils {
+  static readonly STATE_FLAGS: Record<number, string> = {
+    2: 'Hired by Player',
+    4: 'Fired',
+    16: 'Dead',
+    32: 'Hired by Competitor',
+    64: 'Locked',
+    128: 'In Hospital',
+    256: 'Kidnapped by Player',
+    512: 'Vacation',
+    1024: 'Tired',
+    2048: 'Request Cooldown',
+    4096: 'Offended',
+    8192: 'Threatening',
+    16384: 'Beating',
+    32768: 'Killing',
+    65536: 'Kidnapping',
+    131072: 'Imprisoned',
+    262144: 'Kidnapped by Competitor',
+    524288: 'Special Vacation',
+    1048576: 'Doing Policy Bonuses',
+    2097152: 'On The War',
+    4194304: 'Compromised by Competitor',
+    8388608: 'Selected for Poaching',
+  };
+
+  private static getFlag(flagName: string): number {
+    const flag = Object.keys(PersonUtils.STATE_FLAGS).find(
+      key => PersonUtils.STATE_FLAGS[Number(key)] === flagName
+    );
+    return flag ? Number(flag) : 0;
+  }
+
   static getDisplayName(person: Person, nameStrings?: string[]): string {
     if (person.customName) return person.customName;
     
@@ -36,10 +69,13 @@ export class PersonUtils {
     return typeof value === 'string' ? parseFloat(value) : value;
   }
 
-  static getStudioDisplay(studioId: string | number | undefined): string {
+  static getStudioDisplay(studioId: string | undefined): string {
     if (!studioId || studioId === 'NONE') return 'N/A';
     if (studioId === 'PL') return 'Player';
-    return String(studioId);
+    
+    // Use studio-data helper for opponent studios
+    const studioName = getStudioName(studioId);
+    return studioName || studioId; // Fallback to ID if unknown
   }
 
   static getSkillEntries(person: Person): WhiteTag[] {
@@ -55,7 +91,8 @@ export class PersonUtils {
   }
 
   static isDead(person: Person): boolean {
-    return Boolean(person.deathDate && person.deathDate !== '01-01-0001');
+    const state = person.state ?? 0;
+    return Boolean(state & PersonUtils.getFlag('Dead'));
   }
 
   static isBusy(person: Person): boolean {
@@ -63,7 +100,8 @@ export class PersonUtils {
   }
 
   static isLocked(person: Person): boolean {
-    return Boolean((person.state ?? 0) & 64);
+    const state = person.state ?? 0;
+    return Boolean(state & PersonUtils.getFlag('Locked'));
   }
 
   static isHireableByPlayer(person: Person): boolean {
@@ -78,34 +116,9 @@ export class PersonUtils {
 
   static getStateLabel(state?: number): string {
     if (state === undefined || state === 0) return 'None';
-    
-    const STATE_FLAGS: Record<number, string> = {
-      2: 'Hired by Player',
-      4: 'Fired',
-      16: 'Dead',
-      32: 'Hired by Competitor',
-      64: 'Locked',
-      128: 'In Hospital',
-      256: 'Kidnapped by Player',
-      512: 'Vacation',
-      1024: 'Tired',
-      2048: 'Request Cooldown',
-      4096: 'Offended',
-      8192: 'Threatening',
-      16384: 'Beating',
-      32768: 'Killing',
-      65536: 'Kidnapping',
-      131072: 'Imprisoned',
-      262144: 'Kidnapped by Competitor',
-      524288: 'Special Vacation',
-      1048576: 'Doing Policy Bonuses',
-      2097152: 'On The War',
-      4194304: 'Compromised by Competitor',
-      8388608: 'Selected for Poaching',
-    };
 
     const activeStates: string[] = [];
-    for (const [flag, label] of Object.entries(STATE_FLAGS)) {
+    for (const [flag, label] of Object.entries(PersonUtils.STATE_FLAGS)) {
       if (state & Number(flag)) {
         activeStates.push(label);
       }
