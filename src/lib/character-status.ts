@@ -1,3 +1,6 @@
+import artIcon from '@/assets/status/ART.png';
+import comIcon from '@/assets/status/COM.png';
+
 export const RANK_COLORS = {
   1: '#E09D94',
   2: '#A8D4E6',
@@ -14,6 +17,20 @@ export const DIRECTOR_LABELS = {
   ART: ['FRESH PERSPECTIVE', 'DECISIVE TALENT', 'VISIONARY', 'GENIUS'],
   COM: ['FAN FAVORITE', 'SENSATION', 'PHENOMENON', 'HOLLYWOOD GIANT'],
 } as const;
+
+// Status type
+export type StatusType = 'ART' | 'COM';
+
+// Icon mapping for status types
+export const STATUS_ICONS: Record<StatusType, string> = {
+  ART: artIcon,
+  COM: comIcon,
+};
+
+// Helper to get status icon
+export function getStatusIcon(type: StatusType): string {
+  return STATUS_ICONS[type];
+}
 
 export function getRank(value: number): number {
   if (value === 1.0) return 4;

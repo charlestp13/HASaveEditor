@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { open } from '@tauri-apps/plugin-dialog';
 import { saveManager } from '@/lib/tauri-api';
 import { normalizeStudioId } from '@/lib/utils';
 import { PersonStateUpdater } from '@/lib/person-state-updater';
@@ -82,7 +83,6 @@ export function ProfessionTab({ profession, selectedLanguage, saveInfo }: Profes
 
   const handleSelectGamePath = async () => {
     try {
-      const { open } = await import('@tauri-apps/plugin-dialog');
       const selected = await open({
         directory: true,
         multiple: false,

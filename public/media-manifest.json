@@ -5670,37 +5670,5 @@
       "M",
       "O"
     ]
-  },
-  "traits": [
-    "ALCOHOLIC",
-    "ARROGANT",
-    "CALM",
-    "CHASTE",
-    "CHEERY",
-    "DEMANDING",
-    "DISCIPLINED",
-    "HARDWORKING",
-    "HEARTBREAKER",
-    "HOTHEADED",
-    "INDIFFERENT",
-    "JUNKIE",
-    "LAZY",
-    "LEADER",
-    "LUDOMANIAC",
-    "MELANCHOLIC",
-    "MISOGYNIST",
-    "MODEST",
-    "OPEN_MINDED",
-    "PERFECTIONIST",
-    "RACIST",
-    "SIMPLE",
-    "TEAM_PLAYER",
-    "UNDISCIPLINED",
-    "UNWANTED_ACTOR",
-    "XENOPHOBE"
-  ],
-  "status": [
-    "ART",
-    "COM"
-  ]
+  }
 }

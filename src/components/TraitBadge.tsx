@@ -1,4 +1,4 @@
-import { DISPLAYABLE_TRAITS } from '@/lib/character-traits';
+import { DISPLAYABLE_TRAITS, getTraitIcon } from '@/lib/character-traits';
 import { toTitleCase } from '@/lib/utils';
 import { IconBadge } from '@/components/IconBadge';
 
@@ -11,10 +11,13 @@ export function TraitBadge({ trait }: TraitBadgeProps) {
     return null;
   }
 
+  const icon = getTraitIcon(trait);
+  if (!icon) return null;
+
   return (
     <IconBadge
-      iconPath={`/traits/${trait}.png`}
-      text={toTitleCase(trait.replace(/_/g, ' '))}
+      iconPath={icon}
+      text={toTitleCase(trait)}
       color="#8674B0"
       title={trait}
     />

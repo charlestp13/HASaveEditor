@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/dialog';
 import { EditButton } from '@/components/EditButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { DISPLAYABLE_TRAITS, TRAIT_CONFLICTS, type DisplayableTrait } from '@/lib/character-traits';
+import { IconButton } from '@/components/IconButton';
+import { DISPLAYABLE_TRAITS, TRAIT_CONFLICTS, getTraitIcon, type DisplayableTrait } from '@/lib/character-traits';
 import { toTitleCase } from '@/lib/utils';
 
 const MAX_TRAITS = 2;
@@ -137,8 +138,6 @@ export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
   );
 }
 
-const SELECTED_BORDER_STYLE = { borderLeftColor: SELECTED_BORDER_COLOR };
-
 interface TraitButtonProps {
   trait: string;
   isSelected: boolean;
@@ -147,25 +146,19 @@ interface TraitButtonProps {
 }
 
 function TraitButton({ trait, isSelected, isDisabled, onClick }: TraitButtonProps) {
-  const isClickable = isSelected || !isDisabled;
+  const icon = getTraitIcon(trait);
+  const label = toTitleCase(trait);
   
   return (
-    <button
+    <IconButton
+      icon={icon}
+      label={label}
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      selectedBorderColor={SELECTED_BORDER_COLOR}
       onClick={onClick}
-      disabled={!isClickable}
-      className={`flex items-center gap-2 px-3 py-2 rounded border bg-card hover:bg-accent transition-colors text-left ${
-        isSelected ? 'border-l-4' : ''
-      } ${!isClickable ? 'opacity-50 cursor-not-allowed' : ''}`}
-      style={isSelected ? SELECTED_BORDER_STYLE : undefined}
-    >
-      <img 
-        src={`/traits/${trait}.png`} 
-        alt={trait} 
-        className="w-5 h-5 object-contain flex-shrink-0"
-      />
-      <span className="text-sm font-medium flex-1">
-        {toTitleCase(trait.replace(/_/g, ' '))}
-      </span>
-    </button>
+      iconSize="md"
+      textAlign="left"
+    />
   );
 }

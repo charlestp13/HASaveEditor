@@ -1,6 +1,7 @@
 import { StatusBadge } from '@/components/StatusBadge';
 import { Adjuster } from '@/components/Adjuster';
 import { ValueSteppers } from '@/lib/value-steppers';
+import { getStatusIcon } from '@/lib/character-status';
 
 const STATUS_LEVELS = [0.01, 0.15, 0.30, 0.70, 1.00] as const;
 const STATUS_BUTTON_COLOR = "#A6AEBF";
@@ -20,6 +21,8 @@ interface StatusButtonProps {
 }
 
 function StatusButton({ type, action, onClick }: StatusButtonProps) {
+  const icon = getStatusIcon(type);
+  
   return (
     <button
       onClick={onClick}
@@ -27,7 +30,7 @@ function StatusButton({ type, action, onClick }: StatusButtonProps) {
       style={{ borderColor: STATUS_BUTTON_COLOR, backgroundColor: `${STATUS_BUTTON_COLOR}20` }}
     >
       <img 
-        src={`/status/${type}.png`} 
+        src={icon} 
         alt={type} 
         className="w-4 h-4 object-contain"
       />

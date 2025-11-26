@@ -1,3 +1,23 @@
+import gbIcon from '@/assets/studios/GB.png';
+import emIcon from '@/assets/studios/EM.png';
+import suIcon from '@/assets/studios/SU.png';
+import heIcon from '@/assets/studios/HE.png';
+import maIcon from '@/assets/studios/MA.png';
+import allIcon from '@/assets/studios/ALL.png';
+import pl0Icon from '@/assets/studios/PL0.png';
+import pl1Icon from '@/assets/studios/PL1.png';
+import pl2Icon from '@/assets/studios/PL2.png';
+import pl3Icon from '@/assets/studios/PL3.png';
+import pl4Icon from '@/assets/studios/PL4.png';
+import pl5Icon from '@/assets/studios/PL5.png';
+import pl6Icon from '@/assets/studios/PL6.png';
+import pl7Icon from '@/assets/studios/PL7.png';
+import pl8Icon from '@/assets/studios/PL8.png';
+import pl9Icon from '@/assets/studios/PL9.png';
+import pl10Icon from '@/assets/studios/PL10.png';
+import pl11Icon from '@/assets/studios/PL11.png';
+import pl12Icon from '@/assets/studios/PL12.png';
+
 export interface Studio {
   id: string;
   name: string;
@@ -5,12 +25,37 @@ export interface Studio {
 }
 
 export const OPPONENT_STUDIOS: Studio[] = [
-  { id: 'GB', name: 'Gerstein Brothers', icon: 'GB.png' },
-  { id: 'EM', name: 'Evergreen Movies', icon: 'EM.png' },
-  { id: 'SU', name: 'Supreme', icon: 'SU.png' },
-  { id: 'HE', name: 'Hephaestus', icon: 'HE.png' },
-  { id: 'MA', name: 'Marginese', icon: 'MA.png' },
+  { id: 'GB', name: 'Gerstein Brothers', icon: gbIcon },
+  { id: 'EM', name: 'Evergreen Movies', icon: emIcon },
+  { id: 'SU', name: 'Supreme', icon: suIcon },
+  { id: 'HE', name: 'Hephaestus', icon: heIcon },
+  { id: 'MA', name: 'Marginese', icon: maIcon },
 ];
+
+// Player studio logo icons (13 variants)
+export const PLAYER_LOGO_ICONS: Record<number, string> = {
+  0: pl0Icon,
+  1: pl1Icon,
+  2: pl2Icon,
+  3: pl3Icon,
+  4: pl4Icon,
+  5: pl5Icon,
+  6: pl6Icon,
+  7: pl7Icon,
+  8: pl8Icon,
+  9: pl9Icon,
+  10: pl10Icon,
+  11: pl11Icon,
+  12: pl12Icon,
+};
+
+// Special icons
+export const ALL_COMPETITORS_ICON = allIcon;
+
+// Helper function to get player logo icon
+export function getPlayerLogoIcon(logoId: number): string {
+  return PLAYER_LOGO_ICONS[logoId] || pl0Icon;
+}
 
 // Helper function to get studio name by ID
 export function getStudioName(studioId: string | null | undefined): string | undefined {

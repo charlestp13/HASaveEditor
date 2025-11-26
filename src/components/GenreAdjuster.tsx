@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { GENRES, GENRE_ESTABLISHED_THRESHOLD, MAX_ESTABLISHED_GENRES } from '@/lib/character-genres';
+import { IconButton } from '@/components/IconButton';
+import { GENRES, GENRE_ESTABLISHED_THRESHOLD, MAX_ESTABLISHED_GENRES, getGenreIcon } from '@/lib/character-genres';
 import { toTitleCase } from '@/lib/utils';
 
 const SELECTED_BORDER_COLOR = '#ffd779';
@@ -101,8 +102,6 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
   );
 }
 
-const SELECTED_BORDER_STYLE = { borderLeftColor: SELECTED_BORDER_COLOR };
-
 interface GenreButtonProps {
   genre: string;
   isSelected: boolean;
@@ -111,23 +110,19 @@ interface GenreButtonProps {
 }
 
 function GenreButton({ genre, isSelected, isDisabled, onClick }: GenreButtonProps) {
-  const isClickable = isSelected || !isDisabled;
+  const icon = getGenreIcon(genre);
+  const label = toTitleCase(genre);
   
   return (
-    <button
+    <IconButton
+      icon={icon}
+      label={label}
+      isSelected={isSelected}
+      isDisabled={isDisabled}
+      selectedBorderColor={SELECTED_BORDER_COLOR}
       onClick={onClick}
-      disabled={!isClickable}
-      className={`flex items-center gap-2 px-3 py-2 rounded border bg-card hover:bg-accent transition-colors text-sm font-medium ${
-        isSelected ? 'border-l-4' : ''
-      } ${!isClickable ? 'opacity-50 cursor-not-allowed' : ''}`}
-      style={isSelected ? SELECTED_BORDER_STYLE : undefined}
-    >
-      <img 
-        src={`/genres/${genre}.png`} 
-        alt={genre} 
-        className="w-4 h-4 object-contain"
-      />
-      {toTitleCase(genre)}
-    </button>
+      iconSize="sm"
+      textAlign="center"
+    />
   );
 }

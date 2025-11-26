@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Filter } from 'lucide-react';
 import { toTitleCase } from '@/lib/utils';
-import { OPPONENT_STUDIOS } from '@/lib/studio-data';
+import { OPPONENT_STUDIOS, getPlayerLogoIcon, ALL_COMPETITORS_ICON } from '@/lib/studio-data';
 import deadIcon from '@/assets/DEAD.png';
 import unemployedIcon from '@/assets/UN.png';
 import lockedIcon from '@/assets/LOCK.png';
@@ -59,16 +59,16 @@ export const FilterPopover = memo(function FilterPopover({
   );
 
   const studioOptions = useMemo((): FilterOption[] => {
-    const playerIcon = `/src/assets/PL${playerLogoId}.png`;
+    const playerIcon = getPlayerLogoIcon(playerLogoId);
     
     return [
       { id: 'PL', label: toTitleCase(playerStudioName), icon: playerIcon, isDynamic: true },
       { id: 'Unemployed', label: 'Unemployed', icon: unemployedIcon },
-      { id: 'ALL_COMPETITORS', label: 'All Competitors', icon: '/src/assets/ALL.png', isSpecial: true },
+      { id: 'ALL_COMPETITORS', label: 'All Competitors', icon: ALL_COMPETITORS_ICON, isSpecial: true },
       ...opponentStudios.map(studio => ({
         id: studio.id,
         label: studio.name,
-        icon: `/src/assets/${studio.icon}`,
+        icon: studio.icon,
       })),
     ];
   }, [playerStudioName, playerLogoId, opponentStudios]);

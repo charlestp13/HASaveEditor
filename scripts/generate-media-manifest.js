@@ -9,8 +9,6 @@ const outputPath = path.join(__dirname, '../public/media-manifest.json');
 
 const manifest = {
   portraits: {},
-  traits: [],
-  status: []
 };
 
 // --- PORTRAITS ---
@@ -40,52 +38,8 @@ if (fs.existsSync(portraitsDir)) {
   });
 }
 
-// --- TRAITS ---
-const traitsDir = path.join(__dirname, '../public/traits');
-
-if (fs.existsSync(traitsDir)) {
-  const files = fs.readdirSync(traitsDir);
-  
-  files.forEach(file => {
-    const match = file.match(/^([A-Z_]+)\.png$/);
-    if (match) {
-      manifest.traits.push(match[1]);
-    }
-  });
-
-  manifest.traits.sort();
-}
-
-// --- STATUS ---
-const statusDir = path.join(__dirname, '../public/status');
-
-if (fs.existsSync(statusDir)) {
-  const files = fs.readdirSync(statusDir);
-  
-  files.forEach(file => {
-    const match = file.match(/^([A-Z_]+)\.png$/i);
-    if (match) {
-      manifest.status.push(match[1].toUpperCase());
-    }
-  });
-
-  manifest.status.sort();
-}
-
 // --- WRITE MANIFEST ---
 fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2));
 
 console.log(`✅ Generated media manifest:`);
 console.log(`   Portraits: ${Object.keys(manifest.portraits).length}`);
-console.log(`   Traits: ${manifest.traits.length}`);
-console.log(`   Status: ${manifest.status.length}`);
-
-if (Object.keys(manifest.portraits).length === 0) {
-  console.log('⚠️  No portraits found. Place .png files in public/portraits/');
-}
-if (manifest.traits.length === 0) {
-  console.log('⚠️  No traits found. Place .png files in public/traits/');
-}
-if (manifest.status.length === 0) {
-  console.log('⚠️  No status icons found. Place ART.png and COM.png in public/status/');
-}
