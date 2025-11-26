@@ -132,18 +132,11 @@ export class PersonUtils {
     return typeof limit === 'number' ? limit : parseFloat(String(limit)) || 0;
   }
 
-  static getArt(person: Person): number {
+  static getWhiteTagValue(person: Person, tagId: string): number {
     if (!person.whiteTagsNEW || typeof person.whiteTagsNEW !== 'object') return 0;
-    const art = person.whiteTagsNEW['ART'];
-    if (!art) return 0;
-    return typeof art.value === 'string' ? parseFloat(art.value) : art.value;
-  }
-
-  static getCom(person: Person): number {
-    if (!person.whiteTagsNEW || typeof person.whiteTagsNEW !== 'object') return 0;
-    const com = person.whiteTagsNEW['COM'];
-    if (!com) return 0;
-    return typeof com.value === 'string' ? parseFloat(com.value) : com.value;
+    const tag = person.whiteTagsNEW[tagId];
+    if (!tag) return 0;
+    return typeof tag.value === 'string' ? parseFloat(tag.value) : tag.value;
   }
 
   static getSkill(person: Person, profession: string): number {

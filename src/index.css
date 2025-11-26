@@ -29,9 +29,27 @@
   * {
     border-color: hsl(var(--border));
   }
+  
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Also hide scrollbar on all elements */
+  * {
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
   }
 }
 

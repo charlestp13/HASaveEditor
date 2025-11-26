@@ -1,5 +1,5 @@
 [package]
-name = "app"
+name = "HollywoodAnimalSE"
 version = "0.1.0"
 description = "Hollywood Animal Save Editor"
 authors = ["you"]

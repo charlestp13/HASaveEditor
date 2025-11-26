@@ -9,7 +9,7 @@ interface GenreBadgeProps {
 
 export function GenreBadge({ genre, value }: GenreBadgeProps) {
   const isEstablished = value >= GENRE_ESTABLISHED_THRESHOLD;
-  
+
   const icon = getGenreIcon(genre);
   if (!icon) return null;
   
@@ -19,7 +19,6 @@ export function GenreBadge({ genre, value }: GenreBadgeProps) {
       text={toTitleCase(genre)}
       color="#ffd779"
       title={`Value: ${value.toFixed(1)}`}
-      variant="rounded"
       size="sm"
       inactive={!isEstablished}
     />

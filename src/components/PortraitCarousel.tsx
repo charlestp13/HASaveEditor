@@ -90,7 +90,7 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
       <img
         src={availablePortraits[currentIndex]}
         alt="Character portrait"
-        className="object-contain rounded"
+        className="object-contain rounded max-h-16 mx-auto"
         style={{ transform: 'scaleX(-1)' }}
       />
       

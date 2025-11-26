@@ -9,9 +9,9 @@ import { GenreAdjuster } from '@/components/GenreAdjuster';
 import { StatAdjuster } from '@/components/StatAdjuster';
 import { SkillAdjuster } from '@/components/SkillAdjuster';
 import { StatusAdjuster } from '@/components/StatusAdjuster';
+import { SettingsAdjuster } from '@/components/SettingsAdjuster';
 import { CardSection } from '@/components/CardSection';
 import { PersonUtils, GameDate } from '@/lib/utils';
-import { GENRES } from '@/lib/character-genres';
 import { useCharacterDates } from '@/hooks/useCharacterDates';
 import { useCharacterComputed } from '@/hooks/useCharacterComputed';
 import type { Person } from '@/lib/types';
@@ -52,7 +52,10 @@ export const CharacterCard = memo(function CharacterCard({
     art,
     com,
     isActorOrDirector,
-    skillEntries,
+    isCinematographer,
+    indoor,
+    outdoor,
+    genres,
     canEditTraits,
   } = useCharacterComputed(character);
 
@@ -96,17 +99,14 @@ export const CharacterCard = memo(function CharacterCard({
           />
         </div>
 
-        <div className="space-y-2">
-          <div className="text-sm">
-            <span className="text-muted-foreground">Studio: </span>
-            <span className="font-medium">
-              {PersonUtils.getStudioDisplay(character.studioId)}
-            </span>
-          </div>
-        </div>
-
         <div className="flex gap-3 items-start">
           <div className="flex-1 space-y-1">
+            <div className="text-sm">
+              <span className="text-muted-foreground">Studio: </span>
+              <span className="font-medium">
+                {PersonUtils.getStudioDisplay(character.studioId)}
+              </span>
+            </div>
             <div className="text-xs text-muted-foreground">
               State: {PersonUtils.getStateLabel(character.state)}
               {isBusy && ' (On Job)'}
@@ -114,18 +114,6 @@ export const CharacterCard = memo(function CharacterCard({
             {character.gender !== undefined && (
               <div className="text-xs text-muted-foreground">
                 Gender: {character.gender === 1 ? 'Female' : 'Male'}
-              </div>
-            )}
-            {birthParsed && (
-              <div className="text-xs">
-                <span className="text-muted-foreground">Birth: </span>
-                <span className="text-muted-foreground">{birthParsed.format()}</span>
-              </div>
-            )}
-            {isDead && deathParsed && (
-              <div className="text-xs">
-                <span className="text-muted-foreground">Death: </span>
-                <span className="text-destructive">{deathParsed.format()}</span>
               </div>
             )}
           </div>
@@ -137,26 +125,20 @@ export const CharacterCard = memo(function CharacterCard({
           />
         </div>
 
-        
-
-        {isActorOrDirector && (
-          <CardSection title="Public Image">
-            <div className="space-y-2">
-              {PUBLIC_IMAGE_STATS.map(({ type, label }) => {
-                const value = type === 'ART' ? art : com;
-                return (
-                  <StatusAdjuster
-                    key={type}
-                    type={type}
-                    value={value > 0 ? value : null}
-                    label={label}
-                    profession={professionName as 'Actor' | 'Director'}
-                    onChange={(v) => onUpdate?.(`whiteTag:${type}`, v)}
-                  />
-                );
-              })}
+        {birthParsed && (
+          <div className="space-y-1 text-xs">
+            <div>
+              <span className="text-muted-foreground">Birth: </span>
+              <span className="font-mono">{birthParsed.format()}</span>
             </div>
-          </CardSection>
+            {isDead && deathParsed && (
+              <div className="text-destructive">
+                <span className="text-muted-foreground">Death: </span>
+                <span className="font-mono">{deathParsed.format()}</span>
+                <span className="ml-2">(Cause: {character.causeOfDeath})</span>
+              </div>
+            )}
+          </div>
         )}
 
         {canEditTraits && (
@@ -179,17 +161,43 @@ export const CharacterCard = memo(function CharacterCard({
           </CardSection>
         )}
 
+        {isActorOrDirector && (
+          <CardSection title="Public Image">
+            <div className="space-y-2">
+              {PUBLIC_IMAGE_STATS.map(({ type, label }) => {
+                const value = type === 'ART' ? art : com;
+                return (
+                  <StatusAdjuster
+                    key={type}
+                    type={type}
+                    value={value > 0 ? value : null}
+                    label={label}
+                    profession={professionName as 'Actor' | 'Director'}
+                    onChange={(v) => onUpdate?.(`whiteTag:${type}`, v)}
+                  />
+                );
+              })}
+            </div>
+          </CardSection>
+        )}
+
+        {isCinematographer && (
+          <CardSection title="Settings">
+            <SettingsAdjuster
+              outdoorValue={outdoor || 0}
+              indoorValue={indoor || 0}
+              onOutdoorChange={(v) => onUpdate?.('whiteTag:OUTDOOR', v)}
+              onIndoorChange={(v) => onUpdate?.('whiteTag:INDOOR', v)}
+            />
+          </CardSection>
+        )}
+
         {['Scriptwriter', 'Producer', 'Director', 'Actor'].includes(professionName) && (
           <CardSection 
             title="Genres" 
             action={
               <GenreAdjuster
-                genres={skillEntries
-                  .filter(s => (GENRES as readonly string[]).includes(s.id))
-                  .map(s => ({
-                    id: s.id,
-                    value: typeof s.value === 'string' ? parseFloat(s.value) : s.value
-                  }))}
+                genres={genres}
                 onToggle={(genre, shouldAdd) => {
                   onUpdate?.(`whiteTag:${genre}`, shouldAdd ? 12.0 : null);
                 }}
@@ -198,17 +206,15 @@ export const CharacterCard = memo(function CharacterCard({
             collapsible 
             defaultCollapsed
           >
-            {skillEntries.filter(s => (GENRES as readonly string[]).includes(s.id)).length > 0 ? (
+            {genres.length > 0 ? (
               <div className="flex flex-wrap gap-1">
-                {skillEntries
-                  .filter(s => (GENRES as readonly string[]).includes(s.id))
-                  .map((genre) => (
-                    <GenreBadge 
-                      key={genre.id} 
-                      genre={genre.id}
-                      value={typeof genre.value === 'string' ? parseFloat(genre.value) : genre.value} 
-                    />
-                  ))}
+                {genres.map((genre) => (
+                  <GenreBadge 
+                    key={genre.id} 
+                    genre={genre.id}
+                    value={genre.value} 
+                  />
+                ))}
               </div>
             ) : (
               <div className="text-xs text-muted-foreground">No genres</div>
