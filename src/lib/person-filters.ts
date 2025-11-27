@@ -1,4 +1,4 @@
-import { PersonUtils, normalizeStudioId } from './utils';
+import { PersonUtils, StudioUtils } from './utils';
 import type { Person } from './types';
 
 export const STUDIO_IDS = ['PL', 'GB', 'EM', 'SU', 'HE', 'MA'] as const;
@@ -22,7 +22,7 @@ export const PersonFilters = {
 
     if (filters.excludeStudios && filters.excludeStudios.length > 0) {
       filtered = filtered.filter(person => {
-        const studioId = normalizeStudioId(person.studioId);
+        const studioId = StudioUtils.normalizeId(person.studioId);
         return !filters.excludeStudios!.includes(studioId);
       });
     }
@@ -36,7 +36,7 @@ export const PersonFilters = {
     }
 
     if (filters.excludeUnemployed) {
-      filtered = filtered.filter(person => normalizeStudioId(person.studioId) !== 'N/A');
+      filtered = filtered.filter(person => StudioUtils.normalizeId(person.studioId) !== 'N/A');
     }
 
     if (filters.search) {
@@ -58,11 +58,5 @@ export const PersonFilters = {
       excludeLocked: selectedFilters.includes('Locked'),
       excludeUnemployed: selectedFilters.includes('Unemployed'),
     };
-  },
-
-  sortByName(persons: Person[], nameStrings?: string[]): Person[] {
-    return [...persons].sort((a, b) => 
-      PersonUtils.getDisplayName(a, nameStrings).localeCompare(PersonUtils.getDisplayName(b, nameStrings))
-    );
   }
 };

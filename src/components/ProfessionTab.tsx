@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { saveManager } from '@/lib/tauri-api';
-import { normalizeStudioId } from '@/lib/utils';
+import { StudioUtils } from '@/lib/utils';
 import { PersonStateUpdater } from '@/lib/person-state-updater';
 import { PersonFilters } from '@/lib/person-filters';
+import { PersonSorter } from '@/lib/person-sorter';
 import { Input } from '@/components/ui/input';
 import { FilterPopover } from '@/components/FilterPopover';
 import { SortPopover } from '@/components/SortPopover';
@@ -15,21 +16,6 @@ import { useNameTranslation } from '@/hooks/useNameTranslation';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import type { Person, SaveInfo } from '@/lib/types';
 import type { SortField, SortOrder } from '@/components/SortPopover';
-
-function calculateAge(birthDate: string, currentDate: string): number | null {
-  try {
-    const [birthDay, birthMonth, birthYear] = birthDate.split('-').map(Number);
-    const [currentDay, currentMonth, currentYear] = currentDate.split('-').map(Number);
-    
-    let age = currentYear - birthYear;
-    if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
-      age--;
-    }
-    return age;
-  } catch {
-    return null;
-  }
-}
 
 interface ProfessionTabProps {
   profession: string;
@@ -142,7 +128,7 @@ export function ProfessionTab({
   const availableStudios = useMemo(() => {
     const studios = new Set<string>();
     allPersons.forEach(p => {
-      const studioId = normalizeStudioId(p.studioId);
+      const studioId = StudioUtils.normalizeId(p.studioId);
       if (studioId !== 'N/A' && studioId !== 'PL') {
         studios.add(studioId);
       }
@@ -181,51 +167,7 @@ export function ProfessionTab({
 
   // Compute sorted list - only updates when sort settings or refreshKey change
   const sortedPersons = useMemo(() => {
-    // Schwartzian transform: pre-compute sort values, sort, then extract
-    const withSortValues = filteredPersons.map(person => {
-      let sortValue: number;
-
-      switch (sortField) {
-        case 'skill': {
-          const prof = person.professions ? Object.values(person.professions)[0] : '0';
-          sortValue = parseFloat(prof);
-          break;
-        }
-        case 'selfEsteem': {
-          sortValue = parseFloat(person.selfEsteem || '0');
-          break;
-        }
-        case 'age': {
-          if (!person.birthDate || !currentDate) {
-            sortValue = 0;
-          } else {
-            sortValue = calculateAge(person.birthDate, currentDate) || 0;
-          }
-          break;
-        }
-        case 'art': {
-          const art = person.whiteTagsNEW?.['ART'];
-          sortValue = art ? parseFloat(art.value) : 0;
-          break;
-        }
-        case 'com': {
-          const com = person.whiteTagsNEW?.['COM'];
-          sortValue = com ? parseFloat(com.value) : 0;
-          break;
-        }
-        default:
-          sortValue = 0;
-      }
-
-      return { person, sortValue };
-    });
-
-    withSortValues.sort((a, b) => {
-      const comparison = a.sortValue - b.sortValue;
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-
-    return withSortValues.map(item => item.person);
+    return PersonSorter.sort(filteredPersons, sortField, sortOrder, { currentDate });
   }, [filteredPersons, sortField, sortOrder, currentDate, refreshKey]);
 
   // Use sortedPersons for display, but keep it in sync with edits (position unchanged)

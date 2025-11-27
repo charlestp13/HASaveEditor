@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { saveManager } from '@/lib/tauri-api';
 import appBanner from '@/assets/appBanner.png';
 import { ProfessionTab } from '@/components/ProfessionTab';
 import { ErrorBanner } from '@/components/ErrorBanner';
 import { SaveInfoBar } from '@/components/SaveInfoBar';
 import { useAsyncAction } from '@/hooks/useAsyncAction';
+import { useTabState } from '@/hooks/useTabState';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,11 +38,8 @@ const TABS = [
   { id: 'agents', label: 'Agents', profession: 'Agent', countKey: 'agents_count' },
 ] as const;
 
-type TabId = typeof TABS[number]['id'];
-
 export default function App() {
   const [saveInfo, setSaveInfo] = useState<SaveInfo | null>(null);
-  const [activeTab, setActiveTab] = useState<TabId>('actors');
   const [selectedLanguage, setSelectedLanguage] = useState<typeof LANGUAGES[number]>('ENG');
   const [fileKey, setFileKey] = useState<string | null>(null);
   const [globalFilters, setGlobalFilters] = useState<string[]>(['Dead', 'Locked']);
@@ -49,29 +47,18 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [shadyFilter, setShadyFilter] = useState<'all' | 'shady' | 'notShady'>('all');
-  const [visitedTabs, setVisitedTabs] = useState<Set<TabId>>(new Set(['actors']));
-  const [refreshKeys, setRefreshKeys] = useState<Partial<Record<TabId, number>>>({});
   const { loading, error, execute, clearError } = useAsyncAction();
 
-  const handleTabClick = (tabId: TabId) => {
-    if (tabId === activeTab) {
-      // Clicking active tab = refresh sort
-      setRefreshKeys(prev => ({
-        ...prev,
-        [tabId]: (prev[tabId] || 0) + 1
-      }));
-    } else {
-      // Switch to new tab
-      setActiveTab(tabId);
-      setVisitedTabs(prev => new Set([...prev, tabId]));
-    }
-  };
-
-  // Reset visited tabs when opening new file or changing language
-  useEffect(() => {
-    setVisitedTabs(new Set(['actors']));
-    setRefreshKeys({});
-  }, [fileKey, selectedLanguage]);
+  const {
+    activeTab,
+    visitedTabs,
+    refreshKeys,
+    handleTabClick,
+  } = useTabState({
+    initialTab: 'actors',
+    fileKey,
+    selectedLanguage,
+  });
 
   const handleOpenFile = () => execute(async () => {
     const result = await saveManager.openSaveFile();

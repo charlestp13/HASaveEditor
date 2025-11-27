@@ -1,15 +1,15 @@
 import { PortraitCarousel } from '@/components/PortraitCarousel';
 import { PersonUtils } from '@/lib/utils';
-import type { GameDate } from '@/lib/utils';
+import type { DateUtils } from '@/lib/utils';
 
 interface InfoSectionProps {
   studioId: string | null | undefined;
   state: number | undefined;
   isBusy: boolean;
   gender: number | undefined;
-  birthParsed: GameDate | null;
+  birthParsed: DateUtils | null;
   isDead: boolean;
-  deathParsed: GameDate | null;
+  deathParsed: DateUtils | null;
   professions: { [key: string]: any };
   portraitBaseId: number | undefined;
 }

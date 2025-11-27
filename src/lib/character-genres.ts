@@ -46,3 +46,4 @@ export const GENRE_ICONS: Record<Genre, string> = {
 export function getGenreIcon(genre: string): string | undefined {
   return GENRE_ICONS[genre as Genre];
 }
+

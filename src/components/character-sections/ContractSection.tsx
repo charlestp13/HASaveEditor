@@ -1,5 +1,5 @@
 import { CardSection } from '@/components/CardSection';
-import { GameDate } from '@/lib/utils';
+import { DateUtils } from '@/lib/utils';
 
 interface ContractSectionProps {
   contract: {
@@ -43,7 +43,7 @@ export function ContractSection({
         <div>
           <div className="text-muted-foreground">Signed</div>
           <div className="font-mono text-xs">
-            {GameDate.fromDate(new Date(contract.dateOfSigning)).format()}
+            {DateUtils.fromDate(new Date(contract.dateOfSigning)).format()}
           </div>
         </div>
         <div>

@@ -145,6 +145,127 @@ export class PersonUtils {
     const parsed = parseFloat(val);
     return isNaN(parsed) ? 0 : parsed;
   }
+
+  // Genre helpers
+  static hasGenre(person: Person, genre: string): boolean {
+    return person.whiteTagsNEW?.[genre] !== undefined;
+  }
+
+  static getGenreValue(person: Person, genre: string): number {
+    return PersonUtils.getWhiteTagValue(person, genre);
+  }
+
+  static getGenreLevel(person: Person, genre: string): number {
+    const value = PersonUtils.getGenreValue(person, genre);
+    if (value >= 12.0) return 4;
+    if (value >= 8.0) return 3;
+    if (value >= 4.0) return 2;
+    if (value > 0) return 1;
+    return 0;
+  }
+
+  static isGenreEstablished(person: Person, genre: string): boolean {
+    return PersonUtils.getGenreValue(person, genre) >= 12.0;
+  }
+
+  // Status helpers (consolidated from character-status.ts)
+  static getRank(value: number): number {
+    if (value === 1.0) return 4;
+    if (value >= 0.70) return 3;
+    if (value >= 0.30) return 2;
+    if (value >= 0.15) return 1;
+    return 0;
+  }
+
+  static getStatusLabel(
+    type: 'ART' | 'COM',
+    value: number,
+    profession: 'Actor' | 'Director'
+  ): string | null {
+    const rank = PersonUtils.getRank(value);
+    if (rank === 0) return null;
+    
+    const ACTOR_LABELS = {
+      ART: ['PROMISING TALENT', 'COMMANDING PRESENCE', 'TRUE ARTIST', 'ICON'],
+      COM: ['RISING STAR', 'STAR', 'SUPERSTAR', 'LEGEND'],
+    };
+    
+    const DIRECTOR_LABELS = {
+      ART: ['FRESH PERSPECTIVE', 'DECISIVE TALENT', 'VISIONARY', 'GENIUS'],
+      COM: ['FAN FAVORITE', 'SENSATION', 'PHENOMENON', 'HOLLYWOOD GIANT'],
+    };
+    
+    const labels = profession === 'Actor' ? ACTOR_LABELS : DIRECTOR_LABELS;
+    return labels[type][rank - 1];
+  }
+
+  static getStatusColor(value: number): string | null {
+    const rank = PersonUtils.getRank(value);
+    if (!rank) return null;
+    
+    const RANK_COLORS: Record<number, string> = {
+      1: '#E09D94',
+      2: '#A8D4E6',
+      3: '#E8D8A8',
+      4: '#94CCBE',
+    };
+    
+    return RANK_COLORS[rank];
+  }
+
+  // Trait helpers (consolidated from character-traits.ts)
+  static readonly DISPLAYABLE_TRAITS = [
+    "ALCOHOLIC", "ARROGANT", "CALM", "CHASTE", "CHEERY", "DEMANDING",
+    "DISCIPLINED", "HARDWORKING", "HEARTBREAKER", "HOTHEADED", "INDIFFERENT",
+    "JUNKIE", "LAZY", "LEADER", "LUDOMANIAC", "MELANCHOLIC", "MISOGYNIST",
+    "MODEST", "OPEN_MINDED", "PERFECTIONIST", "RACIST", "SIMPLE", "TEAM_PLAYER",
+    "UNDISCIPLINED", "UNWANTED_ACTOR", "XENOPHOBE"
+  ] as const;
+
+  static readonly HIDDEN_TRAITS = [
+    "IMMORTAL", "IMAGE_SOPHISTIC", "IMAGE_VIVID", "MAIN_CHARACTER",
+    "STERILE", "SUPER_IMMORTAL", "UNTOUCHABLE"
+  ] as const;
+
+  static readonly TRAIT_CONFLICTS: Record<string, string> = {
+    "HARDWORKING": "LAZY", "LAZY": "HARDWORKING",
+    "DISCIPLINED": "UNDISCIPLINED", "UNDISCIPLINED": "DISCIPLINED",
+    "PERFECTIONIST": "INDIFFERENT", "INDIFFERENT": "PERFECTIONIST",
+    "HOTHEADED": "CALM", "CALM": "HOTHEADED",
+    "DEMANDING": "MODEST", "MODEST": "DEMANDING",
+    "ARROGANT": "SIMPLE", "SIMPLE": "ARROGANT",
+    "HEARTBREAKER": "CHASTE", "CHASTE": "HEARTBREAKER",
+    "CHEERY": "MELANCHOLIC", "MELANCHOLIC": "CHEERY"
+  };
+
+  static isDisplayableTrait(trait: string): boolean {
+    return PersonUtils.DISPLAYABLE_TRAITS.includes(trait as any);
+  }
+
+  static isHiddenTrait(trait: string): boolean {
+    return PersonUtils.HIDDEN_TRAITS.includes(trait as any);
+  }
+
+  static getConflictingTrait(trait: string): string | null {
+    return PersonUtils.TRAIT_CONFLICTS[trait] || null;
+  }
+
+  static canAddTrait(trait: string, currentTraits: string[]): boolean {
+    if (currentTraits.includes(trait)) return false;
+    const conflict = PersonUtils.TRAIT_CONFLICTS[trait];
+    if (conflict && currentTraits.includes(conflict)) return false;
+    return true;
+  }
+
+  // Genre constants (consolidated from character-genres.ts)
+  static readonly GENRES = [
+    'ACTION', 'DRAMA', 'HISTORICAL', 'THRILLER',
+    'ROMANCE', 'DETECTIVE', 'COMEDY', 'ADVENTURE',
+    'HORROR', 'SCIENCE_FICTION'
+  ] as const;
+
+  static readonly GENRE_ESTABLISHED_THRESHOLD = 12.0;
+  static readonly MAX_ESTABLISHED_GENRES = 3;
 }
 
 export class StudioUtils {
@@ -160,11 +281,11 @@ export class StudioUtils {
   static formatNumber(value: number): string {
     return new Intl.NumberFormat('en-US').format(value);
   }
-}
 
-export function normalizeStudioId(studioId: string | number | null | undefined): string {
-  const id = studioId?.toString() || 'NONE';
-  return id === 'NONE' ? 'N/A' : id;
+  static normalizeId(studioId: string | number | null | undefined): string {
+    const id = studioId?.toString() || 'NONE';
+    return id === 'NONE' ? 'N/A' : id;
+  }
 }
 
 const MONTHS_FULL = [
@@ -177,7 +298,7 @@ const MONTHS_SHORT = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ];
 
-export class GameDate {
+export class DateUtils {
   static readonly GAME_START_DATE = '1929-01-01T00:00:00';
   
   readonly year: number;
@@ -190,26 +311,39 @@ export class GameDate {
     this.day = day;
   }
 
-  static parse(dateStr: string): GameDate | null {
+  static parse(dateStr: string): DateUtils | null {
     const match = dateStr.match(/(\w+) (\d+), (\d+)/);
     if (!match) return null;
 
     const monthIndex = MONTHS_FULL.indexOf(match[1]);
     if (monthIndex === -1) return null;
 
-    return new GameDate(parseInt(match[3]), monthIndex, parseInt(match[2]));
+    return new DateUtils(parseInt(match[3]), monthIndex, parseInt(match[2]));
   }
 
-  static fromDDMMYYYY(dateStr: string): GameDate | null {
+  static fromDDMMYYYY(dateStr: string): DateUtils | null {
     const parts = dateStr.split('-').map(Number);
     if (parts.length !== 3) return null;
 
     const [day, month, year] = parts;
-    return new GameDate(year, month - 1, day);
+    return new DateUtils(year, month - 1, day);
   }
 
-  static fromDate(date: Date): GameDate {
-    return new GameDate(date.getFullYear(), date.getMonth(), date.getDate());
+  static fromDate(date: Date): DateUtils {
+    return new DateUtils(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  static calculateAge(birthDate: string, currentDate: string): number | null {
+    try {
+      const birth = DateUtils.fromDDMMYYYY(birthDate);
+      const current = DateUtils.parse(currentDate);
+      
+      if (!birth || !current) return null;
+      
+      return birth.ageTo(current);
+    } catch {
+      return null;
+    }
   }
 
   toDate(): Date {
@@ -221,7 +355,7 @@ export class GameDate {
     return `${months[this.month]} ${this.day}, ${this.year}`;
   }
 
-  ageTo(currentDate: GameDate): number {
+  ageTo(currentDate: DateUtils): number {
     let age = currentDate.year - this.year;
     const monthDiff = currentDate.month - this.month;
 
@@ -232,7 +366,7 @@ export class GameDate {
     return age;
   }
 
-  daysUntil(target: GameDate): number {
+  daysUntil(target: DateUtils): number {
     const from = this.toDate();
     const to = target.toDate();
     const diffTime = to.getTime() - from.getTime();
@@ -240,19 +374,22 @@ export class GameDate {
   }
 }
 
+// Alias for backward compatibility
+export const GameDate = DateUtils;
+
 export function createWhiteTag(tagId: string, value: number): WhiteTag {
   const valueStr = value.toFixed(3);
   return {
     id: tagId,
     value: valueStr,
-    dateAdded: GameDate.GAME_START_DATE,
+    dateAdded: DateUtils.GAME_START_DATE,
     movieId: 0,
     IsOverall: false,
     overallValues: [{
       movieId: 0,
       sourceType: 0,
       value: valueStr,
-      dateAdded: GameDate.GAME_START_DATE
+      dateAdded: DateUtils.GAME_START_DATE
     }]
   };
 }
