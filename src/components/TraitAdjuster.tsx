@@ -29,10 +29,7 @@ export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
     [traits]
   );
 
-  const atMaxTraits = useMemo(
-    () => displayableCurrentTraits.length >= MAX_TRAITS,
-    [displayableCurrentTraits]
-  );
+  const atMaxTraits = displayableCurrentTraits.length >= MAX_TRAITS;
 
   const { conflictPairs, nonConflictingTraits } = useMemo(() => {
     const seenTraits = new Set<string>();

@@ -5,6 +5,8 @@ import { StudioUtils } from '@/lib/utils';
 import { PersonStateUpdater } from '@/lib/person-state-updater';
 import { PersonFilters } from '@/lib/person-filters';
 import { PersonSorter } from '@/lib/person-sorter';
+import { NameSearcher } from '@/lib/name-searcher';
+import type { SortField, SortOrder } from '@/lib/person-sorter';
 import { Input } from '@/components/ui/input';
 import { FilterPopover } from '@/components/FilterPopover';
 import { SortPopover } from '@/components/SortPopover';
@@ -15,7 +17,6 @@ import { EmptyState } from '@/components/EmptyState';
 import { useNameTranslation } from '@/hooks/useNameTranslation';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import type { Person, SaveInfo } from '@/lib/types';
-import type { SortField, SortOrder } from '@/components/SortPopover';
 
 interface ProfessionTabProps {
   profession: string;
@@ -60,6 +61,8 @@ export function ProfessionTab({
     setError(err instanceof Error ? err.message : fallback), []);
 
   const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
+  
+  const nameSearcher = useMemo(() => new NameSearcher(nameStrings), [nameStrings]);
   
   const savePerson = useCallback(
     (personId: string, field: string, value: number | null) => {
@@ -193,6 +196,14 @@ export function ProfessionTab({
     debouncedSave(`${personId}-${field}`, String(personId), field, value);
   }, [debouncedSave]);
 
+  const handleNameUpdate = useCallback((personId: string | number, field: 'firstNameId' | 'lastNameId', nameId: string) => {
+    setAllPersons(prev => prev.map(p => 
+      p.id === personId ? PersonStateUpdater.updateNameField(p, field, nameId) : p
+    ));
+    saveManager.updatePerson(profession, String(personId), { [field]: nameId })
+      .catch(err => handleError(err, 'Failed to update name'));
+  }, [profession, handleError]);
+
   const handleTraitAdd = useCallback((personId: string | number, trait: string) => {
     setAllPersons(prev => prev.map(p => 
       p.id === personId ? PersonStateUpdater.addTrait(p, trait) : p
@@ -283,8 +294,9 @@ export function ProfessionTab({
         <CharacterList
           persons={persons}
           currentDate={currentDate}
-          nameStrings={nameStrings}
+          nameSearcher={nameSearcher}
           onUpdate={handlePersonUpdate}
+          onNameUpdate={handleNameUpdate}
           onTraitAdd={handleTraitAdd}
           onTraitRemove={handleTraitRemove}
         />

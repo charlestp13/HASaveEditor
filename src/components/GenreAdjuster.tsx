@@ -31,10 +31,7 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
     [genres]
   );
 
-  const atMaxGenres = useMemo(
-    () => establishedGenres.length >= MAX_ESTABLISHED_GENRES,
-    [establishedGenres]
-  );
+  const atMaxGenres = establishedGenres.length >= MAX_ESTABLISHED_GENRES;
 
   // Create a map for quick lookup of genre values
   const genreMap = useMemo(

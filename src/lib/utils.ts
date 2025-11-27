@@ -72,10 +72,8 @@ export class PersonUtils {
   static getStudioDisplay(studioId: string | null | undefined): string {
     if (!studioId || studioId === 'NONE') return 'N/A';
     if (studioId === 'PL') return 'Player';
-    
-    // Use studio-data helper for opponent studios
     const studioName = getStudioName(studioId);
-    return studioName || studioId; // Fallback to ID if unknown
+    return studioName || studioId;
   }
 
   static getSkillEntries(person: Person): WhiteTag[] {
@@ -104,16 +102,6 @@ export class PersonUtils {
     return Boolean(state & PersonUtils.getFlag('Locked'));
   }
 
-  static isHireableByPlayer(person: Person): boolean {
-    const state = person.state ?? 0;
-    const HIREABLE_MASK = -4211;
-    return (state & HIREABLE_MASK) === state;
-  }
-
-  static getGenderLabel(gender?: number): string {
-    return gender === 0 ? 'Male' : 'Female';
-  }
-
   static getStateLabel(state?: number): string {
     if (state === undefined || state === 0) return 'None';
 
@@ -127,145 +115,12 @@ export class PersonUtils {
     return activeStates.length > 0 ? activeStates.join(', ') : `Unknown (${state})`;
   }
 
-  static getLimit(person: Person): number {
-    const limit = person.limit ?? person.Limit ?? 0;
-    return typeof limit === 'number' ? limit : parseFloat(String(limit)) || 0;
-  }
-
   static getWhiteTagValue(person: Person, tagId: string): number {
     if (!person.whiteTagsNEW || typeof person.whiteTagsNEW !== 'object') return 0;
     const tag = person.whiteTagsNEW[tagId];
     if (!tag) return 0;
     return typeof tag.value === 'string' ? parseFloat(tag.value) : tag.value;
   }
-
-  static getSkill(person: Person, profession: string): number {
-    const val = person.professions?.[profession];
-    if (!val) return 0;
-    const parsed = parseFloat(val);
-    return isNaN(parsed) ? 0 : parsed;
-  }
-
-  // Genre helpers
-  static hasGenre(person: Person, genre: string): boolean {
-    return person.whiteTagsNEW?.[genre] !== undefined;
-  }
-
-  static getGenreValue(person: Person, genre: string): number {
-    return PersonUtils.getWhiteTagValue(person, genre);
-  }
-
-  static getGenreLevel(person: Person, genre: string): number {
-    const value = PersonUtils.getGenreValue(person, genre);
-    if (value >= 12.0) return 4;
-    if (value >= 8.0) return 3;
-    if (value >= 4.0) return 2;
-    if (value > 0) return 1;
-    return 0;
-  }
-
-  static isGenreEstablished(person: Person, genre: string): boolean {
-    return PersonUtils.getGenreValue(person, genre) >= 12.0;
-  }
-
-  // Status helpers (consolidated from character-status.ts)
-  static getRank(value: number): number {
-    if (value === 1.0) return 4;
-    if (value >= 0.70) return 3;
-    if (value >= 0.30) return 2;
-    if (value >= 0.15) return 1;
-    return 0;
-  }
-
-  static getStatusLabel(
-    type: 'ART' | 'COM',
-    value: number,
-    profession: 'Actor' | 'Director'
-  ): string | null {
-    const rank = PersonUtils.getRank(value);
-    if (rank === 0) return null;
-    
-    const ACTOR_LABELS = {
-      ART: ['PROMISING TALENT', 'COMMANDING PRESENCE', 'TRUE ARTIST', 'ICON'],
-      COM: ['RISING STAR', 'STAR', 'SUPERSTAR', 'LEGEND'],
-    };
-    
-    const DIRECTOR_LABELS = {
-      ART: ['FRESH PERSPECTIVE', 'DECISIVE TALENT', 'VISIONARY', 'GENIUS'],
-      COM: ['FAN FAVORITE', 'SENSATION', 'PHENOMENON', 'HOLLYWOOD GIANT'],
-    };
-    
-    const labels = profession === 'Actor' ? ACTOR_LABELS : DIRECTOR_LABELS;
-    return labels[type][rank - 1];
-  }
-
-  static getStatusColor(value: number): string | null {
-    const rank = PersonUtils.getRank(value);
-    if (!rank) return null;
-    
-    const RANK_COLORS: Record<number, string> = {
-      1: '#E09D94',
-      2: '#A8D4E6',
-      3: '#E8D8A8',
-      4: '#94CCBE',
-    };
-    
-    return RANK_COLORS[rank];
-  }
-
-  // Trait helpers (consolidated from character-traits.ts)
-  static readonly DISPLAYABLE_TRAITS = [
-    "ALCOHOLIC", "ARROGANT", "CALM", "CHASTE", "CHEERY", "DEMANDING",
-    "DISCIPLINED", "HARDWORKING", "HEARTBREAKER", "HOTHEADED", "INDIFFERENT",
-    "JUNKIE", "LAZY", "LEADER", "LUDOMANIAC", "MELANCHOLIC", "MISOGYNIST",
-    "MODEST", "OPEN_MINDED", "PERFECTIONIST", "RACIST", "SIMPLE", "TEAM_PLAYER",
-    "UNDISCIPLINED", "UNWANTED_ACTOR", "XENOPHOBE"
-  ] as const;
-
-  static readonly HIDDEN_TRAITS = [
-    "IMMORTAL", "IMAGE_SOPHISTIC", "IMAGE_VIVID", "MAIN_CHARACTER",
-    "STERILE", "SUPER_IMMORTAL", "UNTOUCHABLE"
-  ] as const;
-
-  static readonly TRAIT_CONFLICTS: Record<string, string> = {
-    "HARDWORKING": "LAZY", "LAZY": "HARDWORKING",
-    "DISCIPLINED": "UNDISCIPLINED", "UNDISCIPLINED": "DISCIPLINED",
-    "PERFECTIONIST": "INDIFFERENT", "INDIFFERENT": "PERFECTIONIST",
-    "HOTHEADED": "CALM", "CALM": "HOTHEADED",
-    "DEMANDING": "MODEST", "MODEST": "DEMANDING",
-    "ARROGANT": "SIMPLE", "SIMPLE": "ARROGANT",
-    "HEARTBREAKER": "CHASTE", "CHASTE": "HEARTBREAKER",
-    "CHEERY": "MELANCHOLIC", "MELANCHOLIC": "CHEERY"
-  };
-
-  static isDisplayableTrait(trait: string): boolean {
-    return PersonUtils.DISPLAYABLE_TRAITS.includes(trait as any);
-  }
-
-  static isHiddenTrait(trait: string): boolean {
-    return PersonUtils.HIDDEN_TRAITS.includes(trait as any);
-  }
-
-  static getConflictingTrait(trait: string): string | null {
-    return PersonUtils.TRAIT_CONFLICTS[trait] || null;
-  }
-
-  static canAddTrait(trait: string, currentTraits: string[]): boolean {
-    if (currentTraits.includes(trait)) return false;
-    const conflict = PersonUtils.TRAIT_CONFLICTS[trait];
-    if (conflict && currentTraits.includes(conflict)) return false;
-    return true;
-  }
-
-  // Genre constants (consolidated from character-genres.ts)
-  static readonly GENRES = [
-    'ACTION', 'DRAMA', 'HISTORICAL', 'THRILLER',
-    'ROMANCE', 'DETECTIVE', 'COMEDY', 'ADVENTURE',
-    'HORROR', 'SCIENCE_FICTION'
-  ] as const;
-
-  static readonly GENRE_ESTABLISHED_THRESHOLD = 12.0;
-  static readonly MAX_ESTABLISHED_GENRES = 3;
 }
 
 export class StudioUtils {
@@ -374,7 +229,6 @@ export class DateUtils {
   }
 }
 
-// Alias for backward compatibility
 export const GameDate = DateUtils;
 
 export function createWhiteTag(tagId: string, value: number): WhiteTag {

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SaveInfo } from '@/lib/types';
-import type { SortField, SortOrder } from '@/components/SortPopover';
+import type { SortField, SortOrder } from '@/lib/person-sorter';
 
 const LANGUAGES = ['ENG', 'SPA', 'GER', 'FRE', 'PTB', 'RUS', 'CHN', 'JAP', 'BEL', 'UKR'] as const;
 

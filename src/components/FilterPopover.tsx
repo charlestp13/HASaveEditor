@@ -108,10 +108,7 @@ export const FilterPopover = memo(function FilterPopover({
     [availableStudios]
   );
 
-  const competitorIds = useMemo(() => 
-    opponentStudios.map(s => s.id),
-    [opponentStudios]
-  );
+  const competitorIds = opponentStudios.map(s => s.id);
 
   const studioOptions = useMemo((): FilterOption[] => {
     const playerIcon = getPlayerLogoIcon(playerLogoId);

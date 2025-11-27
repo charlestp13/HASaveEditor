@@ -121,6 +121,10 @@ pub struct StudioUpdate {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PersonUpdate {
+    #[serde(rename = "firstNameId")]
+    pub first_name_id: Option<String>,
+    #[serde(rename = "lastNameId")]
+    pub last_name_id: Option<String>,
     #[serde(rename = "customName")]
     pub custom_name: Option<String>,
     pub gender: Option<i32>,
@@ -307,6 +311,12 @@ pub fn update_person(
 }
 
 fn apply_updates(person: &mut Value, profession: &str, update: &PersonUpdate) {
+    if let Some(first_name_id) = &update.first_name_id {
+        person["firstNameId"] = Value::String(first_name_id.clone());
+    }
+    if let Some(last_name_id) = &update.last_name_id {
+        person["lastNameId"] = Value::String(last_name_id.clone());
+    }
     if let Some(name) = &update.custom_name {
         person["customName"] = Value::String(name.clone());
     }

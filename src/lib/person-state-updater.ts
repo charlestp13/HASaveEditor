@@ -38,6 +38,13 @@ export const PersonStateUpdater = {
     return updated;
   },
 
+  updateNameField(person: Person, field: 'firstNameId' | 'lastNameId', nameId: string): Person {
+    return {
+      ...person,
+      [field]: nameId
+    };
+  },
+
   getUpdatedWhiteTags(person: Person, tagId: string, value: number | null): Record<string, any> | undefined {
     if (value === null) {
       if (!person.whiteTagsNEW) return undefined;

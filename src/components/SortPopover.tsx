@@ -3,11 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ArrowUpDown } from 'lucide-react';
+import type { SortField, SortOrder } from '@/lib/person-sorter';
 
 const SELECTED_BORDER_COLOR = '#ff71a9';
-
-export type SortField = 'skill' | 'selfEsteem' | 'age' | 'art' | 'com';
-export type SortOrder = 'asc' | 'desc';
 
 interface SortPopoverProps {
   sortField: SortField;

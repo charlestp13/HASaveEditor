@@ -2,12 +2,14 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { CharacterCard } from './CharacterCard';
 import type { Person } from '@/lib/types';
+import type { NameSearcher } from '@/lib/name-searcher';
 
 interface CharacterListProps {
   persons: Person[];
   currentDate: string;
-  nameStrings: string[];
+  nameSearcher: NameSearcher;
   onUpdate: (personId: string | number, field: string, value: number | null) => void;
+  onNameUpdate: (personId: string | number, field: 'firstNameId' | 'lastNameId', nameId: string) => void;
   onTraitAdd: (personId: string | number, trait: string) => void;
   onTraitRemove: (personId: string | number, trait: string) => void;
 }
@@ -17,8 +19,9 @@ const VIRTUALIZATION_THRESHOLD = 150;
 export function CharacterList({
   persons,
   currentDate,
-  nameStrings,
+  nameSearcher,
   onUpdate,
+  onNameUpdate,
   onTraitAdd,
   onTraitRemove,
 }: CharacterListProps) {
@@ -31,8 +34,9 @@ export function CharacterList({
             key={person.id}
             character={person}
             currentDate={currentDate}
-            nameStrings={nameStrings}
+            nameSearcher={nameSearcher}
             onUpdate={(field, value) => onUpdate(person.id, field, value)}
+            onNameUpdate={(field: 'firstNameId' | 'lastNameId', nameId: string) => onNameUpdate(person.id, field, nameId)}
             onTraitAdd={(trait) => onTraitAdd(person.id, trait)}
             onTraitRemove={(trait) => onTraitRemove(person.id, trait)}
           />
@@ -46,8 +50,9 @@ export function CharacterList({
     <VirtualizedGrid
       persons={persons}
       currentDate={currentDate}
-      nameStrings={nameStrings}
+      nameSearcher={nameSearcher}
       onUpdate={onUpdate}
+      onNameUpdate={onNameUpdate}
       onTraitAdd={onTraitAdd}
       onTraitRemove={onTraitRemove}
     />
@@ -58,8 +63,9 @@ export function CharacterList({
 function VirtualizedGrid({
   persons,
   currentDate,
-  nameStrings,
+  nameSearcher,
   onUpdate,
+  onNameUpdate,
   onTraitAdd,
   onTraitRemove,
 }: CharacterListProps) {
@@ -139,8 +145,9 @@ function VirtualizedGrid({
                     key={person.id}
                     character={person}
                     currentDate={currentDate}
-                    nameStrings={nameStrings}
+                    nameSearcher={nameSearcher}
                     onUpdate={(field, value) => onUpdate(person.id, field, value)}
+                    onNameUpdate={(field: 'firstNameId' | 'lastNameId', nameId: string) => onNameUpdate(person.id, field, nameId)}
                     onTraitAdd={(trait) => onTraitAdd(person.id, trait)}
                     onTraitRemove={(trait) => onTraitRemove(person.id, trait)}
                   />

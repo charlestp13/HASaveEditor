@@ -107,6 +107,8 @@ export interface SaveInfo {
 }
 
 export interface PersonUpdate {
+  firstNameId?: string;
+  lastNameId?: string;
   customName?: string;
   gender?: number;
   studioId?: string | null;

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { PersonUtils } from '@/lib/utils';
+import { EditableNameField } from '@/components/EditableNameField';
 import { useCharacterDates } from '@/hooks/useCharacterDates';
 import { useCharacterComputed } from '@/hooks/useCharacterComputed';
 import {
@@ -14,14 +14,16 @@ import {
   SinsSection,
 } from '@/components/character-sections';
 import type { Person } from '@/lib/types';
+import type { NameSearcher } from '@/lib/name-searcher';
 
 interface CharacterCardProps {
   character: Person;
   currentDate: string;
-  nameStrings: string[];
+  nameSearcher: NameSearcher;
   onClick?: () => void;
   isSelected?: boolean;
   onUpdate?: (field: string, value: number | null) => void;
+  onNameUpdate?: (field: 'firstNameId' | 'lastNameId', nameId: string) => void;
   onTraitAdd?: (trait: string) => void;
   onTraitRemove?: (trait: string) => void;
 }
@@ -29,10 +31,11 @@ interface CharacterCardProps {
 export const CharacterCard = memo(function CharacterCard({ 
   character, 
   currentDate, 
-  nameStrings,
+  nameSearcher,
   onClick,
   isSelected = false,
   onUpdate,
+  onNameUpdate,
   onTraitAdd,
   onTraitRemove
 }: CharacterCardProps) {
@@ -54,6 +57,9 @@ export const CharacterCard = memo(function CharacterCard({
     genres,
   } = useCharacterComputed(character);
 
+  const firstName = nameSearcher.getNameById(parseInt(character.firstNameId || '0', 10)) || character.firstNameId || '';
+  const lastName = nameSearcher.getNameById(parseInt(character.lastNameId || '0', 10)) || character.lastNameId || '';
+
   return (
     <Card 
       className={`cursor-pointer transition-colors ${
@@ -64,7 +70,26 @@ export const CharacterCard = memo(function CharacterCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="font-semibold text-lg">{PersonUtils.getDisplayName(character, nameStrings)}</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <EditableNameField
+                value={firstName}
+                currentId={character.firstNameId || '0'}
+                nameSearcher={nameSearcher}
+                onSelect={(nameId) => {
+                  onNameUpdate?.('firstNameId', nameId);
+                }}
+                placeholder="Search..."
+              />
+              <EditableNameField
+                value={lastName}
+                currentId={character.lastNameId || '0'}
+                nameSearcher={nameSearcher}
+                onSelect={(nameId) => {
+                  onNameUpdate?.('lastNameId', nameId);
+                }}
+                placeholder="Search..."
+              />
+            </div>
             <p className="text-sm text-muted-foreground">{professionName}</p>
           </div>
           <div className="text-right text-sm">
@@ -144,6 +169,8 @@ export const CharacterCard = memo(function CharacterCard({
   const p = prev.character;
   const n = next.character;
   
+  if (p.firstNameId !== n.firstNameId) return false;
+  if (p.lastNameId !== n.lastNameId) return false;
   if (p.mood !== n.mood) return false;
   if (p.attitude !== n.attitude) return false;
   if (p.limit !== n.limit) return false;

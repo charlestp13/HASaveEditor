@@ -7,7 +7,6 @@ import influenceIcon from '@/assets/IP.png';
 
 const formatDollar = (value: number): string => '$' + value.toLocaleString('en-US');
 const formatNumber = (value: number): string => value.toLocaleString('en-US');
-const formatDecimal = (value: number): string => value.toFixed(3);
 
 interface SaveInfoBarProps {
   currentDate: string;
@@ -63,7 +62,7 @@ export const SaveInfoBar = memo(function SaveInfoBar({
             alt="Reputation"
             value={reputation} 
             onChange={(v) => onUpdate?.('reputation', v)}
-            formatDisplay={formatDecimal}
+            formatDisplay={formatNumber}
           />
           <CurrencyInput 
             icon={influenceIcon}
