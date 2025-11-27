@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { saveManager } from '@/lib/tauri-api';
 import appBanner from '@/assets/appBanner.png';
 import { ProfessionTab } from '@/components/ProfessionTab';
@@ -49,7 +49,29 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [shadyFilter, setShadyFilter] = useState<'all' | 'shady' | 'notShady'>('all');
+  const [visitedTabs, setVisitedTabs] = useState<Set<TabId>>(new Set(['actors']));
+  const [refreshKeys, setRefreshKeys] = useState<Partial<Record<TabId, number>>>({});
   const { loading, error, execute, clearError } = useAsyncAction();
+
+  const handleTabClick = (tabId: TabId) => {
+    if (tabId === activeTab) {
+      // Clicking active tab = refresh sort
+      setRefreshKeys(prev => ({
+        ...prev,
+        [tabId]: (prev[tabId] || 0) + 1
+      }));
+    } else {
+      // Switch to new tab
+      setActiveTab(tabId);
+      setVisitedTabs(prev => new Set([...prev, tabId]));
+    }
+  };
+
+  // Reset visited tabs when opening new file or changing language
+  useEffect(() => {
+    setVisitedTabs(new Set(['actors']));
+    setRefreshKeys({});
+  }, [fileKey, selectedLanguage]);
 
   const handleOpenFile = () => execute(async () => {
     const result = await saveManager.openSaveFile();
@@ -68,8 +90,6 @@ export default function App() {
       setSaveInfo(prev => prev ? { ...prev, [field]: value } : null);
     });
   };
-
-  const activeTabConfig = TABS.find(t => t.id === activeTab)!;
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,15 +153,16 @@ export default function App() {
 
       {saveManager.isLoaded() && (
         <>
-          <nav className="border-b sticky top-0 z-30 bg-background">
+          <nav className="border-b sticky top-0 z-20 bg-background">
             <div className="container mx-auto px-4">
               <div className="flex gap-1 flex-wrap">
                 {TABS.map(tab => (
                   <Button
                     key={tab.id}
                     variant={activeTab === tab.id ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabClick(tab.id)}
                     className="rounded-b-none h-9 px-3 text-sm"
+                    title={activeTab === tab.id ? 'Click to refresh sort' : undefined}
                   >
                     {tab.label}
                   </Button>
@@ -151,24 +172,36 @@ export default function App() {
           </nav>
 
           <main className="container mx-auto px-4 py-6">
-            <ProfessionTab
-              key={`${activeTabConfig.profession}-${fileKey}-${selectedLanguage}`}
-              profession={activeTabConfig.profession}
-              selectedLanguage={selectedLanguage}
-              saveInfo={saveInfo}
-              selectedFilters={globalFilters}
-              onFiltersChange={setGlobalFilters}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              onSortChange={(field, order) => {
-                setSortField(field);
-                setSortOrder(order);
-              }}
-              genderFilter={genderFilter}
-              onGenderFilterChange={setGenderFilter}
-              shadyFilter={shadyFilter}
-              onShadyFilterChange={setShadyFilter}
-            />
+            {TABS.map(tab => {
+              const isVisited = visitedTabs.has(tab.id);
+              if (!isVisited) return null;
+              
+              return (
+                <div
+                  key={tab.id}
+                  style={{ display: activeTab === tab.id ? 'block' : 'none' }}
+                >
+                  <ProfessionTab
+                    profession={tab.profession}
+                    selectedLanguage={selectedLanguage}
+                    saveInfo={saveInfo}
+                    selectedFilters={globalFilters}
+                    onFiltersChange={setGlobalFilters}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                    onSortChange={(field, order) => {
+                      setSortField(field);
+                      setSortOrder(order);
+                    }}
+                    genderFilter={genderFilter}
+                    onGenderFilterChange={setGenderFilter}
+                    shadyFilter={shadyFilter}
+                    onShadyFilterChange={setShadyFilter}
+                    refreshKey={refreshKeys[tab.id]}
+                  />
+                </div>
+              );
+            })}
           </main>
         </>
       )}

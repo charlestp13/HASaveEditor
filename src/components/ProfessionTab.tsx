@@ -44,6 +44,7 @@ interface ProfessionTabProps {
   onGenderFilterChange: (filter: 'all' | 'male' | 'female') => void;
   shadyFilter: 'all' | 'shady' | 'notShady';
   onShadyFilterChange: (filter: 'all' | 'shady' | 'notShady') => void;
+  refreshKey?: number;
 }
 
 export function ProfessionTab({ 
@@ -58,7 +59,8 @@ export function ProfessionTab({
   genderFilter,
   onGenderFilterChange,
   shadyFilter,
-  onShadyFilterChange
+  onShadyFilterChange,
+  refreshKey
 }: ProfessionTabProps) {
   const [allPersons, setAllPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
@@ -97,8 +99,8 @@ export function ProfessionTab({
   useEffect(() => {
     saveManager.getCurrentDate()
       .then(setCurrentDate)
-      .catch(console.error);
-  }, []);
+      .catch(err => handleError(err, 'Failed to get current date'));
+  }, [handleError]);
 
   const loadAllPersons = useCallback(async () => {
     if (!saveManager.isLoaded()) return;
@@ -177,7 +179,8 @@ export function ProfessionTab({
     return filtered;
   }, [allPersons, search, selectedFilters, nameStrings, genderFilter, shadyFilter]);
 
-  const persons = useMemo(() => {
+  // Compute sorted list - only updates when sort settings or refreshKey change
+  const sortedPersons = useMemo(() => {
     // Schwartzian transform: pre-compute sort values, sort, then extract
     const withSortValues = filteredPersons.map(person => {
       let sortValue: number;
@@ -223,7 +226,23 @@ export function ProfessionTab({
     });
 
     return withSortValues.map(item => item.person);
-  }, [filteredPersons, sortField, sortOrder, currentDate]);
+  }, [filteredPersons, sortField, sortOrder, currentDate, refreshKey]);
+
+  // Use sortedPersons for display, but keep it in sync with edits (position unchanged)
+  const [displayPersons, setDisplayPersons] = useState<Person[]>([]);
+
+  // Update display when sorted list changes
+  useEffect(() => {
+    setDisplayPersons(sortedPersons);
+  }, [sortedPersons]);
+
+  // When editing, update the person in-place without re-sorting
+  const persons = useMemo(() => {
+    return displayPersons.map(displayPerson => {
+      const updated = filteredPersons.find(p => p.id === displayPerson.id);
+      return updated || displayPerson;
+    });
+  }, [displayPersons, filteredPersons]);
 
   const handlePersonUpdate = useCallback((personId: string | number, field: string, value: number | null) => {
     setAllPersons(prev => prev.map(p => 
