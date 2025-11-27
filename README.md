@@ -1,6 +1,6 @@
 # Hollywood Animal Save Editor
 
-Edit your Hollywood Animal save files with a clean desktop app.
+<img width="1021" height="803" alt="image" src="https://github.com/user-attachments/assets/5084789c-68c7-467c-a58d-238710988c7b" />
 
 ## What It Does
 
