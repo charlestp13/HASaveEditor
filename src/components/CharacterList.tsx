@@ -9,7 +9,7 @@ interface CharacterListProps {
   currentDate: string;
   nameSearcher: NameSearcher;
   onUpdate: (personId: string | number, field: string, value: number | null) => void;
-  onNameUpdate: (personId: string | number, field: 'firstNameId' | 'lastNameId', nameId: string) => void;
+  onStringFieldUpdate: (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
   onTraitAdd: (personId: string | number, trait: string) => void;
   onTraitRemove: (personId: string | number, trait: string) => void;
 }
@@ -21,11 +21,10 @@ export function CharacterList({
   currentDate,
   nameSearcher,
   onUpdate,
-  onNameUpdate,
+  onStringFieldUpdate,
   onTraitAdd,
   onTraitRemove,
 }: CharacterListProps) {
-  // For small lists (<150 items), use simple grid (much faster)
   if (persons.length < VIRTUALIZATION_THRESHOLD) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-2">
@@ -36,7 +35,7 @@ export function CharacterList({
             currentDate={currentDate}
             nameSearcher={nameSearcher}
             onUpdate={(field, value) => onUpdate(person.id, field, value)}
-            onNameUpdate={(field: 'firstNameId' | 'lastNameId', nameId: string) => onNameUpdate(person.id, field, nameId)}
+            onStringFieldUpdate={(field, value) => onStringFieldUpdate(person.id, field, value)}
             onTraitAdd={(trait) => onTraitAdd(person.id, trait)}
             onTraitRemove={(trait) => onTraitRemove(person.id, trait)}
           />
@@ -45,27 +44,25 @@ export function CharacterList({
     );
   }
 
-  // For large lists (150+ items), use virtualization
   return (
     <VirtualizedGrid
       persons={persons}
       currentDate={currentDate}
       nameSearcher={nameSearcher}
       onUpdate={onUpdate}
-      onNameUpdate={onNameUpdate}
+      onStringFieldUpdate={onStringFieldUpdate}
       onTraitAdd={onTraitAdd}
       onTraitRemove={onTraitRemove}
     />
   );
 }
 
-// Virtualized version for large lists
 function VirtualizedGrid({
   persons,
   currentDate,
   nameSearcher,
   onUpdate,
-  onNameUpdate,
+  onStringFieldUpdate,
   onTraitAdd,
   onTraitRemove,
 }: CharacterListProps) {
@@ -147,7 +144,7 @@ function VirtualizedGrid({
                     currentDate={currentDate}
                     nameSearcher={nameSearcher}
                     onUpdate={(field, value) => onUpdate(person.id, field, value)}
-                    onNameUpdate={(field: 'firstNameId' | 'lastNameId', nameId: string) => onNameUpdate(person.id, field, nameId)}
+                    onStringFieldUpdate={(field, value) => onStringFieldUpdate(person.id, field, value)}
                     onTraitAdd={(trait) => onTraitAdd(person.id, trait)}
                     onTraitRemove={(trait) => onTraitRemove(person.id, trait)}
                   />

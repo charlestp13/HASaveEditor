@@ -27,7 +27,7 @@ export type Genre = typeof GENRES[number];
 export const GENRE_ESTABLISHED_THRESHOLD = 12.0;
 export const MAX_ESTABLISHED_GENRES = 3;
 
-export const GENRE_ICONS: Record<Genre, string> = {
+const GENRE_ICONS: Record<Genre, string> = {
   ACTION: actionIcon,
   DRAMA: dramaIcon,
   HISTORICAL: historicalIcon,
@@ -47,4 +47,3 @@ export function getGenreIcon(genre: string): string | undefined {
 export function isGenre(value: string): value is Genre {
   return (GENRES as readonly string[]).includes(value);
 }
-

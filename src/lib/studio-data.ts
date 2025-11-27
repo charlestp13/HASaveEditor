@@ -32,7 +32,7 @@ export const OPPONENT_STUDIOS: Studio[] = [
   { id: 'MA', name: 'Marginese', icon: maIcon },
 ];
 
-export const PLAYER_LOGO_ICONS: Record<number, string> = {
+const PLAYER_LOGO_ICONS: Record<number, string> = {
   0: pl0Icon,
   1: pl1Icon,
   2: pl2Icon,
@@ -64,8 +64,7 @@ export function getStudio(studioId: string | null | undefined): Studio | undefin
   return OPPONENT_STUDIOS.find(s => s.id === studioId);
 }
 
-export const OPPONENT_STUDIO_IDS = OPPONENT_STUDIOS.map(s => s.id);
-export const ALL_STUDIO_IDS = ['PL', ...OPPONENT_STUDIO_IDS] as const;
+const ALL_STUDIO_IDS = ['PL', ...OPPONENT_STUDIOS.map(s => s.id)] as const;
 export type StudioId = typeof ALL_STUDIO_IDS[number];
 
 export function isStudioId(value: string): value is StudioId {

@@ -54,23 +54,9 @@ export const DISPLAYABLE_TRAITS = [
   "XENOPHOBE"
 ] as const;
 
-export const HIDDEN_TRAITS = [
-  "IMMORTAL",
-  "IMAGE_SOPHISTIC",
-  "IMAGE_VIVID",
-  "MAIN_CHARACTER",
-  "STERILE",
-  "SUPER_IMMORTAL",
-  "UNTOUCHABLE"
-] as const;
-
-export const ALL_TRAITS = [...DISPLAYABLE_TRAITS, ...HIDDEN_TRAITS] as const;
-
 export type DisplayableTrait = typeof DISPLAYABLE_TRAITS[number];
-export type HiddenTrait = typeof HIDDEN_TRAITS[number];
-export type CharacterTrait = typeof ALL_TRAITS[number];
 
-export const TRAIT_ICONS: Record<DisplayableTrait, string> = {
+const TRAIT_ICONS: Record<DisplayableTrait, string> = {
   ALCOHOLIC: alcoholicIcon,
   ARROGANT: arrogantIcon,
   CALM: calmIcon,
@@ -107,10 +93,6 @@ export function isDisplayableTrait(trait: string): trait is DisplayableTrait {
   return (DISPLAYABLE_TRAITS as readonly string[]).includes(trait);
 }
 
-export function isHiddenTrait(trait: string): trait is HiddenTrait {
-  return (HIDDEN_TRAITS as readonly string[]).includes(trait);
-}
-
 export const TRAIT_CONFLICTS: Record<string, string> = {
   "HARDWORKING": "LAZY",
   "LAZY": "HARDWORKING",
@@ -129,14 +111,3 @@ export const TRAIT_CONFLICTS: Record<string, string> = {
   "CHEERY": "MELANCHOLIC",
   "MELANCHOLIC": "CHEERY"
 };
-
-export function getConflictingTrait(trait: string): string | null {
-  return TRAIT_CONFLICTS[trait] || null;
-}
-
-export function canAddTrait(trait: string, currentTraits: string[]): boolean {
-  if (currentTraits.includes(trait)) return false;
-  const conflict = TRAIT_CONFLICTS[trait];
-  if (conflict && currentTraits.includes(conflict)) return false;
-  return true;
-}

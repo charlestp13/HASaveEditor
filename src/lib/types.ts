@@ -109,7 +109,7 @@ export interface SaveInfo {
 export interface PersonUpdate {
   firstNameId?: string;
   lastNameId?: string;
-  customName?: string;
+  customName?: string | null;
   gender?: number;
   studioId?: string | null;
   mood?: number;

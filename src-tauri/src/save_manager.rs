@@ -126,7 +126,7 @@ pub struct PersonUpdate {
     #[serde(rename = "lastNameId")]
     pub last_name_id: Option<String>,
     #[serde(rename = "customName")]
-    pub custom_name: Option<String>,
+    pub custom_name: Option<Value>,
     pub gender: Option<i32>,
     #[serde(rename = "studioId")]
     pub studio_id: Option<Value>,
@@ -317,8 +317,12 @@ fn apply_updates(person: &mut Value, profession: &str, update: &PersonUpdate) {
     if let Some(last_name_id) = &update.last_name_id {
         person["lastNameId"] = Value::String(last_name_id.clone());
     }
-    if let Some(name) = &update.custom_name {
-        person["customName"] = Value::String(name.clone());
+    if let Some(custom_name) = &update.custom_name {
+        match custom_name {
+            Value::String(s) if s.is_empty() => person["customName"] = Value::Null,
+            Value::Null => person["customName"] = Value::Null,
+            _ => person["customName"] = custom_name.clone(),
+        }
     }
     if let Some(gender) = update.gender {
         person["gender"] = gender.into();

@@ -38,10 +38,10 @@ export const PersonStateUpdater = {
     return updated;
   },
 
-  updateNameField(person: Person, field: 'firstNameId' | 'lastNameId', nameId: string): Person {
+  updateStringField(person: Person, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null): Person {
     return {
       ...person,
-      [field]: nameId
+      [field]: value
     };
   },
 

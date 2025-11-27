@@ -52,7 +52,6 @@ export default function App() {
   const {
     activeTab,
     visitedTabs,
-    refreshKeys,
     handleTabClick,
   } = useTabState({
     initialTab: 'actors',
@@ -149,7 +148,6 @@ export default function App() {
                     variant={activeTab === tab.id ? 'default' : 'ghost'}
                     onClick={() => handleTabClick(tab.id)}
                     className="rounded-b-none h-9 px-3 text-sm"
-                    title={activeTab === tab.id ? 'Click to refresh sort' : undefined}
                   >
                     {tab.label}
                   </Button>
@@ -184,7 +182,6 @@ export default function App() {
                     onGenderFilterChange={setGenderFilter}
                     shadyFilter={shadyFilter}
                     onShadyFilterChange={setShadyFilter}
-                    refreshKey={refreshKeys[tab.id]}
                   />
                 </div>
               );

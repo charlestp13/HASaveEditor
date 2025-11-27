@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EditableNameField } from '@/components/EditableNameField';
+import { EditableTextField } from '@/components/EditableTextField';
 import { useCharacterDates } from '@/hooks/useCharacterDates';
 import { useCharacterComputed } from '@/hooks/useCharacterComputed';
 import {
@@ -23,7 +24,7 @@ interface CharacterCardProps {
   onClick?: () => void;
   isSelected?: boolean;
   onUpdate?: (field: string, value: number | null) => void;
-  onNameUpdate?: (field: 'firstNameId' | 'lastNameId', nameId: string) => void;
+  onStringFieldUpdate?: (field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
   onTraitAdd?: (trait: string) => void;
   onTraitRemove?: (trait: string) => void;
 }
@@ -35,7 +36,7 @@ export const CharacterCard = memo(function CharacterCard({
   onClick,
   isSelected = false,
   onUpdate,
-  onNameUpdate,
+  onStringFieldUpdate,
   onTraitAdd,
   onTraitRemove
 }: CharacterCardProps) {
@@ -75,22 +76,26 @@ export const CharacterCard = memo(function CharacterCard({
                 value={firstName}
                 currentId={character.firstNameId || '0'}
                 nameSearcher={nameSearcher}
-                onSelect={(nameId) => {
-                  onNameUpdate?.('firstNameId', nameId);
-                }}
+                onSelect={(nameId) => onStringFieldUpdate?.('firstNameId', nameId)}
                 placeholder="Search..."
               />
               <EditableNameField
                 value={lastName}
                 currentId={character.lastNameId || '0'}
                 nameSearcher={nameSearcher}
-                onSelect={(nameId) => {
-                  onNameUpdate?.('lastNameId', nameId);
-                }}
+                onSelect={(nameId) => onStringFieldUpdate?.('lastNameId', nameId)}
                 placeholder="Search..."
               />
             </div>
-            <p className="text-sm text-muted-foreground">{professionName}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{professionName}</span>
+              <span className="text-muted-foreground">·</span>
+              <EditableTextField
+                value={character.customName}
+                onChange={(value) => onStringFieldUpdate?.('customName', value)}
+                placeholder="Custom Name"
+              />
+            </div>
           </div>
           <div className="text-right text-sm">
             <div className="font-mono">ID: {character.id}</div>
@@ -171,6 +176,7 @@ export const CharacterCard = memo(function CharacterCard({
   
   if (p.firstNameId !== n.firstNameId) return false;
   if (p.lastNameId !== n.lastNameId) return false;
+  if (p.customName !== n.customName) return false;
   if (p.mood !== n.mood) return false;
   if (p.attitude !== n.attitude) return false;
   if (p.limit !== n.limit) return false;

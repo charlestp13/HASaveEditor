@@ -2,7 +2,7 @@ import { PersonUtils, StudioUtils } from './utils';
 import { isStudioId } from './studio-data';
 import type { Person } from './types';
 
-export interface FilterConfig {
+interface FilterConfig {
   search?: string;
   excludeStudios?: string[];
   excludeDead?: boolean;

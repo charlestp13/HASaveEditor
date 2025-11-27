@@ -8,6 +8,7 @@ import { PersonSorter } from '@/lib/person-sorter';
 import { NameSearcher } from '@/lib/name-searcher';
 import type { SortField, SortOrder } from '@/lib/person-sorter';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { FilterPopover } from '@/components/FilterPopover';
 import { SortPopover } from '@/components/SortPopover';
 import { CharacterList } from '@/components/CharacterList';
@@ -16,6 +17,7 @@ import { ErrorState } from '@/components/ErrorState';
 import { EmptyState } from '@/components/EmptyState';
 import { useNameTranslation } from '@/hooks/useNameTranslation';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
+import { RefreshCw } from 'lucide-react';
 import type { Person, SaveInfo } from '@/lib/types';
 
 interface ProfessionTabProps {
@@ -31,7 +33,6 @@ interface ProfessionTabProps {
   onGenderFilterChange: (filter: 'all' | 'male' | 'female') => void;
   shadyFilter: 'all' | 'shady' | 'notShady';
   onShadyFilterChange: (filter: 'all' | 'shady' | 'notShady') => void;
-  refreshKey?: number;
 }
 
 export function ProfessionTab({ 
@@ -47,12 +48,12 @@ export function ProfessionTab({
   onGenderFilterChange,
   shadyFilter,
   onShadyFilterChange,
-  refreshKey
 }: ProfessionTabProps) {
   const [allPersons, setAllPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [currentDate, setCurrentDate] = useState<string>('');
 
   const professionLower = profession.toLowerCase();
@@ -170,10 +171,22 @@ export function ProfessionTab({
   }, [filteredPersons, sortField, sortOrder, currentDate, refreshKey]);
 
   const [displayPersons, setDisplayPersons] = useState<Person[]>([]);
+  const [lastSortKey, setLastSortKey] = useState({ sortField, sortOrder, refreshKey, filterCount: 0 });
 
+  const filterCount = filteredPersons.length;
+  
   useEffect(() => {
-    setDisplayPersons(sortedPersons);
-  }, [sortedPersons]);
+    const sortChanged = 
+      sortField !== lastSortKey.sortField || 
+      sortOrder !== lastSortKey.sortOrder || 
+      refreshKey !== lastSortKey.refreshKey ||
+      filterCount !== lastSortKey.filterCount;
+    
+    if (sortChanged || displayPersons.length === 0) {
+      setDisplayPersons(sortedPersons);
+      setLastSortKey({ sortField, sortOrder, refreshKey, filterCount });
+    }
+  }, [sortedPersons, sortField, sortOrder, refreshKey, filterCount, lastSortKey, displayPersons.length]);
 
   const persons = useMemo(() => {
     return displayPersons.map(displayPerson => {
@@ -189,12 +202,17 @@ export function ProfessionTab({
     debouncedSave(`${personId}-${field}`, String(personId), field, value);
   }, [debouncedSave]);
 
-  const handleNameUpdate = useCallback((personId: string | number, field: 'firstNameId' | 'lastNameId', nameId: string) => {
+  const handleStringFieldUpdate = useCallback((
+    personId: string | number, 
+    field: 'firstNameId' | 'lastNameId' | 'customName', 
+    value: string | null
+  ) => {
     setAllPersons(prev => prev.map(p => 
-      p.id === personId ? PersonStateUpdater.updateNameField(p, field, nameId) : p
+      p.id === personId ? PersonStateUpdater.updateStringField(p, field, value) : p
     ));
-    saveManager.updatePerson(profession, String(personId), { [field]: nameId })
-      .catch(err => handleError(err, 'Failed to update name'));
+    const updateValue = field === 'customName' ? (value ?? '') : value;
+    saveManager.updatePerson(profession, String(personId), { [field]: updateValue })
+      .catch(err => handleError(err, `Failed to update ${field}`));
   }, [profession, handleError]);
 
   const handleTraitAdd = useCallback((personId: string | number, trait: string) => {
@@ -258,11 +276,22 @@ export function ProfessionTab({
           )}
         </div>
         <div className="ml-auto flex gap-2">
-          <SortPopover
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onSortChange={onSortChange}
-          />
+          <div className="flex">
+            <SortPopover
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSortChange={onSortChange}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRefreshKey(k => k + 1)}
+              className="rounded-l-none border-l-0"
+              title="Re-sort"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
           <FilterPopover
             playerStudioName={saveInfo.player_studio_name}
             playerLogoId={saveInfo.studio_logo_id}
@@ -289,7 +318,7 @@ export function ProfessionTab({
           currentDate={currentDate}
           nameSearcher={nameSearcher}
           onUpdate={handlePersonUpdate}
-          onNameUpdate={handleNameUpdate}
+          onStringFieldUpdate={handleStringFieldUpdate}
           onTraitAdd={handleTraitAdd}
           onTraitRemove={handleTraitRemove}
         />

@@ -56,7 +56,7 @@ export function SortPopover({ sortField, sortOrder, onSortChange }: SortPopoverP
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 rounded-r-none">
           <ArrowUpDown className="h-4 w-4" />
           Sort
         </Button>

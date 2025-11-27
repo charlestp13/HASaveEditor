@@ -4,7 +4,7 @@ import type { Person } from './types';
 export type SortField = 'skill' | 'selfEsteem' | 'age' | 'art' | 'com';
 export type SortOrder = 'asc' | 'desc';
 
-export interface SortContext {
+interface SortContext {
   currentDate?: string;
 }
 
