@@ -1,8 +1,6 @@
 import { PersonUtils, StudioUtils } from './utils';
+import { isStudioId } from './studio-data';
 import type { Person } from './types';
-
-export const STUDIO_IDS = ['PL', 'GB', 'EM', 'SU', 'HE', 'MA'] as const;
-export type StudioId = typeof STUDIO_IDS[number];
 
 export interface FilterConfig {
   search?: string;
@@ -50,7 +48,7 @@ export const PersonFilters = {
   },
 
   parseSelectedFilters(selectedFilters: string[]): FilterConfig {
-    const studioFilters = selectedFilters.filter(f => STUDIO_IDS.includes(f as StudioId));
+    const studioFilters = selectedFilters.filter(isStudioId);
     
     return {
       excludeStudios: studioFilters.length > 0 ? studioFilters : undefined,

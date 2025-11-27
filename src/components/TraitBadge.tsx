@@ -1,4 +1,4 @@
-import { DISPLAYABLE_TRAITS, getTraitIcon } from '@/lib/character-traits';
+import { isDisplayableTrait, getTraitIcon } from '@/lib/character-traits';
 import { toTitleCase } from '@/lib/utils';
 import { IconBadge } from '@/components/IconBadge';
 
@@ -7,7 +7,7 @@ interface TraitBadgeProps {
 }
 
 export function TraitBadge({ trait }: TraitBadgeProps) {
-  if (!DISPLAYABLE_TRAITS.includes(trait as typeof DISPLAYABLE_TRAITS[number])) {
+  if (!isDisplayableTrait(trait)) {
     return null;
   }
 

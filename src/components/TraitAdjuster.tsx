@@ -9,7 +9,7 @@ import {
 import { EditButton } from '@/components/EditButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { IconButton } from '@/components/IconButton';
-import { DISPLAYABLE_TRAITS, TRAIT_CONFLICTS, getTraitIcon, type DisplayableTrait } from '@/lib/character-traits';
+import { DISPLAYABLE_TRAITS, TRAIT_CONFLICTS, getTraitIcon, isDisplayableTrait } from '@/lib/character-traits';
 import { toTitleCase } from '@/lib/utils';
 
 const MAX_TRAITS = 2;
@@ -25,7 +25,7 @@ interface TraitAdjusterProps {
 
 export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
   const displayableCurrentTraits = useMemo(
-    () => traits.filter(t => DISPLAYABLE_TRAITS.includes(t as DisplayableTrait)),
+    () => traits.filter(isDisplayableTrait),
     [traits]
   );
 
@@ -40,7 +40,7 @@ export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
       if (seenTraits.has(trait)) return;
       
       const conflictTrait = TRAIT_CONFLICTS[trait];
-      if (conflictTrait && DISPLAYABLE_TRAITS.includes(conflictTrait as DisplayableTrait)) {
+      if (conflictTrait && isDisplayableTrait(conflictTrait)) {
         pairs.push([trait, conflictTrait]);
         seenTraits.add(trait);
         seenTraits.add(conflictTrait);

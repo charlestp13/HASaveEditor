@@ -106,11 +106,11 @@ export function getTraitIcon(trait: string): string | undefined {
 }
 
 export function isDisplayableTrait(trait: string): trait is DisplayableTrait {
-  return DISPLAYABLE_TRAITS.includes(trait as DisplayableTrait);
+  return (DISPLAYABLE_TRAITS as readonly string[]).includes(trait);
 }
 
 export function isHiddenTrait(trait: string): trait is HiddenTrait {
-  return HIDDEN_TRAITS.includes(trait as HiddenTrait);
+  return (HIDDEN_TRAITS as readonly string[]).includes(trait);
 }
 
 export const TRAIT_CONFLICTS: Record<string, string> = {

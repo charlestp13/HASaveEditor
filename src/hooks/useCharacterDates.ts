@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
-import { GameDate } from '@/lib/utils';
+import { DateUtils } from '@/lib/utils';
 import type { Person } from '@/lib/types';
 
 export function useCharacterDates(character: Person, currentDate: string) {
   return useMemo(() => {
-    const birthParsed = character.birthDate ? GameDate.fromDDMMYYYY(character.birthDate) : null;
-    const deathParsed = character.deathDate ? GameDate.fromDDMMYYYY(character.deathDate) : null;
+    const birthParsed = character.birthDate ? DateUtils.fromDDMMYYYY(character.birthDate) : null;
+    const deathParsed = character.deathDate ? DateUtils.fromDDMMYYYY(character.deathDate) : null;
     
     let age: number | null = null;
     if (birthParsed && currentDate) {
-      const current = GameDate.parse(currentDate);
+      const current = DateUtils.parse(currentDate);
       if (current) {
         age = birthParsed.ageTo(current);
       }
@@ -17,12 +17,12 @@ export function useCharacterDates(character: Person, currentDate: string) {
 
     let contractDaysLeft: number | null = null;
     if (character.contract && currentDate) {
-      const current = GameDate.parse(currentDate);
+      const current = DateUtils.parse(currentDate);
       if (current) {
         const signing = new Date(character.contract.dateOfSigning);
         const ending = new Date(signing);
         ending.setFullYear(ending.getFullYear() + character.contract.amount);
-        contractDaysLeft = current.daysUntil(GameDate.fromDate(ending));
+        contractDaysLeft = current.daysUntil(DateUtils.fromDate(ending));
       }
     }
 

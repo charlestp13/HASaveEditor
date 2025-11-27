@@ -68,3 +68,12 @@ export function getStudio(studioId: string | null | undefined): Studio | undefin
   if (!studioId) return undefined;
   return OPPONENT_STUDIOS.find(s => s.id === studioId);
 }
+
+// All studio IDs including player
+export const OPPONENT_STUDIO_IDS = OPPONENT_STUDIOS.map(s => s.id);
+export const ALL_STUDIO_IDS = ['PL', ...OPPONENT_STUDIO_IDS] as const;
+export type StudioId = typeof ALL_STUDIO_IDS[number];
+
+export function isStudioId(value: string): value is StudioId {
+  return (ALL_STUDIO_IDS as readonly string[]).includes(value);
+}

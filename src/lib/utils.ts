@@ -124,19 +124,6 @@ export class PersonUtils {
 }
 
 export class StudioUtils {
-  static formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
-
-  static formatNumber(value: number): string {
-    return new Intl.NumberFormat('en-US').format(value);
-  }
-
   static normalizeId(studioId: string | number | null | undefined): string {
     const id = studioId?.toString() || 'NONE';
     return id === 'NONE' ? 'N/A' : id;
@@ -228,8 +215,6 @@ export class DateUtils {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 }
-
-export const GameDate = DateUtils;
 
 export function createWhiteTag(tagId: string, value: number): WhiteTag {
   const valueStr = value.toFixed(3);

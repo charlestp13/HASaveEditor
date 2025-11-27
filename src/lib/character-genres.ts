@@ -47,3 +47,7 @@ export function getGenreIcon(genre: string): string | undefined {
   return GENRE_ICONS[genre as Genre];
 }
 
+export function isGenre(value: string): value is Genre {
+  return (GENRES as readonly string[]).includes(value);
+}
+

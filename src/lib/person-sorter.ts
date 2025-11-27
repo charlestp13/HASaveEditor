@@ -9,9 +9,6 @@ export interface SortContext {
 }
 
 export const PersonSorter = {
-  /**
-   * Sort persons by the specified field and order using Schwartzian transform
-   */
   sort(
     persons: Person[],
     field: SortField,
@@ -31,9 +28,6 @@ export const PersonSorter = {
     return withSortValues.map(item => item.person);
   },
 
-  /**
-   * Get the numeric sort value for a person based on the sort field
-   */
   getSortValue(person: Person, field: SortField, context: SortContext): number {
     switch (field) {
       case 'skill': {
@@ -56,40 +50,5 @@ export const PersonSorter = {
       default:
         return 0;
     }
-  },
-
-  /**
-   * Sort by skill level
-   */
-  sortBySkill(persons: Person[], order: SortOrder = 'desc'): Person[] {
-    return PersonSorter.sort(persons, 'skill', order);
-  },
-
-  /**
-   * Sort by self esteem
-   */
-  sortBySelfEsteem(persons: Person[], order: SortOrder = 'desc'): Person[] {
-    return PersonSorter.sort(persons, 'selfEsteem', order);
-  },
-
-  /**
-   * Sort by age (requires current date)
-   */
-  sortByAge(persons: Person[], currentDate: string, order: SortOrder = 'asc'): Person[] {
-    return PersonSorter.sort(persons, 'age', order, { currentDate });
-  },
-
-  /**
-   * Sort by ART stat
-   */
-  sortByArt(persons: Person[], order: SortOrder = 'desc'): Person[] {
-    return PersonSorter.sort(persons, 'art', order);
-  },
-
-  /**
-   * Sort by COM stat
-   */
-  sortByCom(persons: Person[], order: SortOrder = 'desc'): Person[] {
-    return PersonSorter.sort(persons, 'com', order);
   }
 };
