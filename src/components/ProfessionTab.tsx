@@ -66,9 +66,8 @@ export function ProfessionTab({
   
   const savePerson = useCallback(
     (personId: string, field: string, value: number | null) => {
-      // Handle genres specially - convert whiteTag:GENRE to addGenre/removeGenre
       if (field.startsWith('whiteTag:') && field !== 'whiteTag:ART' && field !== 'whiteTag:COM') {
-        const genre = field.substring(9); // Strip "whiteTag:" prefix
+        const genre = field.substring(9);
         if (value === null) {
           return saveManager.updatePerson(profession, personId, { removeGenre: genre });
         } else {
@@ -76,7 +75,6 @@ export function ProfessionTab({
         }
       }
       
-      // Handle normal fields (ART, COM, etc.)
       const updateField = PersonStateUpdater.normalizeFieldName(field);
       return saveManager.updatePerson(profession, personId, { [updateField]: value });
     },
@@ -147,7 +145,6 @@ export function ProfessionTab({
       nameStrings.length > 0 ? nameStrings : undefined
     );
 
-    // Apply gender and shady filters in single pass
     if (genderFilter !== 'all' || shadyFilter !== 'all') {
       filtered = filtered.filter(person => {
         if (genderFilter !== 'all') {
@@ -168,20 +165,16 @@ export function ProfessionTab({
     return filtered;
   }, [allPersons, search, selectedFilters, nameStrings, genderFilter, shadyFilter]);
 
-  // Compute sorted list - only updates when sort settings or refreshKey change
   const sortedPersons = useMemo(() => {
     return PersonSorter.sort(filteredPersons, sortField, sortOrder, { currentDate });
   }, [filteredPersons, sortField, sortOrder, currentDate, refreshKey]);
 
-  // Use sortedPersons for display, but keep it in sync with edits (position unchanged)
   const [displayPersons, setDisplayPersons] = useState<Person[]>([]);
 
-  // Update display when sorted list changes
   useEffect(() => {
     setDisplayPersons(sortedPersons);
   }, [sortedPersons]);
 
-  // When editing, update the person in-place without re-sorting
   const persons = useMemo(() => {
     return displayPersons.map(displayPerson => {
       const updated = filteredPersons.find(p => p.id === displayPerson.id);

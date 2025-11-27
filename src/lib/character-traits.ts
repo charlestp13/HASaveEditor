@@ -70,7 +70,6 @@ export type DisplayableTrait = typeof DISPLAYABLE_TRAITS[number];
 export type HiddenTrait = typeof HIDDEN_TRAITS[number];
 export type CharacterTrait = typeof ALL_TRAITS[number];
 
-// Icon mapping for displayable traits
 export const TRAIT_ICONS: Record<DisplayableTrait, string> = {
   ALCOHOLIC: alcoholicIcon,
   ARROGANT: arrogantIcon,
@@ -100,7 +99,6 @@ export const TRAIT_ICONS: Record<DisplayableTrait, string> = {
   XENOPHOBE: xenophobeIcon,
 };
 
-// Helper to get trait icon
 export function getTraitIcon(trait: string): string | undefined {
   return TRAIT_ICONS[trait as DisplayableTrait];
 }

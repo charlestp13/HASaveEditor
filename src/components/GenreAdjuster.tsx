@@ -25,7 +25,6 @@ interface GenreAdjusterProps {
 }
 
 export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
-  // Only count genres that are established (value >= threshold)
   const establishedGenres = useMemo(
     () => genres.filter(g => g.value >= GENRE_ESTABLISHED_THRESHOLD),
     [genres]
@@ -33,7 +32,6 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
 
   const atMaxGenres = establishedGenres.length >= MAX_ESTABLISHED_GENRES;
 
-  // Create a map for quick lookup of genre values
   const genreMap = useMemo(
     () => new Map(genres.map(g => [g.id, g.value])),
     [genres]
@@ -44,10 +42,8 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
     const isEstablished = currentValue !== undefined && currentValue >= GENRE_ESTABLISHED_THRESHOLD;
     
     if (isEstablished) {
-      // Deactivate: set to null (remove)
       onToggle(genre, false);
     } else if (!isGenreDisabled(genre)) {
-      // Activate: set to threshold value
       onToggle(genre, true);
     }
   };
@@ -56,10 +52,8 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
     const currentValue = genreMap.get(genre);
     const isEstablished = currentValue !== undefined && currentValue >= GENRE_ESTABLISHED_THRESHOLD;
     
-    // Can always deactivate an established genre
     if (isEstablished) return false;
     
-    // Can't activate if at max unless it already exists (inactive)
     return atMaxGenres;
   };
 

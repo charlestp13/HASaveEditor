@@ -8,7 +8,6 @@ interface PortraitCarouselProps {
   portraitBaseId: number | undefined;
 }
 
-// Cache the manifest globally to avoid re-fetching
 let manifestCache: Record<string, string[]> | null = null;
 let manifestPromise: Promise<Record<string, string[]>> | null = null;
 

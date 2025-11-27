@@ -179,7 +179,6 @@ export const CharacterCard = memo(function CharacterCard({
   const nProf = n.professions ? Object.values(n.professions)[0] : null;
   if (pProf !== nProf) return false;
   
-  // Check all whiteTagsNEW (ART, COM, and all genres)
   const pTags = JSON.stringify(p.whiteTagsNEW);
   const nTags = JSON.stringify(n.whiteTagsNEW);
   if (pTags !== nTags) return false;

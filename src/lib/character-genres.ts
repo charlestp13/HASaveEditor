@@ -24,11 +24,9 @@ export const GENRES = [
 
 export type Genre = typeof GENRES[number];
 
-// Shared constants for genre establishment
 export const GENRE_ESTABLISHED_THRESHOLD = 12.0;
 export const MAX_ESTABLISHED_GENRES = 3;
 
-// Icon mapping for genres
 export const GENRE_ICONS: Record<Genre, string> = {
   ACTION: actionIcon,
   DRAMA: dramaIcon,
@@ -42,7 +40,6 @@ export const GENRE_ICONS: Record<Genre, string> = {
   SCIENCE_FICTION: scifiIcon,
 };
 
-// Helper to get genre icon
 export function getGenreIcon(genre: string): string | undefined {
   return GENRE_ICONS[genre as Genre];
 }

@@ -32,7 +32,6 @@ export const OPPONENT_STUDIOS: Studio[] = [
   { id: 'MA', name: 'Marginese', icon: maIcon },
 ];
 
-// Player studio logo icons (13 variants)
 export const PLAYER_LOGO_ICONS: Record<number, string> = {
   0: pl0Icon,
   1: pl1Icon,
@@ -49,27 +48,22 @@ export const PLAYER_LOGO_ICONS: Record<number, string> = {
   12: pl12Icon,
 };
 
-// Special icons
 export const ALL_COMPETITORS_ICON = allIcon;
 
-// Helper function to get player logo icon
 export function getPlayerLogoIcon(logoId: number): string {
   return PLAYER_LOGO_ICONS[logoId] || pl0Icon;
 }
 
-// Helper function to get studio name by ID
 export function getStudioName(studioId: string | null | undefined): string | undefined {
   if (!studioId) return undefined;
   return OPPONENT_STUDIOS.find(s => s.id === studioId)?.name;
 }
 
-// Helper function to get studio by ID
 export function getStudio(studioId: string | null | undefined): Studio | undefined {
   if (!studioId) return undefined;
   return OPPONENT_STUDIOS.find(s => s.id === studioId);
 }
 
-// All studio IDs including player
 export const OPPONENT_STUDIO_IDS = OPPONENT_STUDIOS.map(s => s.id);
 export const ALL_STUDIO_IDS = ['PL', ...OPPONENT_STUDIO_IDS] as const;
 export type StudioId = typeof ALL_STUDIO_IDS[number];

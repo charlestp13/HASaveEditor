@@ -18,16 +18,13 @@ export const DIRECTOR_LABELS = {
   COM: ['FAN FAVORITE', 'SENSATION', 'PHENOMENON', 'HOLLYWOOD GIANT'],
 } as const;
 
-// Status type
 export type StatusType = 'ART' | 'COM';
 
-// Icon mapping for status types
 export const STATUS_ICONS: Record<StatusType, string> = {
   ART: artIcon,
   COM: comIcon,
 };
 
-// Helper to get status icon
 export function getStatusIcon(type: StatusType): string {
   return STATUS_ICONS[type];
 }
