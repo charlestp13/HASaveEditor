@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { saveManager } from '@/lib/tauri-api';
 import appBanner from '@/assets/appBanner.png';
 import { ProfessionTab } from '@/components/ProfessionTab';
 import { ErrorBanner } from '@/components/ErrorBanner';
-import { SaveInfoBar } from '@/components/SaveInfoBar';
+import { StudioInfoBar } from '@/components/StudioInfoBar';
 import { useAsyncAction } from '@/hooks/useAsyncAction';
 import { useTabState } from '@/hooks/useTabState';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,8 @@ const TABS = [
 
 export default function App() {
   const [saveInfo, setSaveInfo] = useState<SaveInfo | null>(null);
+  const [resources, setResources] = useState<Record<string, number>>({});
+  const [titans, setTitans] = useState<Record<string, number>>({});
   const [selectedLanguage, setSelectedLanguage] = useState<typeof LANGUAGES[number]>('ENG');
   const [fileKey, setFileKey] = useState<string | null>(null);
   const [globalFilters, setGlobalFilters] = useState<string[]>(['Dead', 'Locked']);
@@ -59,22 +62,64 @@ export default function App() {
     selectedLanguage,
   });
 
+  const loadSaveData = async (info: SaveInfo) => {
+    setSaveInfo(info);
+    const res = await saveManager.getResources();
+    setResources(res);
+    const tit = await saveManager.getTitans();
+    setTitans(tit);
+    setFileKey(`${saveManager.getCurrentPath()}-${Date.now()}`);
+  };
+
   const handleOpenFile = () => execute(async () => {
     const result = await saveManager.openSaveFile();
     if (result) {
-      setSaveInfo(result.info);
-      setFileKey(`${saveManager.getCurrentPath()}-${Date.now()}`);
+      await loadSaveData(result.info);
+    }
+  });
+
+  const handleRefresh = () => execute(async () => {
+    const result = await saveManager.reloadSaveFile();
+    if (result) {
+      await loadSaveData(result.info);
     }
   });
 
   const handleSaveFile = () => execute(() => saveManager.saveSaveFile());
   const handleSaveFileAs = () => execute(() => saveManager.saveSaveFileAs());
 
-  const handleStudioUpdate = (field: 'budget' | 'cash' | 'reputation' | 'influence', value: number) => {
-    execute(async () => {
+  const handleStudioUpdate = async (field: 'budget' | 'cash' | 'reputation' | 'influence', value: number) => {
+    try {
       await saveManager.updateStudio({ [field]: value });
       setSaveInfo(prev => prev ? { ...prev, [field]: value } : null);
-    });
+    } catch (err) {
+      console.error('Failed to update studio:', err);
+    }
+  };
+
+  const handleResourceUpdate = async (resourceId: string, value: number) => {
+    try {
+      await saveManager.updateResource(resourceId, value);
+      setResources(prev => ({ ...prev, [resourceId]: value }));
+    } catch (err) {
+      console.error('Failed to update resource:', err);
+    }
+  };
+
+  const handleTitanUpdate = async (titanId: string, value: number) => {
+    try {
+      await saveManager.updateTitan(titanId, value);
+      setTitans(prev => ({ ...prev, [titanId]: value }));
+    } catch (err) {
+      console.error('Failed to update titan:', err);
+    }
+  };
+
+  const getFileName = (): string => {
+    const path = saveManager.getCurrentPath();
+    if (!path) return '';
+    const parts = path.replace(/\\/g, '/').split('/');
+    return parts[parts.length - 1] || '';
   };
 
   return (
@@ -100,9 +145,25 @@ export default function App() {
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleOpenFile} disabled={loading}>
-                  {loading ? 'Loading...' : 'Open Save File'}
-                </Button>
+                <div className="flex">
+                  <Button 
+                    onClick={handleOpenFile} 
+                    disabled={loading}
+                    className="rounded-r-none"
+                  >
+                    {loading ? 'Loading...' : 'Open Save File'}
+                  </Button>
+                  <Button
+                    onClick={handleRefresh}
+                    disabled={!saveManager.isLoaded() || loading}
+                    variant="outline"
+                    size="icon"
+                    className="rounded-l-none border-l-0"
+                    title="Refresh / Reload Save File"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Button
                   onClick={handleSaveFile}
                   disabled={!saveManager.isLoaded() || loading}
@@ -126,14 +187,19 @@ export default function App() {
       {error && <ErrorBanner message={error} onDismiss={clearError} />}
 
       {saveInfo && (
-        <SaveInfoBar
+        <StudioInfoBar
           currentDate={saveInfo.current_date}
           studioName={saveInfo.player_studio_name}
+          fileName={getFileName()}
           budget={saveInfo.budget}
           cash={saveInfo.cash}
           reputation={saveInfo.reputation}
           influence={saveInfo.influence}
-          onUpdate={handleStudioUpdate}
+          resources={resources}
+          titans={titans}
+          onStudioUpdate={handleStudioUpdate}
+          onResourceUpdate={handleResourceUpdate}
+          onTitanUpdate={handleTitanUpdate}
         />
       )}
 

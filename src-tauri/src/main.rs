@@ -22,6 +22,10 @@ fn main() {
             get_language_strings,
             get_game_path,
             set_game_path,
+            get_resources,
+            update_resource,
+            get_titans,
+            update_titan,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

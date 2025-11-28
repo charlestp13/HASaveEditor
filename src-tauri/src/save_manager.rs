@@ -109,6 +109,7 @@ pub struct SaveInfo {
     pub cash: i64,
     pub reputation: f64,
     pub influence: i64,
+    pub studio_logo_id: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -243,6 +244,11 @@ pub fn load_save_file(path: String, state: State<AppState>) -> Result<SaveInfo, 
         .and_then(|v| v.as_i64())
         .unwrap_or(0);
 
+    let studio_logo_id = state_json
+        .get("studioLogoId")
+        .and_then(|v| v.as_i64())
+        .unwrap_or(0);
+
     let info = SaveInfo {
         current_date: calculate_current_date(time_passed),
         player_studio_name,
@@ -261,6 +267,7 @@ pub fn load_save_file(path: String, state: State<AppState>) -> Result<SaveInfo, 
         cash,
         reputation,
         influence,
+        studio_logo_id,
     };
 
     *state.save_data.lock().unwrap() = Some(save_data);
@@ -529,5 +536,83 @@ pub fn update_studio(update: StudioUpdate, state: State<AppState>) -> Result<(),
         }
 
         Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn get_resources(state: State<AppState>) -> Result<std::collections::HashMap<String, i64>, String> {
+    state.with_save_data(|data| {
+        let state_json = data.state_json()?;
+        let resources = state_json
+            .get("otherCountableResources")
+            .and_then(|r| r.as_object())
+            .ok_or("Missing otherCountableResources")?;
+
+        let mut result = std::collections::HashMap::new();
+        for (key, value) in resources.iter() {
+            if key != "$type" {
+                if let Some(v) = value.as_i64() {
+                    result.insert(key.clone(), v);
+                }
+            }
+        }
+        Ok(result)
+    })
+}
+
+#[tauri::command]
+pub fn update_resource(resource_id: String, value: i64, state: State<AppState>) -> Result<(), String> {
+    state.with_save_data_mut(|data| {
+        let state_json = data
+            .get_mut("stateJson")
+            .ok_or_else(|| ERR_MISSING_STATE_JSON.to_string())?;
+
+        let resources = state_json
+            .get_mut("otherCountableResources")
+            .and_then(|r| r.as_object_mut())
+            .ok_or("Missing otherCountableResources")?;
+
+        resources.insert(resource_id, serde_json::json!(value));
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn get_titans(state: State<AppState>) -> Result<std::collections::HashMap<String, i64>, String> {
+    state.with_save_data(|data| {
+        let state_json = data.state_json()?;
+        let opened = state_json
+            .get("openedTitans")
+            .and_then(|t| t.as_object())
+            .ok_or("Missing openedTitans")?;
+
+        let mut result = std::collections::HashMap::new();
+        for (key, value) in opened.iter() {
+            if let Some(item2) = value.get("Item2").and_then(|v| v.as_i64()) {
+                result.insert(key.clone(), item2);
+            }
+        }
+        Ok(result)
+    })
+}
+
+#[tauri::command]
+pub fn update_titan(titan_id: String, value: i64, state: State<AppState>) -> Result<(), String> {
+    state.with_save_data_mut(|data| {
+        let state_json = data
+            .get_mut("stateJson")
+            .ok_or_else(|| ERR_MISSING_STATE_JSON.to_string())?;
+
+        let opened = state_json
+            .get_mut("openedTitans")
+            .and_then(|t| t.as_object_mut())
+            .ok_or("Missing openedTitans")?;
+
+        if let Some(titan) = opened.get_mut(&titan_id) {
+            titan["Item2"] = serde_json::json!(value);
+            Ok(())
+        } else {
+            Err(format!("Titan {} not found in openedTitans", titan_id))
+        }
     })
 }

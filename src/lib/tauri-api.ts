@@ -123,6 +123,54 @@ export class TauriSaveManager {
     }
   }
 
+  async getResources(): Promise<Record<string, number>> {
+    try {
+      return await invoke<Record<string, number>>('get_resources');
+    } catch (err) {
+      console.error('Failed to get resources:', err);
+      throw err;
+    }
+  }
+
+  async updateResource(resourceId: string, value: number): Promise<void> {
+    try {
+      await invoke('update_resource', { resourceId, value });
+    } catch (err) {
+      console.error('Failed to update resource:', err);
+      throw err;
+    }
+  }
+
+  async getTitans(): Promise<Record<string, number>> {
+    try {
+      return await invoke<Record<string, number>>('get_titans');
+    } catch (err) {
+      console.error('Failed to get titans:', err);
+      throw err;
+    }
+  }
+
+  async updateTitan(titanId: string, value: number): Promise<void> {
+    try {
+      await invoke('update_titan', { titanId, value });
+    } catch (err) {
+      console.error('Failed to update titan:', err);
+      throw err;
+    }
+  }
+
+  async reloadSaveFile(): Promise<{ info: SaveInfo } | null> {
+    if (!this.currentPath) return null;
+    
+    try {
+      const info = await invoke<SaveInfo>('load_save_file', { path: this.currentPath });
+      return { info };
+    } catch (err) {
+      console.error('Failed to reload file:', err);
+      throw err;
+    }
+  }
+
   getCurrentPath(): string | null {
     return this.currentPath;
   }

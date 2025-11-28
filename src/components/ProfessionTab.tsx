@@ -88,7 +88,7 @@ export function ProfessionTab({
     saveManager.getCurrentDate()
       .then(setCurrentDate)
       .catch(err => handleError(err, 'Failed to get current date'));
-  }, [handleError]);
+  }, [handleError, saveInfo]);
 
   const loadAllPersons = useCallback(async () => {
     if (!saveManager.isLoaded()) return;
@@ -107,7 +107,7 @@ export function ProfessionTab({
 
   useEffect(() => {
     loadAllPersons();
-  }, [loadAllPersons]);
+  }, [loadAllPersons, saveInfo]);
 
   const handleSelectGamePath = async () => {
     try {

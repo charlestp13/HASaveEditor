@@ -15,6 +15,7 @@ export function useTabState(options: UseTabStateOptions = {}) {
   const [visitedTabs, setVisitedTabs] = useState<Set<TabId>>(new Set([initialTab]));
 
   useEffect(() => {
+    setActiveTab(initialTab);
     setVisitedTabs(new Set([initialTab]));
   }, [fileKey, selectedLanguage, initialTab]);
 
@@ -25,9 +26,15 @@ export function useTabState(options: UseTabStateOptions = {}) {
     }
   }, [activeTab]);
 
+  const resetTabs = useCallback(() => {
+    setActiveTab(initialTab);
+    setVisitedTabs(new Set([initialTab]));
+  }, [initialTab]);
+
   return {
     activeTab,
     visitedTabs,
     handleTabClick,
+    resetTabs,
   };
 }
