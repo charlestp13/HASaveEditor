@@ -2,12 +2,17 @@ import type { Person } from '../types';
 import { PersonUtils, StudioUtils } from './person-utils';
 import { Studios } from '../game-data/studios';
 
+export type GenderFilter = 'all' | 'male' | 'female';
+export type ShadyFilter = 'all' | 'shady' | 'notShady';
+
 export interface FilterConfig {
   search?: string;
   excludeStudios?: string[];
   excludeDead?: boolean;
   excludeLocked?: boolean;
   excludeUnemployed?: boolean;
+  gender?: GenderFilter;
+  shady?: ShadyFilter;
 }
 
 export class PersonFilters {
@@ -31,6 +36,20 @@ export class PersonFilters {
 
     if (filters.excludeUnemployed) {
       filtered = filtered.filter((person) => StudioUtils.normalizeId(person.studioId) !== 'N/A');
+    }
+
+    if (filters.gender && filters.gender !== 'all') {
+      filtered = filtered.filter((person) => {
+        const personGender = person.gender === 1 ? 'female' : 'male';
+        return personGender === filters.gender;
+      });
+    }
+
+    if (filters.shady && filters.shady !== 'all') {
+      filtered = filtered.filter((person) => {
+        const isShady = person.isShady === true;
+        return filters.shady === 'shady' ? isShady : !isShady;
+      });
     }
 
     if (filters.search) {

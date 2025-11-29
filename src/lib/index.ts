@@ -30,6 +30,8 @@ export {
   PersonStateUpdater,
   NameSearcher,
   type FilterConfig,
+  type GenderFilter,
+  type ShadyFilter,
   type SortField,
   type SortOrder,
   type SortContext,
