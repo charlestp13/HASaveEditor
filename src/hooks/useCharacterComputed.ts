@@ -20,7 +20,7 @@ export function useCharacterComputed(character: Person) {
     
     const canEditStatus = professionName === 'Actor' || professionName === 'Director';
     const canEditSettings = professionName === 'Cinematographer';
-    const canEditGenres = ['Scriptwriter', 'Producer', 'Director', 'Actor'].includes(professionName);
+    const canEditGenres = ['Screenwriter', 'Producer', 'Director', 'Actor'].includes(professionName);
     const canEditTraits = professionName !== 'Agent' && professionName !== 'Executive';
     
     const genres = PersonUtils.getSkillEntries(character)

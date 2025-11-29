@@ -1,16 +1,30 @@
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 
-interface EditButtonProps {
-  onClick?: () => void;
+interface EditButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-export function EditButton({ onClick, children }: EditButtonProps) {
-  return (
-    <Button variant="outline" size="sm" onClick={onClick} className="w-[88px] gap-1">
-      <Plus className="h-3 w-3" />
-      {children}
-    </Button>
-  );
-}
+export const EditButton = React.forwardRef<HTMLButtonElement, EditButtonProps>(
+  ({ onClick, children, ...props }, ref) => {
+    return (
+      <Button 
+        ref={ref}
+        variant="outline" 
+        size="sm" 
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.(e);
+        }} 
+        className="w-[88px] h-7 gap-1 py-0 [&_svg]:size-3"
+        {...props}
+      >
+        <Pencil />
+        {children}
+      </Button>
+    );
+  }
+);
+
+EditButton.displayName = 'EditButton';

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { FilterPopover } from '@/components/FilterPopover';
 import { SortPopover } from '@/components/SortPopover';
 import { CharacterList } from '@/components/CharacterList';
+import { PortraitEditorDialog } from '@/components/PortraitEditorDialog';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorState } from '@/components/ErrorState';
 import { EmptyState } from '@/components/EmptyState';
@@ -19,6 +20,25 @@ import { useNameTranslation } from '@/hooks/useNameTranslation';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import { RefreshCw } from 'lucide-react';
 import type { Person, SaveInfo } from '@/lib/types';
+
+const PROFESSION_DISPLAY_NAMES: Record<string, string> = {
+  Actor: 'Actor',
+  Scriptwriter: 'Screenwriter',
+  Director: 'Director',
+  Producer: 'Producer',
+  Cinematographer: 'Cinematographer',
+  FilmEditor: 'Editor',
+  Composer: 'Composer',
+};
+
+function getProfessionDisplayName(profession: string): string {
+  return PROFESSION_DISPLAY_NAMES[profession] || profession;
+}
+
+interface UsedPortrait {
+  characterName: string;
+  profession: string;
+}
 
 interface ProfessionTabProps {
   profession: string;
@@ -34,6 +54,8 @@ interface ProfessionTabProps {
   onGenderFilterChange: (filter: 'all' | 'male' | 'female') => void;
   shadyFilter: 'all' | 'shady' | 'notShady';
   onShadyFilterChange: (filter: 'all' | 'shady' | 'notShady') => void;
+  usedPortraits: Map<number, UsedPortrait>;
+  onPortraitUsageChange?: (profession: string, portraits: Map<number, UsedPortrait>) => void;
 }
 
 export const ProfessionTab = memo(function ProfessionTab({ 
@@ -50,15 +72,22 @@ export const ProfessionTab = memo(function ProfessionTab({
   onGenderFilterChange,
   shadyFilter,
   onShadyFilterChange,
+  usedPortraits,
+  onPortraitUsageChange,
 }: ProfessionTabProps) {
   const [allPersons, setAllPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [editingPortraitPersonId, setEditingPortraitPersonId] = useState<string | number | null>(null);
 
   const currentDate = saveInfo?.current_date ?? '';
   const professionLower = profession.toLowerCase();
+  
+  const isTalentProfession = profession !== 'Agent' && 
+    !profession.startsWith('Lieut') && 
+    !profession.startsWith('Cpt');
   
   const handleError = useCallback((err: unknown, fallback: string) => 
     setError(err instanceof Error ? err.message : fallback), []);
@@ -66,6 +95,33 @@ export const ProfessionTab = memo(function ProfessionTab({
   const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
   
   const nameSearcher = useMemo(() => new NameSearcher(nameStrings), [nameStrings]);
+
+  const editingPerson = useMemo(() => {
+    if (!editingPortraitPersonId) return null;
+    return allPersons.find(p => p.id === editingPortraitPersonId) || null;
+  }, [editingPortraitPersonId, allPersons]);
+
+  useEffect(() => {
+    if (!isTalentProfession || !onPortraitUsageChange) return;
+    if (allPersons.length === 0) {
+      onPortraitUsageChange(profession, new Map());
+      return;
+    }
+    
+    const portraits = new Map<number, UsedPortrait>();
+    allPersons.forEach(person => {
+      if (person.portraitBaseId !== undefined) {
+        const firstName = nameSearcher.getNameById(parseInt(person.firstNameId || '0', 10)) || '';
+        const lastName = nameSearcher.getNameById(parseInt(person.lastNameId || '0', 10)) || '';
+        const rawProfName = person.professions ? Object.keys(person.professions)[0] : profession;
+        portraits.set(person.portraitBaseId, {
+          characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
+          profession: getProfessionDisplayName(rawProfName),
+        });
+      }
+    });
+    onPortraitUsageChange(profession, portraits);
+  }, [allPersons, nameSearcher, profession, isTalentProfession, onPortraitUsageChange]);
   
   const savePerson = useCallback(
     (personId: string, field: string, value: number | null) => {
@@ -220,6 +276,19 @@ export const ProfessionTab = memo(function ProfessionTab({
       .catch(err => handleError(err, 'Failed to remove trait'));
   }, [profession, handleError]);
 
+  const handlePortraitChange = useCallback((personId: string | number, portraitId: number) => {
+    setAllPersons(prev => prev.map(p => 
+      p.id === personId ? { ...p, portraitBaseId: portraitId } : p
+    ));
+    setEditingPortraitPersonId(null);
+    saveManager.updatePerson(profession, String(personId), { portraitBaseId: portraitId })
+      .catch(err => handleError(err, 'Failed to update portrait'));
+  }, [profession, handleError]);
+
+  const handleEditPortrait = useCallback((personId: string | number) => {
+    setEditingPortraitPersonId(personId);
+  }, []);
+
   const displayError = error || nameError;
   const isGamePathError = displayError?.includes('Game installation not found') ||
                           displayError?.includes('Browse for Game Folder') ||
@@ -310,6 +379,18 @@ export const ProfessionTab = memo(function ProfessionTab({
           onStringFieldUpdate={handleStringFieldUpdate}
           onTraitAdd={handleTraitAdd}
           onTraitRemove={handleTraitRemove}
+          onEditPortrait={isTalentProfession ? handleEditPortrait : undefined}
+        />
+      )}
+
+      {isTalentProfession && editingPerson && (
+        <PortraitEditorDialog
+          open={!!editingPortraitPersonId}
+          onOpenChange={(open) => !open && setEditingPortraitPersonId(null)}
+          gender={editingPerson.gender!}
+          currentPortraitId={editingPerson.portraitBaseId!}
+          usedPortraits={usedPortraits}
+          onSelectPortrait={(portraitId) => handlePortraitChange(editingPerson.id, portraitId)}
         />
       )}
     </div>

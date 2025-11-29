@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { saveManager } from '@/lib/tauri-api';
 import appBanner from '@/assets/appBanner.png';
@@ -12,6 +12,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SaveInfo, CompetitorStudio } from '@/lib/types';
 import type { SortField, SortOrder } from '@/lib/person-sorter';
+
+interface UsedPortrait {
+  characterName: string;
+  profession: string;
+}
 
 const LANGUAGES = ['ENG', 'SPA', 'GER', 'FRE', 'PTB', 'RUS', 'CHN', 'JAP', 'BEL', 'UKR'] as const;
 
@@ -30,12 +35,12 @@ const LANGUAGE_NAMES: Record<typeof LANGUAGES[number], string> = {
 
 const TABS = [
   { id: 'actors', label: 'Actors', profession: 'Actor', countKey: 'actors_count' },
+  { id: 'screenwriters', label: 'Screenwriters', profession: 'Scriptwriter', countKey: 'writers_count' },
   { id: 'directors', label: 'Directors', profession: 'Director', countKey: 'directors_count' },
   { id: 'producers', label: 'Producers', profession: 'Producer', countKey: 'producers_count' },
-  { id: 'writers', label: 'Writers', profession: 'Scriptwriter', countKey: 'writers_count' },
+  { id: 'cinematographers', label: 'Cinematographers', profession: 'Cinematographer', countKey: 'cinematographers_count' },
   { id: 'editors', label: 'Editors', profession: 'FilmEditor', countKey: 'editors_count' },
   { id: 'composers', label: 'Composers', profession: 'Composer', countKey: 'composers_count' },
-  { id: 'cinematographers', label: 'Cinematographers', profession: 'Cinematographer', countKey: 'cinematographers_count' },
   { id: 'agents', label: 'Agents', profession: 'Agent', countKey: 'agents_count' },
 ] as const;
 
@@ -51,12 +56,31 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [shadyFilter, setShadyFilter] = useState<'all' | 'shady' | 'notShady'>('all');
+  const [portraitsByProfession, setPortraitsByProfession] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
   const { loading, error, execute, clearError } = useAsyncAction();
 
   const handleSortChange = useCallback((field: SortField, order: SortOrder) => {
     setSortField(field);
     setSortOrder(order);
   }, []);
+
+  const handlePortraitUsageChange = useCallback((profession: string, portraits: Map<number, UsedPortrait>) => {
+    setPortraitsByProfession(prev => {
+      const next = new Map(prev);
+      next.set(profession, portraits);
+      return next;
+    });
+  }, []);
+
+  const combinedUsedPortraits = useMemo(() => {
+    const combined = new Map<number, UsedPortrait>();
+    portraitsByProfession.forEach(professionPortraits => {
+      professionPortraits.forEach((info, id) => {
+        combined.set(id, info);
+      });
+    });
+    return combined;
+  }, [portraitsByProfession]);
 
   const {
     activeTab,
@@ -74,6 +98,7 @@ export default function App() {
     setTitans({});
     setCompetitors([]);
     setFileKey(null);
+    setPortraitsByProfession(new Map());
   };
 
   const loadSaveData = async (info: SaveInfo) => {
@@ -284,6 +309,8 @@ export default function App() {
                     onGenderFilterChange={setGenderFilter}
                     shadyFilter={shadyFilter}
                     onShadyFilterChange={setShadyFilter}
+                    usedPortraits={combinedUsedPortraits}
+                    onPortraitUsageChange={handlePortraitUsageChange}
                   />
                 </div>
               );

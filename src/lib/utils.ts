@@ -56,14 +56,24 @@ export class PersonUtils {
     return `Person ${person.id}`;
   }
 
-  static getProfessionName(person: Person): string {
+  static getRawProfessionName(person: Person): string {
     if (!person.professions) return 'Unknown';
     const keys = Object.keys(person.professions);
     return keys.length > 0 ? keys[0] : 'Unknown';
   }
 
+  static getProfessionName(person: Person): string {
+    const rawName = PersonUtils.getRawProfessionName(person);
+    if (rawName === 'Unknown') return rawName;
+    const displayNames: Record<string, string> = {
+      FilmEditor: 'Editor',
+      Scriptwriter: 'Screenwriter',
+    };
+    return displayNames[rawName] || rawName;
+  }
+
   static getProfessionValue(person: Person): number {
-    const profession = PersonUtils.getProfessionName(person);
+    const profession = PersonUtils.getRawProfessionName(person);
     const value = person.professions?.[profession];
     if (!value) return 0;
     return typeof value === 'string' ? parseFloat(value) : value;

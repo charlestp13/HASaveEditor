@@ -1,4 +1,5 @@
 import { PortraitCarousel } from '@/components/PortraitCarousel';
+import { EditButton } from '@/components/EditButton';
 import { PersonUtils } from '@/lib/utils';
 import type { DateUtils } from '@/lib/utils';
 
@@ -12,6 +13,7 @@ interface InfoSectionProps {
   deathParsed: DateUtils | null;
   professions: { [key: string]: any };
   portraitBaseId: number | undefined;
+  onEditPortrait?: () => void;
 }
 
 export function InfoSection({
@@ -24,16 +26,37 @@ export function InfoSection({
   deathParsed,
   professions,
   portraitBaseId,
+  onEditPortrait,
 }: InfoSectionProps) {
+  const professionType = (() => {
+    if (!professions) return 'TALENT';
+    const professionKeys = Object.keys(professions);
+    if (professionKeys.length === 0) return 'TALENT';
+    const profession = professionKeys[0];
+    if (profession === 'Agent') return 'AGENT';
+    if (profession.startsWith('Lieut') || profession.startsWith('Cpt')) return 'LIEUT';
+    return 'TALENT';
+  })();
+
+  const canEditPortrait = professionType === 'TALENT' && 
+    gender !== undefined && 
+    portraitBaseId !== undefined &&
+    onEditPortrait !== undefined;
+
   return (
     <>
-      <div className="space-y-2">
+      <div className="flex items-center justify-between">
         <div className="text-sm">
           <span className="text-muted-foreground">Studio: </span>
           <span className="font-medium">
             {PersonUtils.getStudioDisplay(studioId)}
           </span>
         </div>
+        {canEditPortrait && (
+          <EditButton onClick={onEditPortrait}>
+            Portrait
+          </EditButton>
+        )}
       </div>
 
       <div className="flex gap-3 items-start">

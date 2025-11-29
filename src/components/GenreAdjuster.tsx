@@ -6,8 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { EditButton } from '@/components/EditButton';
 import { IconButton } from '@/components/IconButton';
 import { GENRES, GENRE_ESTABLISHED_THRESHOLD, MAX_ESTABLISHED_GENRES, getGenreIcon } from '@/lib/character-genres';
 import { toTitleCase } from '@/lib/utils';
@@ -65,10 +64,7 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-[88px] gap-1">
-          <Plus className="h-3 w-3" />
-          Genres
-        </Button>
+        <EditButton>Genres</EditButton>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>

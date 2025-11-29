@@ -27,6 +27,7 @@ interface CharacterCardProps {
   onStringFieldUpdate?: (field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
   onTraitAdd?: (trait: string) => void;
   onTraitRemove?: (trait: string) => void;
+  onEditPortrait?: () => void;
 }
 
 export const CharacterCard = memo(function CharacterCard({ 
@@ -38,7 +39,8 @@ export const CharacterCard = memo(function CharacterCard({
   onUpdate,
   onStringFieldUpdate,
   onTraitAdd,
-  onTraitRemove
+  onTraitRemove,
+  onEditPortrait,
 }: CharacterCardProps) {
   const { age, birthParsed, deathParsed, contractDaysLeft } = useCharacterDates(character, currentDate);
   const {
@@ -63,15 +65,15 @@ export const CharacterCard = memo(function CharacterCard({
 
   return (
     <Card 
-      className={`cursor-pointer transition-colors ${
+      className={`transition-colors ${
         isSelected ? 'ring-2 ring-primary' : ''
       } ${isDead ? 'opacity-60' : ''}`}
       onClick={onClick}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center gap-2">
               <EditableNameField
                 value={firstName}
                 currentId={character.firstNameId || '0'}
@@ -87,15 +89,12 @@ export const CharacterCard = memo(function CharacterCard({
                 placeholder="Search..."
               />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{professionName}</span>
-              <span className="text-muted-foreground">·</span>
-              <EditableTextField
-                value={character.customName}
-                onChange={(value) => onStringFieldUpdate?.('customName', value)}
-                placeholder="Custom Name"
-              />
-            </div>
+            <EditableTextField
+              value={character.customName}
+              onChange={(value) => onStringFieldUpdate?.('customName', value)}
+              placeholder="Custom Name"
+            />
+            <div className="text-sm text-muted-foreground">{professionName}</div>
           </div>
           <div className="text-right text-sm">
             <div className="font-mono">ID: {character.id}</div>
@@ -123,6 +122,7 @@ export const CharacterCard = memo(function CharacterCard({
           deathParsed={deathParsed}
           professions={character.professions || {}}
           portraitBaseId={character.portraitBaseId}
+          onEditPortrait={onEditPortrait}
         />
 
         {canEditTraits && (
@@ -180,6 +180,7 @@ export const CharacterCard = memo(function CharacterCard({
   if (p.mood !== n.mood) return false;
   if (p.attitude !== n.attitude) return false;
   if (p.limit !== n.limit) return false;
+  if (p.portraitBaseId !== n.portraitBaseId) return false;
   
   const pProf = p.professions ? Object.values(p.professions)[0] : null;
   const nProf = n.professions ? Object.values(n.professions)[0] : null;

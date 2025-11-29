@@ -95,6 +95,7 @@ export interface PersonUpdate {
   removeTrait?: string;
   addGenre?: string;
   removeGenre?: string;
+  portraitBaseId?: number;
 }
 
 export interface StudioUpdate {

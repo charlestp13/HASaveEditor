@@ -11,6 +11,7 @@ interface CharacterListProps {
   onStringFieldUpdate: (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
   onTraitAdd: (personId: string | number, trait: string) => void;
   onTraitRemove: (personId: string | number, trait: string) => void;
+  onEditPortrait?: (personId: string | number) => void;
 }
 
 export const CharacterList = memo(function CharacterList({
@@ -21,6 +22,7 @@ export const CharacterList = memo(function CharacterList({
   onStringFieldUpdate,
   onTraitAdd,
   onTraitRemove,
+  onEditPortrait,
 }: CharacterListProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-2">
@@ -34,6 +36,7 @@ export const CharacterList = memo(function CharacterList({
           onStringFieldUpdate={(field, value) => onStringFieldUpdate(person.id, field, value)}
           onTraitAdd={(trait) => onTraitAdd(person.id, trait)}
           onTraitRemove={(trait) => onTraitRemove(person.id, trait)}
+          onEditPortrait={onEditPortrait ? () => onEditPortrait(person.id) : undefined}
         />
       ))}
     </div>

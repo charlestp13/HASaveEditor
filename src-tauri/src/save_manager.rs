@@ -149,6 +149,8 @@ pub struct PersonUpdate {
     pub add_genre: Option<String>,
     #[serde(rename = "removeGenre")]
     pub remove_genre: Option<String>,
+    #[serde(rename = "portraitBaseId")]
+    pub portrait_base_id: Option<i32>,
 }
 
 fn json_id_matches(value: &Value, target: &str) -> bool {
@@ -379,6 +381,9 @@ fn apply_updates(person: &mut Value, profession: &str, update: &PersonUpdate) {
     }
     if let Some(genre) = &update.add_genre {
         upsert_white_tag(person, genre, 12.0);
+    }
+    if let Some(portrait_base_id) = update.portrait_base_id {
+        person["portraitBaseId"] = portrait_base_id.into();
     }
 }
 
