@@ -1,7 +1,6 @@
 import { memo } from 'react';
 import { CharacterCard } from './CharacterCard';
-import type { Person } from '@/lib/types';
-import type { NameSearcher } from '@/lib/name-searcher';
+import type { Person, NameSearcher } from '@/lib';
 
 interface CharacterListProps {
   persons: Person[];

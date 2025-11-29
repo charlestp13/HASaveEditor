@@ -1,6 +1,5 @@
-import { toTitleCase } from '@/lib/utils';
 import { IconBadge } from '@/components/IconBadge';
-import { GENRE_ESTABLISHED_THRESHOLD, getGenreIcon } from '@/lib/character-genres';
+import { Formatter, Genres } from '@/lib';
 
 interface GenreBadgeProps {
   genre: string;
@@ -8,15 +7,15 @@ interface GenreBadgeProps {
 }
 
 export function GenreBadge({ genre, value }: GenreBadgeProps) {
-  const isEstablished = value >= GENRE_ESTABLISHED_THRESHOLD;
+  const isEstablished = value >= Genres.ESTABLISHED_THRESHOLD;
 
-  const icon = getGenreIcon(genre);
+  const icon = Genres.getIcon(genre);
   if (!icon) return null;
   
   return (
     <IconBadge
       iconPath={icon}
-      text={toTitleCase(genre)}
+      text={Formatter.toTitleCase(genre)}
       color="#ffd779"
       title={`Value: ${value.toFixed(1)}`}
       size="sm"

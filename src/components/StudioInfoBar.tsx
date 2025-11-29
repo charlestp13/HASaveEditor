@@ -2,8 +2,7 @@ import { useState, useEffect, memo } from 'react';
 import { Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { OPPONENT_STUDIOS } from '@/lib/studio-data';
-import type { CompetitorStudio } from '@/lib/types';
+import { Studios, type CompetitorStudio } from '@/lib';
 import budgetIcon from '@/assets/BUDGET.png';
 import cashIcon from '@/assets/CASH.png';
 import reputationIcon from '@/assets/REPUTATION.png';
@@ -119,7 +118,7 @@ export const StudioInfoBar = memo(function StudioInfoBar({
   };
 
   const getStudioInfo = (id: string) => {
-    return OPPONENT_STUDIOS.find(s => s.id === id);
+    return Studios.OPPONENTS.find(s => s.id === id);
   };
 
   return (

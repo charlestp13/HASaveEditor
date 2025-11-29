@@ -1,51 +1,40 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { saveManager } from '@/lib/tauri-api';
+import { useEffect, useCallback, useRef } from 'react';
+import { saveManager } from '@/lib';
+import { useAsyncAction } from './useAsyncAction';
 
 export function useNameTranslation(selectedLanguage: string) {
-  const [nameStrings, setNameStrings] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { loading, error, execute } = useAsyncAction();
+  const nameStringsRef = useRef<string[]>([]);
   const loadedLanguageRef = useRef<string | null>(null);
 
+  const loadStrings = useCallback(async (language: string, force = false) => {
+    if (!force && loadedLanguageRef.current === language) return;
+
+    const result = await execute(async () => {
+      const strings = await saveManager.getLanguageStrings(language);
+      nameStringsRef.current = strings;
+      loadedLanguageRef.current = language;
+      return strings;
+    });
+
+    if (!result) {
+      nameStringsRef.current = [];
+    }
+  }, [execute]);
+
   useEffect(() => {
-    if (loadedLanguageRef.current === selectedLanguage) {
-      return;
-    }
+    loadStrings(selectedLanguage);
+  }, [selectedLanguage, loadStrings]);
 
-    const loadStrings = async () => {
-      try {
-        const strings = await saveManager.getLanguageStrings(selectedLanguage);
-        setNameStrings(strings);
-        setError(null);
-        loadedLanguageRef.current = selectedLanguage;
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        if (errorMsg.includes('Game installation not found') || errorMsg.includes('Browse for Game Folder')) {
-          setError(errorMsg);
-        } else {
-          setNameStrings([]);
-        }
-      }
-    };
-
-    loadStrings();
-  }, [selectedLanguage]);
-
-  const reload = useCallback(async () => {
+  const reload = useCallback(() => {
     loadedLanguageRef.current = null;
-    try {
-      const strings = await saveManager.getLanguageStrings(selectedLanguage);
-      setNameStrings(strings);
-      setError(null);
-      loadedLanguageRef.current = selectedLanguage;
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      if (errorMsg.includes('Game installation not found') || errorMsg.includes('Browse for Game Folder')) {
-        setError(errorMsg);
-      } else {
-        setNameStrings([]);
-      }
-    }
-  }, [selectedLanguage]);
+    loadStrings(selectedLanguage, true);
+  }, [selectedLanguage, loadStrings]);
 
-  return { nameStrings, error, reload };
+  return { 
+    nameStrings: nameStringsRef.current, 
+    loading,
+    error, 
+    reload,
+  };
 }

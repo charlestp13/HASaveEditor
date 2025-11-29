@@ -1,5 +1,4 @@
-import { ACTOR_LABELS, DIRECTOR_LABELS, getRank, getStatusColor, getStatusIcon } from '@/lib/character-status';
-import { toTitleCase } from '@/lib/utils';
+import { Status, Formatter } from '@/lib';
 import { IconBadge } from '@/components/IconBadge';
 
 interface StatusBadgeProps {
@@ -9,14 +8,14 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ type, value, profession }: StatusBadgeProps) {
-  const rank = getRank(value);
-  const color = getStatusColor(value);
+  const rank = Status.getRank(value);
+  const color = Status.getColor(value);
   
   if (rank === 0 || !color) return null;
 
-  const labels = profession === 'Actor' ? ACTOR_LABELS : DIRECTOR_LABELS;
-  const label = toTitleCase(labels[type][rank - 1]);
-  const icon = getStatusIcon(type);
+  const labels = profession === 'Actor' ? Status.ACTOR_LABELS : Status.DIRECTOR_LABELS;
+  const label = Formatter.toTitleCase(labels[type][rank - 1]);
+  const icon = Status.getIcon(type);
 
   return (
     <IconBadge

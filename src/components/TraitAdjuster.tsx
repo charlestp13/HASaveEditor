@@ -9,8 +9,7 @@ import {
 import { EditButton } from '@/components/EditButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { IconButton } from '@/components/IconButton';
-import { DISPLAYABLE_TRAITS, TRAIT_CONFLICTS, getTraitIcon, isDisplayableTrait } from '@/lib/character-traits';
-import { toTitleCase } from '@/lib/utils';
+import { Traits, Formatter } from '@/lib';
 
 const MAX_TRAITS = 2;
 const SELECTED_BORDER_COLOR = '#caff96';
@@ -25,7 +24,7 @@ interface TraitAdjusterProps {
 
 export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
   const displayableCurrentTraits = useMemo(
-    () => traits.filter(isDisplayableTrait),
+    () => traits.filter(Traits.isDisplayable),
     [traits]
   );
 
@@ -36,11 +35,11 @@ export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
     const pairs: Array<[string, string]> = [];
     const nonConflicting: string[] = [];
 
-    DISPLAYABLE_TRAITS.forEach(trait => {
+    Traits.LIST.forEach(trait => {
       if (seenTraits.has(trait)) return;
       
-      const conflictTrait = TRAIT_CONFLICTS[trait];
-      if (conflictTrait && isDisplayableTrait(conflictTrait)) {
+      const conflictTrait = Traits.CONFLICTS[trait];
+      if (conflictTrait && Traits.isDisplayable(conflictTrait)) {
         pairs.push([trait, conflictTrait]);
         seenTraits.add(trait);
         seenTraits.add(conflictTrait);
@@ -62,7 +61,7 @@ export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
 
   const isTraitDisabled = (trait: string): boolean => {
     if (traits.includes(trait)) return false;
-    const conflictTrait = TRAIT_CONFLICTS[trait];
+    const conflictTrait = Traits.CONFLICTS[trait];
     if (conflictTrait && traits.includes(conflictTrait)) return true;
     return atMaxTraits;
   };
@@ -143,8 +142,8 @@ interface TraitButtonProps {
 }
 
 function TraitButton({ trait, isSelected, isDisabled, onClick }: TraitButtonProps) {
-  const icon = getTraitIcon(trait);
-  const label = toTitleCase(trait);
+  const icon = Traits.getIcon(trait);
+  const label = Formatter.toTitleCase(trait);
   
   return (
     <IconButton

@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Filter } from 'lucide-react';
-import { toTitleCase } from '@/lib/utils';
-import { OPPONENT_STUDIOS, getPlayerLogoIcon, ALL_COMPETITORS_ICON } from '@/lib/studio-data';
+import { Formatter, Studios } from '@/lib';
 import deadIcon from '@/assets/DEAD.png';
 import unemployedIcon from '@/assets/UN.png';
 import lockedIcon from '@/assets/LOCK.png';
@@ -104,19 +103,19 @@ export const FilterPopover = memo(function FilterPopover({
   const [open, setOpen] = useState(false);
 
   const opponentStudios = useMemo(() => 
-    OPPONENT_STUDIOS.filter(studio => availableStudios.includes(studio.id)),
+    Studios.OPPONENTS.filter(studio => availableStudios.includes(studio.id)),
     [availableStudios]
   );
 
   const competitorIds = opponentStudios.map(s => s.id);
 
   const studioOptions = useMemo((): FilterOption[] => {
-    const playerIcon = getPlayerLogoIcon(playerLogoId);
+    const playerIcon = Studios.getPlayerLogoIcon(playerLogoId);
     
     return [
-      { id: 'PL', label: toTitleCase(playerStudioName), icon: playerIcon, isDynamic: true },
+      { id: 'PL', label: Formatter.toTitleCase(playerStudioName), icon: playerIcon, isDynamic: true },
       { id: 'Unemployed', label: 'Unemployed', icon: unemployedIcon },
-      { id: 'ALL_COMPETITORS', label: 'All Competitors', icon: ALL_COMPETITORS_ICON, isSpecial: true },
+      { id: 'ALL_COMPETITORS', label: 'All Competitors', icon: Studios.ALL_COMPETITORS_ICON, isSpecial: true },
       ...opponentStudios.map(studio => ({
         id: studio.id,
         label: studio.name,

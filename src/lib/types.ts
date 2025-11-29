@@ -1,3 +1,7 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Person Types
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface Person {
   id: number;
   firstNameId?: string;
@@ -16,64 +20,27 @@ export interface Person {
   limit?: number;
   Limit?: number;
   state?: number;
-  professions?: {
-    [key: string]: string;
-  };
+  professions?: Record<string, string>;
   skill?: number;
   whiteTagsNEW?: Record<string, WhiteTag>;
-  contract?: {
-    contractType: number;
-    amount: number;
-    startAmount: number;
-    initialFee: string;
-    monthlySalary: string;
-    weightToSalary: string;
-    dateOfSigning: string;
-  };
+  contract?: PersonContract;
   labels?: string[];
   aSins?: string[];
-  activeOrPlannedMovies?: any;
+  activeOrPlannedMovies?: unknown[];
   isShady?: boolean;
   isOnTheHook?: boolean;
   mayHaveSins?: boolean | null;
   prefIlGift?: number;
 }
 
-export interface OverallValue {
-  movieId: number;
-  sourceType: number;
-  value: string;
-  dateAdded: string;
-}
-
-export interface WhiteTag {
-  id: string;
-  value: string;
-  dateAdded: string;
-  movieId: number;
-  IsOverall: boolean;
-  overallValues: OverallValue[];
-}
-
-export interface SaveInfo {
-  current_date: string;
-  player_studio_name: string;
-  actors_count: number;
-  directors_count: number;
-  producers_count: number;
-  writers_count: number;
-  editors_count: number;
-  composers_count: number;
-  cinematographers_count: number;
-  agents_count: number;
-  executives_count: number;
-  movies_count: number;
-  studios_count: number;
-  budget: number;
-  cash: number;
-  reputation: number;
-  influence: number;
-  studio_logo_id: number;
+export interface PersonContract {
+  contractType: number;
+  amount: number;
+  startAmount: number;
+  initialFee: string;
+  monthlySalary: string;
+  weightToSalary: string;
+  dateOfSigning: string;
 }
 
 export interface PersonUpdate {
@@ -97,6 +64,55 @@ export interface PersonUpdate {
   removeGenre?: string;
   portraitBaseId?: number;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// White Tag Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface WhiteTag {
+  id: string;
+  value: string;
+  dateAdded: string;
+  movieId: number;
+  IsOverall: boolean;
+  overallValues: OverallValue[];
+}
+
+export interface OverallValue {
+  movieId: number;
+  sourceType: number;
+  value: string;
+  dateAdded: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Save File Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface SaveInfo {
+  current_date: string;
+  player_studio_name: string;
+  actors_count: number;
+  directors_count: number;
+  producers_count: number;
+  writers_count: number;
+  editors_count: number;
+  composers_count: number;
+  cinematographers_count: number;
+  agents_count: number;
+  executives_count: number;
+  movies_count: number;
+  studios_count: number;
+  budget: number;
+  cash: number;
+  reputation: number;
+  influence: number;
+  studio_logo_id: number;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Studio Types
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface StudioUpdate {
   budget?: number;

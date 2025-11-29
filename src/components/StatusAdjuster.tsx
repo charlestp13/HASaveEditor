@@ -1,7 +1,6 @@
 import { StatusBadge } from '@/components/StatusBadge';
 import { Adjuster } from '@/components/Adjuster';
-import { ValueSteppers } from '@/lib/value-steppers';
-import { getStatusIcon } from '@/lib/character-status';
+import { ValueSteppers, Status } from '@/lib';
 
 const STATUS_LEVELS = [0.01, 0.15, 0.30, 0.70, 1.00] as const;
 const STATUS_BUTTON_COLOR = "#A6AEBF";
@@ -21,7 +20,7 @@ interface StatusButtonProps {
 }
 
 function StatusButton({ type, action, onClick }: StatusButtonProps) {
-  const icon = getStatusIcon(type);
+  const icon = Status.getIcon(type);
   
   return (
     <button

@@ -2,8 +2,7 @@ import { memo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EditableNameField } from '@/components/EditableNameField';
 import { EditableTextField } from '@/components/EditableTextField';
-import { useCharacterDates } from '@/hooks/useCharacterDates';
-import { useCharacterComputed } from '@/hooks/useCharacterComputed';
+import { useCharacterData } from '@/hooks/useCharacterData';
 import {
   StatsSection,
   InfoSection,
@@ -14,8 +13,7 @@ import {
   ContractSection,
   SinsSection,
 } from '@/components/character-sections';
-import type { Person } from '@/lib/types';
-import type { NameSearcher } from '@/lib/name-searcher';
+import type { Person, NameSearcher } from '@/lib';
 
 interface CharacterCardProps {
   character: Person;
@@ -42,23 +40,26 @@ export const CharacterCard = memo(function CharacterCard({
   onTraitRemove,
   onEditPortrait,
 }: CharacterCardProps) {
-  const { age, birthParsed, deathParsed, contractDaysLeft } = useCharacterDates(character, currentDate);
   const {
+    age,
+    birthParsed,
+    deathParsed,
+    contractDaysLeft,
     isDead,
     isBusy,
     professionName,
     professionValue,
-    displayableTraits,
     art,
     com,
     indoor,
     outdoor,
+    displayableTraits,
+    genres,
     canEditStatus,
     canEditSettings,
     canEditGenres,
     canEditTraits,
-    genres,
-  } = useCharacterComputed(character);
+  } = useCharacterData(character, currentDate);
 
   const firstName = nameSearcher.getNameById(parseInt(character.firstNameId || '0', 10)) || character.firstNameId || '';
   const lastName = nameSearcher.getNameById(parseInt(character.lastNameId || '0', 10)) || character.lastNameId || '';

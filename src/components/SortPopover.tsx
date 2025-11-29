@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ArrowUpDown } from 'lucide-react';
-import type { SortField, SortOrder } from '@/lib/person-sorter';
+import type { SortField, SortOrder } from '@/lib';
 
 const SELECTED_BORDER_COLOR = '#ff71a9';
 

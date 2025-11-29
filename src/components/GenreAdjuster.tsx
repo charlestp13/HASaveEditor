@@ -8,8 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { EditButton } from '@/components/EditButton';
 import { IconButton } from '@/components/IconButton';
-import { GENRES, GENRE_ESTABLISHED_THRESHOLD, MAX_ESTABLISHED_GENRES, getGenreIcon } from '@/lib/character-genres';
-import { toTitleCase } from '@/lib/utils';
+import { Genres, Formatter } from '@/lib';
 
 const SELECTED_BORDER_COLOR = '#ffd779';
 
@@ -25,11 +24,11 @@ interface GenreAdjusterProps {
 
 export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
   const establishedGenres = useMemo(
-    () => genres.filter(g => g.value >= GENRE_ESTABLISHED_THRESHOLD),
+    () => genres.filter(g => g.value >= Genres.ESTABLISHED_THRESHOLD),
     [genres]
   );
 
-  const atMaxGenres = establishedGenres.length >= MAX_ESTABLISHED_GENRES;
+  const atMaxGenres = establishedGenres.length >= Genres.MAX_ESTABLISHED;
 
   const genreMap = useMemo(
     () => new Map(genres.map(g => [g.id, g.value])),
@@ -38,7 +37,7 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
 
   const handleGenreClick = (genre: string) => {
     const currentValue = genreMap.get(genre);
-    const isEstablished = currentValue !== undefined && currentValue >= GENRE_ESTABLISHED_THRESHOLD;
+    const isEstablished = currentValue !== undefined && currentValue >= Genres.ESTABLISHED_THRESHOLD;
     
     if (isEstablished) {
       onToggle(genre, false);
@@ -49,7 +48,7 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
 
   const isGenreDisabled = (genre: string): boolean => {
     const currentValue = genreMap.get(genre);
-    const isEstablished = currentValue !== undefined && currentValue >= GENRE_ESTABLISHED_THRESHOLD;
+    const isEstablished = currentValue !== undefined && currentValue >= Genres.ESTABLISHED_THRESHOLD;
     
     if (isEstablished) return false;
     
@@ -58,7 +57,7 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
 
   const isGenreSelected = (genre: string): boolean => {
     const currentValue = genreMap.get(genre);
-    return currentValue !== undefined && currentValue >= GENRE_ESTABLISHED_THRESHOLD;
+    return currentValue !== undefined && currentValue >= Genres.ESTABLISHED_THRESHOLD;
   };
 
   return (
@@ -69,12 +68,12 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            Edit Established Genres ({establishedGenres.length}/{MAX_ESTABLISHED_GENRES})
+            Edit Established Genres ({establishedGenres.length}/{Genres.MAX_ESTABLISHED})
           </DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-2 mt-4">
-          {GENRES.map(genre => (
+          {Genres.LIST.map(genre => (
             <GenreButton
               key={genre}
               genre={genre}
@@ -97,8 +96,8 @@ interface GenreButtonProps {
 }
 
 function GenreButton({ genre, isSelected, isDisabled, onClick }: GenreButtonProps) {
-  const icon = getGenreIcon(genre);
-  const label = toTitleCase(genre);
+  const icon = Genres.getIcon(genre);
+  const label = Formatter.toTitleCase(genre);
   
   return (
     <IconButton

@@ -1,12 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
-import { saveManager } from '@/lib/tauri-api';
-import { StudioUtils } from '@/lib/utils';
-import { PersonStateUpdater } from '@/lib/person-state-updater';
-import { PersonFilters } from '@/lib/person-filters';
-import { PersonSorter } from '@/lib/person-sorter';
-import { NameSearcher } from '@/lib/name-searcher';
-import type { SortField, SortOrder } from '@/lib/person-sorter';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FilterPopover } from '@/components/FilterPopover';
@@ -19,7 +12,18 @@ import { EmptyState } from '@/components/EmptyState';
 import { useNameTranslation } from '@/hooks/useNameTranslation';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import { RefreshCw } from 'lucide-react';
-import type { Person, SaveInfo } from '@/lib/types';
+import { 
+  saveManager, 
+  StudioUtils, 
+  PersonStateUpdater, 
+  PersonFilters, 
+  PersonSorter, 
+  NameSearcher,
+  type SortField, 
+  type SortOrder,
+  type Person, 
+  type SaveInfo,
+} from '@/lib';
 
 const PROFESSION_DISPLAY_NAMES: Record<string, string> = {
   Actor: 'Actor',

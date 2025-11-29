@@ -1,5 +1,4 @@
-import { isDisplayableTrait, getTraitIcon } from '@/lib/character-traits';
-import { toTitleCase } from '@/lib/utils';
+import { Traits, Formatter } from '@/lib';
 import { IconBadge } from '@/components/IconBadge';
 
 interface TraitBadgeProps {
@@ -7,17 +6,17 @@ interface TraitBadgeProps {
 }
 
 export function TraitBadge({ trait }: TraitBadgeProps) {
-  if (!isDisplayableTrait(trait)) {
+  if (!Traits.isDisplayable(trait)) {
     return null;
   }
 
-  const icon = getTraitIcon(trait);
+  const icon = Traits.getIcon(trait);
   if (!icon) return null;
 
   return (
     <IconBadge
       iconPath={icon}
-      text={toTitleCase(trait)}
+      text={Formatter.toTitleCase(trait)}
       color="#8674B0"
       title={trait}
     />

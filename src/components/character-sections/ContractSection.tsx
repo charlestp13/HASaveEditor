@@ -1,5 +1,5 @@
 import { CardSection } from '@/components/CardSection';
-import { DateUtils } from '@/lib/utils';
+import { DateUtils } from '@/lib';
 
 interface ContractSectionProps {
   contract: {

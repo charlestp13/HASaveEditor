@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
-import { saveManager } from '@/lib/tauri-api';
+import { saveManager } from '@/lib';
 import appBanner from '@/assets/appBanner.png';
 import { ProfessionTab } from '@/components/ProfessionTab';
 import { ErrorBanner } from '@/components/ErrorBanner';
@@ -10,8 +10,7 @@ import { useTabState } from '@/hooks/useTabState';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SaveInfo, CompetitorStudio } from '@/lib/types';
-import type { SortField, SortOrder } from '@/lib/person-sorter';
+import type { SortField, SortOrder, SaveInfo, CompetitorStudio } from '@/lib';
 
 interface UsedPortrait {
   characterName: string;

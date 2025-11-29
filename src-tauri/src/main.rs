@@ -3,9 +3,13 @@
     windows_subsystem = "windows"
 )]
 
-mod save_manager;
+mod commands;
+mod models;
+mod state;
+mod utils;
 
-use save_manager::*;
+use commands::*;
+use state::AppState;
 
 fn main() {
     tauri::Builder::default()

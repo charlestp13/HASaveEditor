@@ -1,7 +1,6 @@
 import { PortraitCarousel } from '@/components/PortraitCarousel';
 import { EditButton } from '@/components/EditButton';
-import { PersonUtils } from '@/lib/utils';
-import type { DateUtils } from '@/lib/utils';
+import { PersonUtils, type DateUtils } from '@/lib';
 
 interface InfoSectionProps {
   studioId: string | null | undefined;

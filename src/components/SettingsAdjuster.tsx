@@ -1,5 +1,5 @@
 import { Adjuster } from '@/components/Adjuster';
-import { ValueSteppers } from '@/lib/value-steppers';
+import { ValueSteppers } from '@/lib';
 import starIcon from '@/assets/STAR.png';
 import starGlowIcon from '@/assets/STAR_GLOW.png';
 
