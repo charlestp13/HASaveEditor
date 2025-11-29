@@ -1,6 +1,7 @@
 # Hollywood Animal Save Editor
 
-<img width="1021" height="803" alt="image" src="https://github.com/user-attachments/assets/5084789c-68c7-467c-a58d-238710988c7b" />
+<img width="1306" height="1058" alt="image" src="https://github.com/user-attachments/assets/cbc6d7c5-172f-41be-86e0-21f1c0a3f3ef" />
+
 
 ## What It Does
 
