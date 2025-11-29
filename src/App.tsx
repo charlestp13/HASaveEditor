@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { saveManager } from '@/lib/tauri-api';
 import appBanner from '@/assets/appBanner.png';
@@ -10,7 +10,7 @@ import { useTabState } from '@/hooks/useTabState';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SaveInfo } from '@/lib/types';
+import type { SaveInfo, CompetitorStudio } from '@/lib/types';
 import type { SortField, SortOrder } from '@/lib/person-sorter';
 
 const LANGUAGES = ['ENG', 'SPA', 'GER', 'FRE', 'PTB', 'RUS', 'CHN', 'JAP', 'BEL', 'UKR'] as const;
@@ -43,6 +43,7 @@ export default function App() {
   const [saveInfo, setSaveInfo] = useState<SaveInfo | null>(null);
   const [resources, setResources] = useState<Record<string, number>>({});
   const [titans, setTitans] = useState<Record<string, number>>({});
+  const [competitors, setCompetitors] = useState<CompetitorStudio[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<typeof LANGUAGES[number]>('ENG');
   const [fileKey, setFileKey] = useState<string | null>(null);
   const [globalFilters, setGlobalFilters] = useState<string[]>(['Dead', 'Locked']);
@@ -51,6 +52,11 @@ export default function App() {
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [shadyFilter, setShadyFilter] = useState<'all' | 'shady' | 'notShady'>('all');
   const { loading, error, execute, clearError } = useAsyncAction();
+
+  const handleSortChange = useCallback((field: SortField, order: SortOrder) => {
+    setSortField(field);
+    setSortOrder(order);
+  }, []);
 
   const {
     activeTab,
@@ -62,16 +68,28 @@ export default function App() {
     selectedLanguage,
   });
 
+  const resetState = () => {
+    setSaveInfo(null);
+    setResources({});
+    setTitans({});
+    setCompetitors([]);
+    setFileKey(null);
+  };
+
   const loadSaveData = async (info: SaveInfo) => {
-    setSaveInfo(info);
     const res = await saveManager.getResources();
-    setResources(res);
     const tit = await saveManager.getTitans();
+    const comp = await saveManager.getCompetitors();
+    
+    setSaveInfo(info);
+    setResources(res);
     setTitans(tit);
+    setCompetitors(comp);
     setFileKey(`${saveManager.getCurrentPath()}-${Date.now()}`);
   };
 
   const handleOpenFile = () => execute(async () => {
+    resetState();
     const result = await saveManager.openSaveFile();
     if (result) {
       await loadSaveData(result.info);
@@ -79,6 +97,7 @@ export default function App() {
   });
 
   const handleRefresh = () => execute(async () => {
+    resetState();
     const result = await saveManager.reloadSaveFile();
     if (result) {
       await loadSaveData(result.info);
@@ -112,6 +131,23 @@ export default function App() {
       setTitans(prev => ({ ...prev, [titanId]: value }));
     } catch (err) {
       console.error('Failed to update titan:', err);
+    }
+  };
+
+  const handleCompetitorUpdate = async (competitorId: string, field: 'lastBudget' | 'ip' | 'budgetCheatsRemaining', value: number) => {
+    try {
+      await saveManager.updateCompetitor(competitorId, { [field]: value });
+      const fieldMap: Record<string, keyof CompetitorStudio> = {
+        lastBudget: 'last_budget',
+        ip: 'ip',
+        budgetCheatsRemaining: 'budget_cheats_remaining',
+      };
+      const stateField = fieldMap[field];
+      setCompetitors(prev => prev.map(c => 
+        c.id === competitorId ? { ...c, [stateField]: value } : c
+      ));
+    } catch (err) {
+      console.error('Failed to update competitor:', err);
     }
   };
 
@@ -197,9 +233,11 @@ export default function App() {
           influence={saveInfo.influence}
           resources={resources}
           titans={titans}
+          competitors={competitors}
           onStudioUpdate={handleStudioUpdate}
           onResourceUpdate={handleResourceUpdate}
           onTitanUpdate={handleTitanUpdate}
+          onCompetitorUpdate={handleCompetitorUpdate}
         />
       )}
 
@@ -236,14 +274,12 @@ export default function App() {
                     profession={tab.profession}
                     selectedLanguage={selectedLanguage}
                     saveInfo={saveInfo}
+                    fileKey={fileKey}
                     selectedFilters={globalFilters}
                     onFiltersChange={setGlobalFilters}
                     sortField={sortField}
                     sortOrder={sortOrder}
-                    onSortChange={(field, order) => {
-                      setSortField(field);
-                      setSortOrder(order);
-                    }}
+                    onSortChange={handleSortChange}
                     genderFilter={genderFilter}
                     onGenderFilterChange={setGenderFilter}
                     shadyFilter={shadyFilter}

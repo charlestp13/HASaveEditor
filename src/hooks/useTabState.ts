@@ -26,15 +26,9 @@ export function useTabState(options: UseTabStateOptions = {}) {
     }
   }, [activeTab]);
 
-  const resetTabs = useCallback(() => {
-    setActiveTab(initialTab);
-    setVisitedTabs(new Set([initialTab]));
-  }, [initialTab]);
-
   return {
     activeTab,
     visitedTabs,
     handleTabClick,
-    resetTabs,
   };
 }

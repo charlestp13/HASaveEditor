@@ -55,36 +55,6 @@ export interface WhiteTag {
   overallValues: OverallValue[];
 }
 
-export interface Studio {
-  name: string;
-  player?: boolean;
-  budget?: number;
-  cash?: number;
-  reputation?: number;
-  influence?: number;
-}
-
-export interface Movie {
-  id: string;
-  title?: string;
-  year?: number;
-  budget?: number;
-  revenue?: number;
-  rating?: number;
-  genre?: string;
-  studioId?: number;
-  status?: string;
-}
-
-export interface SaveFile {
-  year?: number;
-  professions?: {
-    [key: string]: Person[];
-  };
-  studios?: Studio[];
-  movies?: Movie[];
-}
-
 export interface SaveInfo {
   current_date: string;
   player_studio_name: string;
@@ -132,4 +102,19 @@ export interface StudioUpdate {
   cash?: number;
   reputation?: number;
   influence?: number;
+}
+
+export interface CompetitorStudio {
+  id: string;
+  last_budget: number;
+  income_this_month: number;
+  ip: number;
+  is_dead: boolean;
+  budget_cheats_remaining: number;
+}
+
+export interface CompetitorUpdate {
+  lastBudget?: number;
+  ip?: number;
+  budgetCheatsRemaining?: number;
 }

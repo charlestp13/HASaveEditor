@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
-import type { SaveInfo, Person, PersonUpdate, StudioUpdate } from './types';
+import type { SaveInfo, Person, PersonUpdate, StudioUpdate, CompetitorStudio, CompetitorUpdate } from './types';
 
 export class TauriSaveManager {
   private currentPath: string | null = null;
@@ -167,6 +167,24 @@ export class TauriSaveManager {
       return { info };
     } catch (err) {
       console.error('Failed to reload file:', err);
+      throw err;
+    }
+  }
+
+  async getCompetitors(): Promise<CompetitorStudio[]> {
+    try {
+      return await invoke<CompetitorStudio[]>('get_competitors');
+    } catch (err) {
+      console.error('Failed to get competitors:', err);
+      throw err;
+    }
+  }
+
+  async updateCompetitor(competitorId: string, update: CompetitorUpdate): Promise<void> {
+    try {
+      await invoke('update_competitor', { competitorId, update });
+    } catch (err) {
+      console.error('Failed to update competitor:', err);
       throw err;
     }
   }

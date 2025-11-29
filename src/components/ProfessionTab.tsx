@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { saveManager } from '@/lib/tauri-api';
 import { StudioUtils } from '@/lib/utils';
@@ -24,6 +24,7 @@ interface ProfessionTabProps {
   profession: string;
   selectedLanguage: string;
   saveInfo: SaveInfo | null;
+  fileKey: string | null;
   selectedFilters: string[];
   onFiltersChange: (filters: string[]) => void;
   sortField: SortField;
@@ -35,10 +36,11 @@ interface ProfessionTabProps {
   onShadyFilterChange: (filter: 'all' | 'shady' | 'notShady') => void;
 }
 
-export function ProfessionTab({ 
+export const ProfessionTab = memo(function ProfessionTab({ 
   profession, 
   selectedLanguage, 
   saveInfo,
+  fileKey,
   selectedFilters,
   onFiltersChange,
   sortField,
@@ -54,8 +56,8 @@ export function ProfessionTab({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [currentDate, setCurrentDate] = useState<string>('');
 
+  const currentDate = saveInfo?.current_date ?? '';
   const professionLower = profession.toLowerCase();
   
   const handleError = useCallback((err: unknown, fallback: string) => 
@@ -85,29 +87,38 @@ export function ProfessionTab({
   const { debouncedSave } = useDebouncedSave(savePerson, 300);
 
   useEffect(() => {
-    saveManager.getCurrentDate()
-      .then(setCurrentDate)
-      .catch(err => handleError(err, 'Failed to get current date'));
-  }, [handleError, saveInfo]);
-
-  const loadAllPersons = useCallback(async () => {
+    if (!fileKey) return;
     if (!saveManager.isLoaded()) return;
 
+    const loadPersons = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await saveManager.getPersons(profession);
+        setAllPersons(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : `Failed to load ${professionLower}s`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPersons();
+  }, [profession, professionLower, fileKey]);
+
+  const handleRetry = useCallback(async () => {
+    if (!saveManager.isLoaded()) return;
     setLoading(true);
     setError(null);
     try {
       const data = await saveManager.getPersons(profession);
       setAllPersons(data);
     } catch (err) {
-      handleError(err, `Failed to load ${professionLower}s`);
+      setError(err instanceof Error ? err.message : `Failed to load ${professionLower}s`);
     } finally {
       setLoading(false);
     }
-  }, [profession, professionLower, handleError]);
-
-  useEffect(() => {
-    loadAllPersons();
-  }, [loadAllPersons, saveInfo]);
+  }, [profession, professionLower]);
 
   const handleSelectGamePath = async () => {
     try {
@@ -139,6 +150,8 @@ export function ProfessionTab({
   }, [allPersons]);
 
   const filteredPersons = useMemo(() => {
+    if (allPersons.length === 0) return [];
+    
     const filterConfig = PersonFilters.parseSelectedFilters(selectedFilters);
     let filtered = PersonFilters.applyAll(
       allPersons, 
@@ -166,34 +179,10 @@ export function ProfessionTab({
     return filtered;
   }, [allPersons, search, selectedFilters, nameStrings, genderFilter, shadyFilter]);
 
-  const sortedPersons = useMemo(() => {
-    return PersonSorter.sort(filteredPersons, sortField, sortOrder, { currentDate });
-  }, [filteredPersons, sortField, sortOrder, currentDate, refreshKey]);
-
-  const [displayPersons, setDisplayPersons] = useState<Person[]>([]);
-  const [lastSortKey, setLastSortKey] = useState({ sortField, sortOrder, refreshKey, filterCount: 0 });
-
-  const filterCount = filteredPersons.length;
-  
-  useEffect(() => {
-    const sortChanged = 
-      sortField !== lastSortKey.sortField || 
-      sortOrder !== lastSortKey.sortOrder || 
-      refreshKey !== lastSortKey.refreshKey ||
-      filterCount !== lastSortKey.filterCount;
-    
-    if (sortChanged || displayPersons.length === 0) {
-      setDisplayPersons(sortedPersons);
-      setLastSortKey({ sortField, sortOrder, refreshKey, filterCount });
-    }
-  }, [sortedPersons, sortField, sortOrder, refreshKey, filterCount, lastSortKey, displayPersons.length]);
-
   const persons = useMemo(() => {
-    return displayPersons.map(displayPerson => {
-      const updated = filteredPersons.find(p => p.id === displayPerson.id);
-      return updated || displayPerson;
-    });
-  }, [displayPersons, filteredPersons]);
+    if (allPersons.length === 0) return [];
+    return PersonSorter.sort(filteredPersons, sortField, sortOrder, { currentDate });
+  }, [allPersons.length, filteredPersons, sortField, sortOrder, currentDate, refreshKey]);
 
   const handlePersonUpdate = useCallback((personId: string | number, field: string, value: number | null) => {
     setAllPersons(prev => prev.map(p => 
@@ -250,7 +239,7 @@ export function ProfessionTab({
       <ErrorState
         title={isGamePathError ? 'Game Installation Not Found' : `Failed to load ${professionLower}s`}
         message={displayError}
-        onRetry={loadAllPersons}
+        onRetry={handleRetry}
         onBrowse={isGamePathError ? handleSelectGamePath : undefined}
         browseLabel="Browse for Game Folder"
       />
@@ -325,4 +314,4 @@ export function ProfessionTab({
       )}
     </div>
   );
-}
+});
