@@ -179,7 +179,7 @@ export const FilterPopover = memo(function FilterPopover({
             {activeCount}
           </span>
         )}
-        <PopoverContent className="w-auto min-w-[240px] max-w-sm" align="end">
+        <PopoverContent className="w-auto min-w-60 max-w-sm" align="end">
         <div className="space-y-1">
           <div className="pb-2 font-medium text-sm">Hide Characters</div>
           
@@ -253,7 +253,7 @@ const FilterOptionItem = memo(function FilterOptionItem({ option, isSelected, on
       }`}
       style={isSelected ? { borderLeftColor: SELECTED_BORDER_COLOR } : undefined}
     >
-      <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+      <div className="w-6 h-6 shrink-0 flex items-center justify-center">
         <img
           src={option.icon}
           alt={option.label}

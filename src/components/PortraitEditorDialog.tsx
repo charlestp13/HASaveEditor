@@ -82,14 +82,14 @@ function PortraitThumbnail({
         <>
           <button
             type="button"
-            className="absolute left-0 bottom-[-24px] h-8 w-8 bg-background/80 hover:bg-background rounded flex items-center justify-center"
+            className="absolute left-0 -bottom-6 h-8 w-8 bg-background/80 hover:bg-background rounded flex items-center justify-center"
             onClick={handlePrev}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             type="button"
-            className="absolute right-0 bottom-[-24px] h-8 w-8 bg-background/80 hover:bg-background rounded flex items-center justify-center"
+            className="absolute right-0 -bottom-6 h-8 w-8 bg-background/80 hover:bg-background rounded flex items-center justify-center"
             onClick={handleNext}
           >
             <ChevronRight className="h-4 w-4" />

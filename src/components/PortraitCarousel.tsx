@@ -85,7 +85,7 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
   }
 
   return (
-    <div className="relative w-32 h-24 flex-shrink-0 rounded">
+    <div className="relative w-32 h-24 shrink-0 rounded">
       <img
         src={availablePortraits[currentIndex]}
         alt="Character portrait"

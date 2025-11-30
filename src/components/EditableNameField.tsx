@@ -109,7 +109,7 @@ export function EditableNameField({
               onKeyDown={handleKeyDown}
               onBlur={handleBlur}
               placeholder={placeholder}
-              className="max-w-[80px] focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="max-w-20 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
         </PopoverTrigger>
