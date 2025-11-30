@@ -32,16 +32,6 @@ import {
 // Constants & Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PROFESSION_DISPLAY_NAMES: Record<string, string> = {
-  Actor: 'Actor',
-  Scriptwriter: 'Screenwriter',
-  Director: 'Director',
-  Producer: 'Producer',
-  Cinematographer: 'Cinematographer',
-  FilmEditor: 'Editor',
-  Composer: 'Composer',
-};
-
 interface UsedPortrait {
   characterName: string;
   profession: string;
@@ -62,44 +52,17 @@ interface ProfessionTabProps {
   shadyFilter: ShadyFilter;
   onShadyFilterChange: (filter: ShadyFilter) => void;
   usedPortraits: Map<number, UsedPortrait>;
-  onPortraitUsageChange?: (profession: string, portraits: Map<number, UsedPortrait>) => void;
+  onPortraitChange?: (oldPortraitId: number | undefined, newPortraitId: number, characterName: string, profession: string) => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper Functions
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getProfessionDisplayName(profession: string): string {
-  return PROFESSION_DISPLAY_NAMES[profession] || profession;
-}
-
 function isTalentProfession(profession: string): boolean {
   return profession !== 'Agent' && 
     !profession.startsWith('Lieut') && 
     !profession.startsWith('Cpt');
-}
-
-function buildPortraitMap(
-  persons: Person[],
-  profession: string,
-  nameSearcher: NameSearcher
-): Map<number, UsedPortrait> {
-  const portraits = new Map<number, UsedPortrait>();
-  
-  for (const person of persons) {
-    if (person.portraitBaseId === undefined) continue;
-    
-    const firstName = nameSearcher.getNameById(parseInt(person.firstNameId || '0', 10)) || '';
-    const lastName = nameSearcher.getNameById(parseInt(person.lastNameId || '0', 10)) || '';
-    const rawProfName = person.professions ? Object.keys(person.professions)[0] : profession;
-    
-    portraits.set(person.portraitBaseId, {
-      characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
-      profession: getProfessionDisplayName(rawProfName),
-    });
-  }
-  
-  return portraits;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,7 +84,7 @@ export const ProfessionTab = memo(function ProfessionTab({
   shadyFilter,
   onShadyFilterChange,
   usedPortraits,
-  onPortraitUsageChange,
+  onPortraitChange,
 }: ProfessionTabProps) {
   // ───────────────────────────────────────────────────────────────────────────
   // State
@@ -198,19 +161,6 @@ export const ProfessionTab = memo(function ProfessionTab({
   }, [fileKey, loadPersons]);
 
   // ───────────────────────────────────────────────────────────────────────────
-  // Portrait Usage Tracking
-  // ───────────────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!canEditPortraits || !onPortraitUsageChange) return;
-    
-    const portraits = allPersons.length > 0 
-      ? buildPortraitMap(allPersons, profession, nameSearcher)
-      : new Map();
-    
-    onPortraitUsageChange(profession, portraits);
-  }, [allPersons, nameSearcher, profession, canEditPortraits, onPortraitUsageChange]);
-
-  // ───────────────────────────────────────────────────────────────────────────
   // Filtering & Sorting
   // ───────────────────────────────────────────────────────────────────────────
   const availableStudios = useMemo(() => {
@@ -256,10 +206,17 @@ export const ProfessionTab = memo(function ProfessionTab({
 
   const handlePortraitChange = useCallback(
     (personId: string | number, portraitId: number) => {
+      const person = allPersons.find(p => p.id === personId);
+      if (person) {
+        const firstName = nameSearcher.getNameById(parseInt(person.firstNameId || '0', 10)) || '';
+        const lastName = nameSearcher.getNameById(parseInt(person.lastNameId || '0', 10)) || '';
+        const characterName = `${firstName} ${lastName}`.trim() || `ID ${person.id}`;
+        onPortraitChange?.(person.portraitBaseId, portraitId, characterName, profession);
+      }
       handlePortraitChangeBase(personId, portraitId);
       setEditingPortraitPersonId(null);
     },
-    [handlePortraitChangeBase]
+    [handlePortraitChangeBase, allPersons, nameSearcher, onPortraitChange, profession]
   );
 
   const handleSelectGamePath = useCallback(async () => {

@@ -10,7 +10,7 @@ import { useTabState } from '@/hooks/useTabState';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SortField, SortOrder, SaveInfo, CompetitorStudio } from '@/lib';
+import type { SortField, SortOrder, SaveInfo, CompetitorStudio, Person } from '@/lib';
 
 interface UsedPortrait {
   characterName: string;
@@ -43,6 +43,41 @@ const TABS = [
   { id: 'agents', label: 'Agents', profession: 'Agent', countKey: 'agents_count' },
 ] as const;
 
+const TALENT_PROFESSIONS = ['Actor', 'Scriptwriter', 'Director', 'Producer', 'Cinematographer', 'FilmEditor', 'Composer'] as const;
+
+const PROFESSION_DISPLAY_NAMES: Record<string, string> = {
+  Actor: 'Actor',
+  Scriptwriter: 'Screenwriter',
+  Director: 'Director',
+  Producer: 'Producer',
+  Cinematographer: 'Cinematographer',
+  FilmEditor: 'Editor',
+  Composer: 'Composer',
+};
+
+function buildPortraitMap(
+  persons: Person[],
+  profession: string,
+  nameStrings: string[]
+): Map<number, UsedPortrait> {
+  const portraits = new Map<number, UsedPortrait>();
+  
+  for (const person of persons) {
+    if (person.portraitBaseId === undefined) continue;
+    
+    const firstName = nameStrings[parseInt(person.firstNameId || '0', 10)] || '';
+    const lastName = nameStrings[parseInt(person.lastNameId || '0', 10)] || '';
+    const rawProfName = person.professions ? Object.keys(person.professions)[0] : profession;
+    
+    portraits.set(person.portraitBaseId, {
+      characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
+      profession: PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
+    });
+  }
+  
+  return portraits;
+}
+
 export default function App() {
   const [saveInfo, setSaveInfo] = useState<SaveInfo | null>(null);
   const [resources, setResources] = useState<Record<string, number>>({});
@@ -63,10 +98,25 @@ export default function App() {
     setSortOrder(order);
   }, []);
 
-  const handlePortraitUsageChange = useCallback((profession: string, portraits: Map<number, UsedPortrait>) => {
+  const handlePortraitChange = useCallback((
+    oldPortraitId: number | undefined,
+    newPortraitId: number,
+    characterName: string,
+    profession: string
+  ) => {
     setPortraitsByProfession(prev => {
       const next = new Map(prev);
-      next.set(profession, portraits);
+      const professionPortraits = new Map(next.get(profession) || new Map());
+      
+      if (oldPortraitId !== undefined) {
+        professionPortraits.delete(oldPortraitId);
+      }
+      professionPortraits.set(newPortraitId, {
+        characterName,
+        profession: PROFESSION_DISPLAY_NAMES[profession] || profession,
+      });
+      
+      next.set(profession, professionPortraits);
       return next;
     });
   }, []);
@@ -100,15 +150,23 @@ export default function App() {
     setPortraitsByProfession(new Map());
   };
 
-  const loadSaveData = async (info: SaveInfo) => {
+  const loadSaveData = async (info: SaveInfo, nameStrings: string[]) => {
     const res = await saveManager.getResources();
     const tit = await saveManager.getTitans();
     const comp = await saveManager.getCompetitors();
+    
+    const allPortraits = new Map<string, Map<number, UsedPortrait>>();
+    for (const profession of TALENT_PROFESSIONS) {
+      const persons = await saveManager.getPersons(profession);
+      const portraits = buildPortraitMap(persons, profession, nameStrings);
+      allPortraits.set(profession, portraits);
+    }
     
     setSaveInfo(info);
     setResources(res);
     setTitans(tit);
     setCompetitors(comp);
+    setPortraitsByProfession(allPortraits);
     setFileKey(`${saveManager.getCurrentPath()}-${Date.now()}`);
   };
 
@@ -116,7 +174,8 @@ export default function App() {
     resetState();
     const result = await saveManager.openSaveFile();
     if (result) {
-      await loadSaveData(result.info);
+      const nameStrings = await saveManager.getLanguageStrings(selectedLanguage);
+      await loadSaveData(result.info, nameStrings);
     }
   });
 
@@ -124,7 +183,8 @@ export default function App() {
     resetState();
     const result = await saveManager.reloadSaveFile();
     if (result) {
-      await loadSaveData(result.info);
+      const nameStrings = await saveManager.getLanguageStrings(selectedLanguage);
+      await loadSaveData(result.info, nameStrings);
     }
   });
 
@@ -309,7 +369,7 @@ export default function App() {
                     shadyFilter={shadyFilter}
                     onShadyFilterChange={setShadyFilter}
                     usedPortraits={combinedUsedPortraits}
-                    onPortraitUsageChange={handlePortraitUsageChange}
+                    onPortraitChange={handlePortraitChange}
                   />
                 </div>
               );
