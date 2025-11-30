@@ -1,4 +1,5 @@
-import { memo } from 'react';
+import { memo, forwardRef, useMemo } from 'react';
+import { VirtuosoGrid } from 'react-virtuoso';
 import { CharacterCard } from './CharacterCard';
 import type { Person, NameSearcher } from '@/lib';
 
@@ -13,6 +14,34 @@ interface CharacterListProps {
   onEditPortrait?: (personId: string | number) => void;
 }
 
+const gridComponents = {
+  List: forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+    ({ style, children, ...props }, ref) => (
+      <div
+        ref={ref}
+        {...props}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+          gap: '0.5rem',
+          padding: '0.5rem',
+          ...style,
+        }}
+        className="sm:!grid-cols-2 lg:!grid-cols-3 xl:!grid-cols-4"
+      >
+        {children}
+      </div>
+    )
+  ),
+  Item: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+    <div {...props}>
+      {children}
+    </div>
+  ),
+};
+
+gridComponents.List.displayName = 'GridList';
+
 export const CharacterList = memo(function CharacterList({
   persons,
   currentDate,
@@ -23,14 +52,13 @@ export const CharacterList = memo(function CharacterList({
   onEditGenres,
   onEditPortrait,
 }: CharacterListProps) {
-  return (
-    <div 
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-2"
-      style={{ contentVisibility: 'auto' }}
-    >
-      {persons.map((person) => (
+  const itemContent = useMemo(() => {
+    return (index: number) => {
+      const person = persons[index];
+      if (!person) return null;
+      
+      return (
         <CharacterCard
-          key={person.id}
           character={person}
           personId={person.id}
           currentDate={currentDate}
@@ -41,7 +69,21 @@ export const CharacterList = memo(function CharacterList({
           onEditGenres={onEditGenres}
           onEditPortrait={onEditPortrait}
         />
-      ))}
-    </div>
+      );
+    };
+  }, [persons, currentDate, nameSearcher, onUpdate, onStringFieldUpdate, onEditTraits, onEditGenres, onEditPortrait]);
+
+  if (persons.length === 0) {
+    return null;
+  }
+
+  return (
+    <VirtuosoGrid
+      useWindowScroll
+      totalCount={persons.length}
+      overscan={200}
+      components={gridComponents}
+      itemContent={itemContent}
+    />
   );
 });

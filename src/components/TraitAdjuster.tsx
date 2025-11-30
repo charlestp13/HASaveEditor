@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
   Dialog,
-  NonModalDialogContent,
+  DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -67,8 +67,8 @@ export function TraitAdjuster({ open, onOpenChange, traits, onAdd, onRemove }: T
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <NonModalDialogContent className="max-w-2xl" onClose={() => onOpenChange(false)} aria-describedby={undefined}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>
             Edit Character Traits ({displayableCurrentTraits.length}/{MAX_TRAITS})
@@ -126,7 +126,7 @@ export function TraitAdjuster({ open, onOpenChange, traits, onAdd, onRemove }: T
             )}
           </TabsContent>
         </Tabs>
-      </NonModalDialogContent>
+      </DialogContent>
     </Dialog>
   );
 }

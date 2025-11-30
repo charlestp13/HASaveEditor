@@ -143,29 +143,17 @@ export const ProfessionTab = memo(function ProfessionTab({
   );
 
   const openTraitsEditor = useCallback(
-    (personId: string | number) => {
-      requestAnimationFrame(() => {
-        setEditingTraitsPersonId(personId);
-      });
-    },
+    (personId: string | number) => setEditingTraitsPersonId(personId),
     []
   );
 
   const openGenresEditor = useCallback(
-    (personId: string | number) => {
-      requestAnimationFrame(() => {
-        setEditingGenresPersonId(personId);
-      });
-    },
+    (personId: string | number) => setEditingGenresPersonId(personId),
     []
   );
 
   const openPortraitEditor = useCallback(
-    (personId: string | number) => {
-      requestAnimationFrame(() => {
-        setEditingPortraitPersonId(personId);
-      });
-    },
+    (personId: string | number) => setEditingPortraitPersonId(personId),
     []
   );
 
@@ -269,11 +257,7 @@ export const ProfessionTab = memo(function ProfessionTab({
       {canEditPortraits && editingTraitsPerson && (
         <TraitAdjuster
           open={!!editingTraitsPersonId}
-          onOpenChange={(open) => {
-            if (!open) {
-              setEditingTraitsPersonId(null);
-            }
-          }}
+          onOpenChange={(open) => !open && setEditingTraitsPersonId(null)}
           traits={editingTraitsPerson.labels || []}
           onAdd={(trait) => handleTraitAdd(editingTraitsPerson.id, trait)}
           onRemove={(trait) => handleTraitRemove(editingTraitsPerson.id, trait)}
@@ -283,11 +267,7 @@ export const ProfessionTab = memo(function ProfessionTab({
       {canEditPortraits && editingGenresPerson && (
         <GenreAdjuster
           open={!!editingGenresPersonId}
-          onOpenChange={(open) => {
-            if (!open) {
-              setEditingGenresPersonId(null);
-            }
-          }}
+          onOpenChange={(open) => !open && setEditingGenresPersonId(null)}
           genres={PersonUtils.getGenresWithValues(editingGenresPerson)}
           onToggle={(genre, shouldAdd) => {
             handlePersonUpdate(editingGenresPerson.id, `whiteTag:${genre}`, shouldAdd ? 12.0 : null);
@@ -298,11 +278,7 @@ export const ProfessionTab = memo(function ProfessionTab({
       {canEditPortraits && editingPerson && (
         <PortraitEditorDialog
           open={!!editingPortraitPersonId}
-          onOpenChange={(open) => {
-            if (!open) {
-              setEditingPortraitPersonId(null);
-            }
-          }}
+          onOpenChange={(open) => !open && setEditingPortraitPersonId(null)}
           gender={editingPerson.gender!}
           currentPortraitId={editingPerson.portraitBaseId!}
           usedPortraits={usedPortraits}

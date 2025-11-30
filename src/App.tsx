@@ -344,15 +344,24 @@ export default function App() {
             </div>
           </nav>
 
-          <main className="container mx-auto px-4 py-6">
+          <main className="container mx-auto px-4 py-6 relative">
             {TABS.map(tab => {
               const isVisited = visitedTabs.has(tab.id);
               if (!isVisited) return null;
               
+              const isActive = activeTab === tab.id;
+              
               return (
                 <div
                   key={tab.id}
-                  style={{ display: activeTab === tab.id ? 'block' : 'none' }}
+                  style={isActive ? undefined : {
+                    position: 'absolute',
+                    opacity: 0,
+                    pointerEvents: 'none',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                  }}
                 >
                   <ProfessionTab
                     profession={tab.profession}

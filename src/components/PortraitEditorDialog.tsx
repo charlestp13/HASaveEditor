@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
-  NonModalDialogContent,
+  DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -158,8 +158,8 @@ export function PortraitEditorDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <NonModalDialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col" onClose={() => onOpenChange(false)} aria-describedby={undefined}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>
             Select Portrait ({gender === 1 ? 'Female' : 'Male'}) - {allPortraitIds.length} available
@@ -235,7 +235,7 @@ export function PortraitEditorDialog({
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
-      </NonModalDialogContent>
+      </DialogContent>
     </Dialog>
   );
 }
