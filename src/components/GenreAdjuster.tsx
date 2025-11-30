@@ -4,9 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import { EditButton } from '@/components/EditButton';
 import { IconButton } from '@/components/IconButton';
 import { Genres, Formatter } from '@/lib';
 
@@ -18,11 +16,13 @@ interface GenreWithValue {
 }
 
 interface GenreAdjusterProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   genres: GenreWithValue[];
   onToggle: (genre: string, shouldAdd: boolean) => void;
 }
 
-export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
+export function GenreAdjuster({ open, onOpenChange, genres, onToggle }: GenreAdjusterProps) {
   const establishedGenres = useMemo(
     () => genres.filter(g => g.value >= Genres.ESTABLISHED_THRESHOLD),
     [genres]
@@ -61,10 +61,7 @@ export function GenreAdjuster({ genres, onToggle }: GenreAdjusterProps) {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <EditButton>Genres</EditButton>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>

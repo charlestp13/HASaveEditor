@@ -23,8 +23,8 @@ interface CharacterCardProps {
   isSelected?: boolean;
   onUpdate?: (field: string, value: number | null) => void;
   onStringFieldUpdate?: (field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
-  onTraitAdd?: (trait: string) => void;
-  onTraitRemove?: (trait: string) => void;
+  onEditTraits?: () => void;
+  onEditGenres?: () => void;
   onEditPortrait?: () => void;
 }
 
@@ -36,8 +36,8 @@ export const CharacterCard = memo(function CharacterCard({
   isSelected = false,
   onUpdate,
   onStringFieldUpdate,
-  onTraitAdd,
-  onTraitRemove,
+  onEditTraits,
+  onEditGenres,
   onEditPortrait,
 }: CharacterCardProps) {
   const {
@@ -130,8 +130,7 @@ export const CharacterCard = memo(function CharacterCard({
           <TraitsSection
             labels={character.labels}
             displayableTraits={displayableTraits}
-            onTraitAdd={onTraitAdd}
-            onTraitRemove={onTraitRemove}
+            onEditTraits={onEditTraits}
           />
         )}
 
@@ -153,7 +152,7 @@ export const CharacterCard = memo(function CharacterCard({
         )}
 
         {canEditGenres && (
-          <GenresSection genres={genres} onUpdate={onUpdate} />
+          <GenresSection genres={genres} onEditGenres={onEditGenres} />
         )}
 
         {character.contract && (

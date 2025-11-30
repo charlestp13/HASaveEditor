@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -7,30 +7,23 @@ import { FilterPopover } from '@/components/FilterPopover';
 import { SortPopover } from '@/components/SortPopover';
 import { CharacterList } from '@/components/CharacterList';
 import { PortraitEditorDialog } from '@/components/PortraitEditorDialog';
+import { TraitAdjuster } from '@/components/TraitAdjuster';
+import { GenreAdjuster } from '@/components/GenreAdjuster';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorState } from '@/components/ErrorState';
 import { EmptyState } from '@/components/EmptyState';
-import { useNameTranslation } from '@/hooks/useNameTranslation';
+import { useProfessionData } from '@/hooks/useProfessionData';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
-import { usePersonUpdates } from '@/hooks/usePersonUpdates';
 import {
   saveManager,
-  StudioUtils,
   PersonStateUpdater,
-  PersonFilters,
-  PersonSorter,
-  NameSearcher,
+  PersonUtils,
   type SortField,
   type SortOrder,
   type GenderFilter,
   type ShadyFilter,
-  type Person,
   type SaveInfo,
 } from '@/lib';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Constants & Types
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface UsedPortrait {
   characterName: string;
@@ -55,19 +48,11 @@ interface ProfessionTabProps {
   onPortraitChange?: (oldPortraitId: number | undefined, newPortraitId: number, characterName: string, profession: string) => void;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helper Functions
-// ─────────────────────────────────────────────────────────────────────────────
-
 function isTalentProfession(profession: string): boolean {
   return profession !== 'Agent' && 
     !profession.startsWith('Lieut') && 
     !profession.startsWith('Cpt');
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const ProfessionTab = memo(function ProfessionTab({
   profession,
@@ -86,41 +71,37 @@ export const ProfessionTab = memo(function ProfessionTab({
   usedPortraits,
   onPortraitChange,
 }: ProfessionTabProps) {
-  // ───────────────────────────────────────────────────────────────────────────
-  // State
-  // ───────────────────────────────────────────────────────────────────────────
-  const [allPersons, setAllPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [editingPortraitPersonId, setEditingPortraitPersonId] = useState<string | number | null>(null);
+  const [editingTraitsPersonId, setEditingTraitsPersonId] = useState<string | number | null>(null);
+  const [editingGenresPersonId, setEditingGenresPersonId] = useState<string | number | null>(null);
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Derived Values
-  // ───────────────────────────────────────────────────────────────────────────
   const currentDate = saveInfo?.current_date ?? '';
   const professionLower = profession.toLowerCase();
   const canEditPortraits = isTalentProfession(profession);
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Hooks
-  // ───────────────────────────────────────────────────────────────────────────
-  const handleError = useCallback(
-    (err: unknown, fallback: string) => setError(err instanceof Error ? err.message : fallback),
-    []
-  );
-
-  const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
-  const nameSearcher = useMemo(() => new NameSearcher(nameStrings), [nameStrings]);
-
   const {
+    allPersons,
+    persons,
+    loading,
+    error,
+    nameSearcher,
+    availableStudios,
+    reloadNames,
+    loadPersons,
+    refresh,
     handlePersonUpdate: handlePersonUpdateBase,
     handleStringFieldUpdate,
     handleTraitAdd,
     handleTraitRemove,
-    handlePortraitChange: handlePortraitChangeBase,
-  } = usePersonUpdates({ profession, setAllPersons, onError: handleError });
+    handlePortraitUpdate,
+  } = useProfessionData(
+    profession,
+    fileKey,
+    selectedLanguage,
+    { selectedFilters, search, genderFilter, shadyFilter },
+    { sortField, sortOrder, currentDate }
+  );
 
   const savePerson = useCallback(
     (personId: string, field: string, value: number | null) => {
@@ -138,64 +119,6 @@ export const ProfessionTab = memo(function ProfessionTab({
 
   const { debouncedSave } = useDebouncedSave(savePerson, 300);
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Data Loading
-  // ───────────────────────────────────────────────────────────────────────────
-  const loadPersons = useCallback(async () => {
-    if (!saveManager.isLoaded()) return;
-    
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await saveManager.getPersons(profession);
-      setAllPersons(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to load ${professionLower}s`);
-    } finally {
-      setLoading(false);
-    }
-  }, [profession, professionLower]);
-
-  useEffect(() => {
-    if (fileKey) loadPersons();
-  }, [fileKey, loadPersons]);
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Filtering & Sorting
-  // ───────────────────────────────────────────────────────────────────────────
-  const availableStudios = useMemo(() => {
-    const studios = new Set<string>();
-    for (const p of allPersons) {
-      const studioId = StudioUtils.normalizeId(p.studioId);
-      if (studioId !== 'N/A' && studioId !== 'PL') {
-        studios.add(studioId);
-      }
-    }
-    return Array.from(studios).sort();
-  }, [allPersons]);
-
-  const persons = useMemo(() => {
-    if (allPersons.length === 0) return [];
-
-    const filterConfig = {
-      ...PersonFilters.parseSelectedFilters(selectedFilters),
-      search,
-      gender: genderFilter,
-      shady: shadyFilter,
-    };
-
-    const filtered = PersonFilters.applyAll(
-      allPersons,
-      filterConfig,
-      nameStrings.length > 0 ? nameStrings : undefined
-    );
-
-    return PersonSorter.sort(filtered, sortField, sortOrder, { currentDate });
-  }, [allPersons, search, selectedFilters, nameStrings, genderFilter, shadyFilter, sortField, sortOrder, currentDate, refreshKey]);
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Event Handlers
-  // ───────────────────────────────────────────────────────────────────────────
   const handlePersonUpdate = useCallback(
     (personId: string | number, field: string, value: number | null) => {
       handlePersonUpdateBase(personId, field, value);
@@ -213,10 +136,10 @@ export const ProfessionTab = memo(function ProfessionTab({
         const characterName = `${firstName} ${lastName}`.trim() || `ID ${person.id}`;
         onPortraitChange?.(person.portraitBaseId, portraitId, characterName, profession);
       }
-      handlePortraitChangeBase(personId, portraitId);
+      handlePortraitUpdate(personId, portraitId);
       setEditingPortraitPersonId(null);
     },
-    [handlePortraitChangeBase, allPersons, nameSearcher, onPortraitChange, profession]
+    [handlePortraitUpdate, allPersons, nameSearcher, onPortraitChange, profession]
   );
 
   const handleSelectGamePath = useCallback(async () => {
@@ -228,44 +151,46 @@ export const ProfessionTab = memo(function ProfessionTab({
       });
       if (selected && typeof selected === 'string') {
         await saveManager.setGamePath(selected);
-        setError(null);
         reloadNames();
       }
     } catch (err) {
-      handleError(err, 'Failed to set game path');
+      console.error('Failed to set game path:', err);
     }
-  }, [reloadNames, handleError]);
+  }, [reloadNames]);
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Derived Display Values
-  // ───────────────────────────────────────────────────────────────────────────
   const editingPerson = useMemo(
     () => (editingPortraitPersonId ? allPersons.find(p => p.id === editingPortraitPersonId) ?? null : null),
     [editingPortraitPersonId, allPersons]
   );
 
-  const displayError = error || nameError;
-  const isGamePathError = displayError?.includes('Game installation not found') ||
-    displayError?.includes('Browse for Game Folder') ||
-    displayError?.includes('verify the game installation path');
+  const editingTraitsPerson = useMemo(
+    () => (editingTraitsPersonId ? allPersons.find(p => p.id === editingTraitsPersonId) ?? null : null),
+    [editingTraitsPersonId, allPersons]
+  );
+
+  const editingGenresPerson = useMemo(
+    () => (editingGenresPersonId ? allPersons.find(p => p.id === editingGenresPersonId) ?? null : null),
+    [editingGenresPersonId, allPersons]
+  );
+
+  const isGamePathError = error?.includes('Game installation not found') ||
+    error?.includes('Browse for Game Folder') ||
+    error?.includes('verify the game installation path');
 
   const hasFilters = search || selectedFilters.length > 0;
   const emptyMessage = hasFilters
     ? `No ${professionLower}s found${search ? ` matching "${search}"` : ''}`
     : `No ${professionLower}s in this save file`;
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Render
-  // ───────────────────────────────────────────────────────────────────────────
   if (!saveInfo) {
     return <EmptyState message="No save file loaded" />;
   }
 
-  if (displayError) {
+  if (error) {
     return (
       <ErrorState
         title={isGamePathError ? 'Game Installation Not Found' : `Failed to load ${professionLower}s`}
-        message={displayError}
+        message={error}
         onRetry={loadPersons}
         onBrowse={isGamePathError ? handleSelectGamePath : undefined}
         browseLabel="Browse for Game Folder"
@@ -284,7 +209,7 @@ export const ProfessionTab = memo(function ProfessionTab({
         sortField={sortField}
         sortOrder={sortOrder}
         onSortChange={onSortChange}
-        onRefresh={() => setRefreshKey(k => k + 1)}
+        onRefresh={refresh}
         saveInfo={saveInfo}
         availableStudios={availableStudios}
         selectedFilters={selectedFilters}
@@ -308,9 +233,30 @@ export const ProfessionTab = memo(function ProfessionTab({
           nameSearcher={nameSearcher}
           onUpdate={handlePersonUpdate}
           onStringFieldUpdate={handleStringFieldUpdate}
-          onTraitAdd={handleTraitAdd}
-          onTraitRemove={handleTraitRemove}
+          onEditTraits={canEditPortraits ? (id) => setEditingTraitsPersonId(id) : undefined}
+          onEditGenres={canEditPortraits ? (id) => setEditingGenresPersonId(id) : undefined}
           onEditPortrait={canEditPortraits ? (id) => setEditingPortraitPersonId(id) : undefined}
+        />
+      )}
+
+      {canEditPortraits && editingTraitsPerson && (
+        <TraitAdjuster
+          open={!!editingTraitsPersonId}
+          onOpenChange={(open) => !open && setEditingTraitsPersonId(null)}
+          traits={editingTraitsPerson.labels || []}
+          onAdd={(trait) => handleTraitAdd(editingTraitsPerson.id, trait)}
+          onRemove={(trait) => handleTraitRemove(editingTraitsPerson.id, trait)}
+        />
+      )}
+
+      {canEditPortraits && editingGenresPerson && (
+        <GenreAdjuster
+          open={!!editingGenresPersonId}
+          onOpenChange={(open) => !open && setEditingGenresPersonId(null)}
+          genres={PersonUtils.getGenresWithValues(editingGenresPerson)}
+          onToggle={(genre, shouldAdd) => {
+            handlePersonUpdate(editingGenresPerson.id, `whiteTag:${genre}`, shouldAdd ? 12.0 : null);
+          }}
         />
       )}
 
@@ -327,10 +273,6 @@ export const ProfessionTab = memo(function ProfessionTab({
     </div>
   );
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Toolbar Subcomponent
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface ToolbarProps {
   search: string;

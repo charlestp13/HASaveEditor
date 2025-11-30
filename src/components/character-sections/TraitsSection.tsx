@@ -1,30 +1,21 @@
 import { CardSection } from '@/components/CardSection';
 import { TraitBadge } from '@/components/TraitBadge';
-import { TraitAdjuster } from '@/components/TraitAdjuster';
+import { EditButton } from '@/components/EditButton';
 
 interface TraitsSectionProps {
   labels: string[] | undefined;
   displayableTraits: string[];
-  onTraitAdd?: (trait: string) => void;
-  onTraitRemove?: (trait: string) => void;
+  onEditTraits?: () => void;
 }
 
 export function TraitsSection({
-  labels,
   displayableTraits,
-  onTraitAdd,
-  onTraitRemove,
+  onEditTraits,
 }: TraitsSectionProps) {
   return (
     <CardSection
       title="Traits"
-      action={
-        <TraitAdjuster
-          traits={labels || []}
-          onAdd={(trait) => onTraitAdd?.(trait)}
-          onRemove={(trait) => onTraitRemove?.(trait)}
-        />
-      }
+      action={onEditTraits && <EditButton onClick={onEditTraits}>Traits</EditButton>}
     >
       {displayableTraits.length > 0 ? (
         <div className="flex flex-wrap gap-1">

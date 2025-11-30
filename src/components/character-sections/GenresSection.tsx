@@ -1,24 +1,17 @@
 import { CardSection } from '@/components/CardSection';
 import { GenreBadge } from '@/components/GenreBadge';
-import { GenreAdjuster } from '@/components/GenreAdjuster';
+import { EditButton } from '@/components/EditButton';
 
 interface GenresSectionProps {
   genres: Array<{ id: string; value: number }>;
-  onUpdate?: (field: string, value: number | null) => void;
+  onEditGenres?: () => void;
 }
 
-export function GenresSection({ genres, onUpdate }: GenresSectionProps) {
+export function GenresSection({ genres, onEditGenres }: GenresSectionProps) {
   return (
     <CardSection
       title="Genres"
-      action={
-        <GenreAdjuster
-          genres={genres}
-          onToggle={(genre, shouldAdd) => {
-            onUpdate?.(`whiteTag:${genre}`, shouldAdd ? 12.0 : null);
-          }}
-        />
-      }
+      action={onEditGenres && <EditButton onClick={onEditGenres}>Genres</EditButton>}
       collapsible
       defaultCollapsed
     >

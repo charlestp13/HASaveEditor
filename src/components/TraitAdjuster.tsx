@@ -4,9 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import { EditButton } from '@/components/EditButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { IconButton } from '@/components/IconButton';
 import { Traits, Formatter } from '@/lib';
@@ -17,12 +15,14 @@ const TAB_CONTENT_MIN_HEIGHT = 'min-h-[400px]';
 const TRAIT_GRID_CLASSES = 'grid grid-cols-2 gap-2';
 
 interface TraitAdjusterProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   traits: string[];
   onAdd: (trait: string) => void;
   onRemove: (trait: string) => void;
 }
 
-export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
+export function TraitAdjuster({ open, onOpenChange, traits, onAdd, onRemove }: TraitAdjusterProps) {
   const displayableCurrentTraits = useMemo(
     () => traits.filter(Traits.isDisplayable),
     [traits]
@@ -67,10 +67,7 @@ export function TraitAdjuster({ traits, onAdd, onRemove }: TraitAdjusterProps) {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <EditButton>Traits</EditButton>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>

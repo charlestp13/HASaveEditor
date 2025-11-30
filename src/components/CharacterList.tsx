@@ -8,8 +8,8 @@ interface CharacterListProps {
   nameSearcher: NameSearcher;
   onUpdate: (personId: string | number, field: string, value: number | null) => void;
   onStringFieldUpdate: (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
-  onTraitAdd: (personId: string | number, trait: string) => void;
-  onTraitRemove: (personId: string | number, trait: string) => void;
+  onEditTraits?: (personId: string | number) => void;
+  onEditGenres?: (personId: string | number) => void;
   onEditPortrait?: (personId: string | number) => void;
 }
 
@@ -19,8 +19,8 @@ export const CharacterList = memo(function CharacterList({
   nameSearcher,
   onUpdate,
   onStringFieldUpdate,
-  onTraitAdd,
-  onTraitRemove,
+  onEditTraits,
+  onEditGenres,
   onEditPortrait,
 }: CharacterListProps) {
   return (
@@ -33,8 +33,8 @@ export const CharacterList = memo(function CharacterList({
           nameSearcher={nameSearcher}
           onUpdate={(field, value) => onUpdate(person.id, field, value)}
           onStringFieldUpdate={(field, value) => onStringFieldUpdate(person.id, field, value)}
-          onTraitAdd={(trait) => onTraitAdd(person.id, trait)}
-          onTraitRemove={(trait) => onTraitRemove(person.id, trait)}
+          onEditTraits={onEditTraits ? () => onEditTraits(person.id) : undefined}
+          onEditGenres={onEditGenres ? () => onEditGenres(person.id) : undefined}
           onEditPortrait={onEditPortrait ? () => onEditPortrait(person.id) : undefined}
         />
       ))}

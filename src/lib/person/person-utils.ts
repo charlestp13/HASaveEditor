@@ -1,5 +1,6 @@
 import type { Person, WhiteTag } from '../types';
 import { Studios } from '../game-data/studios';
+import { Genres } from '../game-data/genres';
 
 export class PersonUtils {
   // ───────────────────────────────────────────────────────────────────────────
@@ -144,6 +145,15 @@ export class PersonUtils {
     return Object.values(person.whiteTagsNEW).filter(
       (tag): tag is WhiteTag => tag && typeof tag === 'object' && 'id' in tag
     );
+  }
+
+  static getGenresWithValues(person: Person): Array<{ id: string; value: number }> {
+    return PersonUtils.getWhiteTagEntries(person)
+      .filter(s => Genres.isValid(s.id))
+      .map(s => ({
+        id: s.id,
+        value: typeof s.value === 'string' ? parseFloat(s.value) : s.value
+      }));
   }
 }
 
