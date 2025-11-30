@@ -24,18 +24,22 @@ export const CharacterList = memo(function CharacterList({
   onEditPortrait,
 }: CharacterListProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-2">
+    <div 
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-2"
+      style={{ contentVisibility: 'auto' }}
+    >
       {persons.map((person) => (
         <CharacterCard
           key={person.id}
           character={person}
+          personId={person.id}
           currentDate={currentDate}
           nameSearcher={nameSearcher}
-          onUpdate={(field, value) => onUpdate(person.id, field, value)}
-          onStringFieldUpdate={(field, value) => onStringFieldUpdate(person.id, field, value)}
-          onEditTraits={onEditTraits ? () => onEditTraits(person.id) : undefined}
-          onEditGenres={onEditGenres ? () => onEditGenres(person.id) : undefined}
-          onEditPortrait={onEditPortrait ? () => onEditPortrait(person.id) : undefined}
+          onUpdate={onUpdate}
+          onStringFieldUpdate={onStringFieldUpdate}
+          onEditTraits={onEditTraits}
+          onEditGenres={onEditGenres}
+          onEditPortrait={onEditPortrait}
         />
       ))}
     </div>

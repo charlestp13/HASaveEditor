@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
   Dialog,
-  DialogContent,
+  NonModalDialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -61,8 +61,8 @@ export function GenreAdjuster({ open, onOpenChange, genres, onToggle }: GenreAdj
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+      <NonModalDialogContent className="max-w-md" onClose={() => onOpenChange(false)} aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>
             Edit Established Genres ({establishedGenres.length}/{Genres.MAX_ESTABLISHED})
@@ -80,7 +80,7 @@ export function GenreAdjuster({ open, onOpenChange, genres, onToggle }: GenreAdj
             />
           ))}
         </div>
-      </DialogContent>
+      </NonModalDialogContent>
     </Dialog>
   );
 }

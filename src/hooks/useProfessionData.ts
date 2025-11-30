@@ -101,7 +101,18 @@ export function useProfessionData(
     return PersonSorter.sort(filtered, sortConfig.sortField, sortConfig.sortOrder, {
       currentDate: sortConfig.currentDate,
     });
-  }, [allPersons, filterConfig, sortConfig, nameStrings, refreshKey]);
+  }, [
+    allPersons,
+    filterConfig.selectedFilters,
+    filterConfig.search,
+    filterConfig.genderFilter,
+    filterConfig.shadyFilter,
+    sortConfig.sortField,
+    sortConfig.sortOrder,
+    sortConfig.currentDate,
+    nameStrings,
+    refreshKey
+  ]);
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
 

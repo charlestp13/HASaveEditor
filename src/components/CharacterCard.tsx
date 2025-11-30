@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EditableNameField } from '@/components/EditableNameField';
 import { EditableTextField } from '@/components/EditableTextField';
@@ -17,19 +17,21 @@ import type { Person, NameSearcher } from '@/lib';
 
 interface CharacterCardProps {
   character: Person;
+  personId: string | number;
   currentDate: string;
   nameSearcher: NameSearcher;
   onClick?: () => void;
   isSelected?: boolean;
-  onUpdate?: (field: string, value: number | null) => void;
-  onStringFieldUpdate?: (field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
-  onEditTraits?: () => void;
-  onEditGenres?: () => void;
-  onEditPortrait?: () => void;
+  onUpdate?: (personId: string | number, field: string, value: number | null) => void;
+  onStringFieldUpdate?: (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
+  onEditTraits?: (personId: string | number) => void;
+  onEditGenres?: (personId: string | number) => void;
+  onEditPortrait?: (personId: string | number) => void;
 }
 
 export const CharacterCard = memo(function CharacterCard({ 
-  character, 
+  character,
+  personId,
   currentDate, 
   nameSearcher,
   onClick,
@@ -64,6 +66,31 @@ export const CharacterCard = memo(function CharacterCard({
   const firstName = nameSearcher.getNameById(parseInt(character.firstNameId || '0', 10)) || character.firstNameId || '';
   const lastName = nameSearcher.getNameById(parseInt(character.lastNameId || '0', 10)) || character.lastNameId || '';
 
+  const handleUpdate = useCallback(
+    (field: string, value: number | null) => onUpdate?.(personId, field, value),
+    [onUpdate, personId]
+  );
+
+  const handleStringFieldUpdate = useCallback(
+    (field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => onStringFieldUpdate?.(personId, field, value),
+    [onStringFieldUpdate, personId]
+  );
+
+  const handleEditTraits = useCallback(
+    () => onEditTraits?.(personId),
+    [onEditTraits, personId]
+  );
+
+  const handleEditGenres = useCallback(
+    () => onEditGenres?.(personId),
+    [onEditGenres, personId]
+  );
+
+  const handleEditPortrait = useCallback(
+    () => onEditPortrait?.(personId),
+    [onEditPortrait, personId]
+  );
+
   return (
     <Card 
       className={`transition-colors ${
@@ -79,20 +106,20 @@ export const CharacterCard = memo(function CharacterCard({
                 value={firstName}
                 currentId={character.firstNameId || '0'}
                 nameSearcher={nameSearcher}
-                onSelect={(nameId) => onStringFieldUpdate?.('firstNameId', nameId)}
+                onSelect={(nameId) => handleStringFieldUpdate('firstNameId', nameId)}
                 placeholder="Search..."
               />
               <EditableNameField
                 value={lastName}
                 currentId={character.lastNameId || '0'}
                 nameSearcher={nameSearcher}
-                onSelect={(nameId) => onStringFieldUpdate?.('lastNameId', nameId)}
+                onSelect={(nameId) => handleStringFieldUpdate('lastNameId', nameId)}
                 placeholder="Search..."
               />
             </div>
             <EditableTextField
               value={character.customName}
-              onChange={(value) => onStringFieldUpdate?.('customName', value)}
+              onChange={(value) => handleStringFieldUpdate('customName', value)}
               placeholder="Custom Name"
             />
             <div className="text-sm text-muted-foreground">{professionName}</div>
@@ -110,7 +137,7 @@ export const CharacterCard = memo(function CharacterCard({
           attitude={Number(character.attitude ?? 0)}
           professionValue={professionValue}
           limit={Number(character.limit ?? 1)}
-          onUpdate={onUpdate}
+          onUpdate={handleUpdate}
         />
 
         <InfoSection
@@ -123,14 +150,14 @@ export const CharacterCard = memo(function CharacterCard({
           deathParsed={deathParsed}
           professions={character.professions || {}}
           portraitBaseId={character.portraitBaseId}
-          onEditPortrait={onEditPortrait}
+          onEditPortrait={handleEditPortrait}
         />
 
         {canEditTraits && (
           <TraitsSection
             labels={character.labels}
             displayableTraits={displayableTraits}
-            onEditTraits={onEditTraits}
+            onEditTraits={handleEditTraits}
           />
         )}
 
@@ -139,7 +166,7 @@ export const CharacterCard = memo(function CharacterCard({
             art={art}
             com={com}
             professionName={professionName}
-            onUpdate={onUpdate}
+            onUpdate={handleUpdate}
           />
         )}
 
@@ -147,12 +174,12 @@ export const CharacterCard = memo(function CharacterCard({
           <SettingsSection
             indoor={indoor || 0}
             outdoor={outdoor || 0}
-            onUpdate={onUpdate}
+            onUpdate={handleUpdate}
           />
         )}
 
         {canEditGenres && (
-          <GenresSection genres={genres} onEditGenres={onEditGenres} />
+          <GenresSection genres={genres} onEditGenres={handleEditGenres} />
         )}
 
         {character.contract && (
@@ -170,6 +197,7 @@ export const CharacterCard = memo(function CharacterCard({
   );
 }, (prev, next) => {
   if (prev.isSelected !== next.isSelected) return false;
+  if (prev.personId !== next.personId) return false;
   
   const p = prev.character;
   const n = next.character;
