@@ -5,6 +5,7 @@ import { EditableTextField } from '@/components/EditableTextField';
 import { useCharacterData } from '@/hooks/useCharacterData';
 import {
   StatsSection,
+  ExecutiveStatsSection,
   InfoSection,
   TraitsSection,
   StatusSection,
@@ -49,6 +50,7 @@ export const CharacterCard = memo(function CharacterCard({
     contractDaysLeft,
     isDead,
     isBusy,
+    isExecutive,
     professionName,
     professionValue,
     art,
@@ -132,14 +134,22 @@ export const CharacterCard = memo(function CharacterCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <StatsSection
-          mood={Number(character.mood ?? 0)}
-          attitude={Number(character.attitude ?? 0)}
-          selfEsteem={Number(character.selfEsteem ?? 0)}
-          professionValue={professionValue}
-          limit={Number(character.limit ?? 1)}
-          onUpdate={handleUpdate}
-        />
+        {isExecutive ? (
+          <ExecutiveStatsSection
+            selfEsteem={Number(character.selfEsteem ?? 0)}
+            seniority={professionValue}
+            onUpdate={handleUpdate}
+          />
+        ) : (
+          <StatsSection
+            mood={Number(character.mood ?? 0)}
+            attitude={Number(character.attitude ?? 0)}
+            selfEsteem={Number(character.selfEsteem ?? 0)}
+            professionValue={professionValue}
+            limit={Number(character.limit ?? 1)}
+            onUpdate={handleUpdate}
+          />
+        )}
 
         <InfoSection
           studioId={character.studioId}

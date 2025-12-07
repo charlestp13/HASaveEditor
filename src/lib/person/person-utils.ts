@@ -35,7 +35,13 @@ export class PersonUtils {
   private static readonly PROFESSION_DISPLAY_NAMES: Record<string, string> = {
     FilmEditor: 'Editor',
     Scriptwriter: 'Screenwriter',
+    CptHR: 'Human Resources Executive',
+    CptLawyer: 'Legal Executive',
+    CptFinancier: 'Financial Executive',
+    CptPR: 'Public Relations Executive',
   };
+
+  static readonly EXECUTIVE_PROFESSIONS = ['Human Resources Executive', 'Legal Executive', 'Financial Executive', 'Public Relations Executive'] as const;
 
   // ───────────────────────────────────────────────────────────────────────────
   // State Checks
@@ -47,6 +53,11 @@ export class PersonUtils {
 
   static isLocked(person: Person): boolean {
     return PersonUtils.hasFlag(person, 'Locked');
+  }
+
+  static isExecutive(person: Person): boolean {
+    const profName = PersonUtils.getProfessionName(person);
+    return PersonUtils.EXECUTIVE_PROFESSIONS.includes(profName as typeof PersonUtils.EXECUTIVE_PROFESSIONS[number]);
   }
 
   static isBusy(person: Person): boolean {

@@ -34,11 +34,31 @@ pub struct PersonUpdate {
     pub portrait_base_id: Option<i32>,
 }
 
+const CAPTAIN_PROFESSIONS: [&str; 4] = ["CptHR", "CptLawyer", "CptFinancier", "CptPR"];
+
 pub fn has_profession(character: &Value, profession: &str) -> bool {
     character
         .get("professions")
         .and_then(|p| p.as_object())
-        .is_some_and(|map| map.contains_key(profession))
+        .is_some_and(|map| {
+            if profession == "Executive" {
+                CAPTAIN_PROFESSIONS.iter().any(|cpt| map.contains_key(*cpt))
+            } else {
+                map.contains_key(profession)
+            }
+        })
+}
+
+pub fn get_captain_profession(character: &Value) -> Option<&str> {
+    character
+        .get("professions")
+        .and_then(|p| p.as_object())
+        .and_then(|map| {
+            CAPTAIN_PROFESSIONS
+                .iter()
+                .find(|cpt| map.contains_key(**cpt))
+                .copied()
+        })
 }
 
 pub fn count_profession(characters: &[Value], profession: &str) -> usize {

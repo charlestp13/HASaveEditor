@@ -1,7 +1,7 @@
 use serde_json::Value;
 use tauri::State;
 
-use crate::models::{has_profession, PersonUpdate};
+use crate::models::{get_captain_profession, has_profession, PersonUpdate};
 use crate::state::AppState;
 use crate::utils::{json_id_matches, SaveDataExt};
 
@@ -38,7 +38,15 @@ pub fn update_person(
             })
             .ok_or_else(|| format!("Person {} not found", person_id))?;
 
-        apply_updates(person, &profession, &update);
+        let actual_profession = if profession == "Executive" {
+            get_captain_profession(person)
+                .map(|s| s.to_string())
+                .unwrap_or(profession)
+        } else {
+            profession
+        };
+
+        apply_updates(person, &actual_profession, &update);
         Ok(())
     })
 }

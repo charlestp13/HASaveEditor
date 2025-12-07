@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   saveManager,
   StudioUtils,
@@ -38,6 +38,7 @@ export function useProfessionData(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const sortedOrderRef = useRef<number[]>([]);
 
   const professionLower = profession.toLowerCase();
 
@@ -56,6 +57,7 @@ export function useProfessionData(
     try {
       const data = await saveManager.getPersons(profession);
       setAllPersons(data);
+      sortedOrderRef.current = [];
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to load ${professionLower}s`);
     } finally {
@@ -98,9 +100,33 @@ export function useProfessionData(
       nameStrings.length > 0 ? nameStrings : undefined
     );
 
-    return PersonSorter.sort(filtered, sortConfig.sortField, sortConfig.sortOrder, {
-      currentDate: sortConfig.currentDate,
-    });
+    const needsSort = sortedOrderRef.current.length === 0 || 
+      !sortedOrderRef.current.every(id => filtered.some(p => p.id === id));
+
+    if (needsSort) {
+      const sorted = PersonSorter.sort(filtered, sortConfig.sortField, sortConfig.sortOrder, {
+        currentDate: sortConfig.currentDate,
+      });
+      sortedOrderRef.current = sorted.map(p => p.id);
+      return sorted;
+    }
+
+    const personMap = new Map(filtered.map(p => [p.id, p]));
+    const result: Person[] = [];
+    
+    for (const id of sortedOrderRef.current) {
+      const person = personMap.get(id);
+      if (person) {
+        result.push(person);
+        personMap.delete(id);
+      }
+    }
+    
+    for (const person of personMap.values()) {
+      result.push(person);
+    }
+
+    return result;
   }, [
     allPersons,
     filterConfig.selectedFilters,
@@ -114,7 +140,10 @@ export function useProfessionData(
     refreshKey
   ]);
 
-  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
+  const refresh = useCallback(() => {
+    sortedOrderRef.current = [];
+    setRefreshKey(k => k + 1);
+  }, []);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Person Updates

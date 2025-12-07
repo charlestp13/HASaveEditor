@@ -13,9 +13,9 @@ export function ResearchBonusAdjuster({ icon, alt, value, onChange }: ResearchBo
   const { startHold, stopHold } = useHoldAcceleration(
     value,
     onChange,
-    { initialStep: 1, acceleratedStep: 5 },
+    { initialStep: 1, acceleratedStep: 5, snapToGrid: true, gridSize: 5 },
     0,
-    100
+    5
   );
 
   return (
@@ -28,7 +28,7 @@ export function ResearchBonusAdjuster({ icon, alt, value, onChange }: ResearchBo
         onIncreaseMouseDown={() => startHold(1)}
         onIncreaseMouseUp={stopHold}
         decreaseDisabled={value <= 0}
-        increaseDisabled={value >= 100}
+        increaseDisabled={value >= 5}
       />
     </div>
   );

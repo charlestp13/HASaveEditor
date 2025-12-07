@@ -112,16 +112,21 @@ export const FilterPopover = memo(function FilterPopover({
   const studioOptions = useMemo((): FilterOption[] => {
     const playerIcon = Studios.getPlayerLogoIcon(playerLogoId);
     
-    return [
+    const options: FilterOption[] = [
       { id: 'PL', label: Formatter.toTitleCase(playerStudioName), icon: playerIcon, isDynamic: true },
       { id: 'Unemployed', label: 'Unemployed', icon: unemployedIcon },
-      { id: 'ALL_COMPETITORS', label: 'All Competitors', icon: Studios.ALL_COMPETITORS_ICON, isSpecial: true },
-      ...opponentStudios.map(studio => ({
+    ];
+    
+    if (opponentStudios.length > 0) {
+      options.push({ id: 'ALL_COMPETITORS', label: 'All Competitors', icon: Studios.ALL_COMPETITORS_ICON, isSpecial: true });
+      options.push(...opponentStudios.map(studio => ({
         id: studio.id,
         label: studio.name,
         icon: studio.icon,
-      })),
-    ];
+      })));
+    }
+    
+    return options;
   }, [playerStudioName, playerLogoId, opponentStudios]);
 
   const allItems = useMemo((): FilterItem[] => [

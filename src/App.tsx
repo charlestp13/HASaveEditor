@@ -41,6 +41,7 @@ const TABS = [
   { id: 'editors', label: 'Editors', profession: 'FilmEditor', countKey: 'editors_count' },
   { id: 'composers', label: 'Composers', profession: 'Composer', countKey: 'composers_count' },
   { id: 'agents', label: 'Agents', profession: 'Agent', countKey: 'agents_count' },
+  { id: 'executives', label: 'Executives', profession: 'Executive', countKey: 'executives_count' },
 ] as const;
 
 const TALENT_PROFESSIONS = ['Actor', 'Scriptwriter', 'Director', 'Producer', 'Cinematographer', 'FilmEditor', 'Composer'] as const;
@@ -86,7 +87,7 @@ export default function App() {
   const [competitors, setCompetitors] = useState<CompetitorStudio[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<typeof LANGUAGES[number]>('ENG');
   const [fileKey, setFileKey] = useState<string | null>(null);
-  const [globalFilters, setGlobalFilters] = useState<string[]>(['Dead', 'Locked']);
+  const [globalFilters, setGlobalFilters] = useState<string[]>(['Dead', 'Locked', 'Unemployed', 'GB', 'EM', 'SU', 'HE', 'MA']);
   const [sortField, setSortField] = useState<SortField>('skill');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
