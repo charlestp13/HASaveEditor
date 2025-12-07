@@ -48,12 +48,6 @@ interface ProfessionTabProps {
   onPortraitChange?: (oldPortraitId: number | undefined, newPortraitId: number, characterName: string, profession: string) => void;
 }
 
-function isTalentProfession(profession: string): boolean {
-  return profession !== 'Agent' && 
-    !profession.startsWith('Lieut') && 
-    !profession.startsWith('Cpt');
-}
-
 export const ProfessionTab = memo(function ProfessionTab({
   profession,
   selectedLanguage,
@@ -78,7 +72,6 @@ export const ProfessionTab = memo(function ProfessionTab({
 
   const currentDate = saveInfo?.current_date ?? '';
   const professionLower = profession.toLowerCase();
-  const canEditPortraits = isTalentProfession(profession);
 
   const {
     allPersons,
@@ -248,13 +241,13 @@ export const ProfessionTab = memo(function ProfessionTab({
           nameSearcher={nameSearcher}
           onUpdate={handlePersonUpdate}
           onStringFieldUpdate={handleStringFieldUpdate}
-          onEditTraits={canEditPortraits ? openTraitsEditor : undefined}
-          onEditGenres={canEditPortraits ? openGenresEditor : undefined}
-          onEditPortrait={canEditPortraits ? openPortraitEditor : undefined}
+          onEditTraits={openTraitsEditor}
+          onEditGenres={openGenresEditor}
+          onEditPortrait={openPortraitEditor}
         />
       )}
 
-      {canEditPortraits && editingTraitsPerson && (
+      {editingTraitsPerson && (
         <TraitAdjuster
           open={!!editingTraitsPersonId}
           onOpenChange={(open) => !open && setEditingTraitsPersonId(null)}
@@ -264,7 +257,7 @@ export const ProfessionTab = memo(function ProfessionTab({
         />
       )}
 
-      {canEditPortraits && editingGenresPerson && (
+      {editingGenresPerson && (
         <GenreAdjuster
           open={!!editingGenresPersonId}
           onOpenChange={(open) => !open && setEditingGenresPersonId(null)}
@@ -275,7 +268,7 @@ export const ProfessionTab = memo(function ProfessionTab({
         />
       )}
 
-      {canEditPortraits && editingPerson && (
+      {editingPerson && (
         <PortraitEditorDialog
           open={!!editingPortraitPersonId}
           onOpenChange={(open) => !open && setEditingPortraitPersonId(null)}
@@ -283,6 +276,7 @@ export const ProfessionTab = memo(function ProfessionTab({
           currentPortraitId={editingPerson.portraitBaseId!}
           usedPortraits={usedPortraits}
           onSelectPortrait={(portraitId) => handlePortraitChange(editingPerson.id, portraitId)}
+          portraitType={PersonUtils.getPortraitType(editingPerson.professions)}
         />
       )}
     </div>

@@ -27,18 +27,7 @@ export function InfoSection({
   portraitBaseId,
   onEditPortrait,
 }: InfoSectionProps) {
-  const professionType = (() => {
-    if (!professions) return 'TALENT';
-    const professionKeys = Object.keys(professions);
-    if (professionKeys.length === 0) return 'TALENT';
-    const profession = professionKeys[0];
-    if (profession === 'Agent') return 'AGENT';
-    if (profession.startsWith('Lieut') || profession.startsWith('Cpt')) return 'LIEUT';
-    return 'TALENT';
-  })();
-
-  const canEditPortrait = professionType === 'TALENT' && 
-    gender !== undefined && 
+  const canEditPortrait = gender !== undefined && 
     portraitBaseId !== undefined &&
     onEditPortrait !== undefined;
 

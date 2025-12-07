@@ -2,6 +2,8 @@ import type { Person, WhiteTag } from '../types';
 import { Studios } from '../game-data/studios';
 import { Genres } from '../game-data/genres';
 
+export type PortraitType = 'TALENT' | 'LIEUT' | 'AGENT';
+
 export class PersonUtils {
   // ───────────────────────────────────────────────────────────────────────────
   // State Flags
@@ -32,16 +34,34 @@ export class PersonUtils {
     8388608: 'Selected for Poaching',
   };
 
-  private static readonly PROFESSION_DISPLAY_NAMES: Record<string, string> = {
-    FilmEditor: 'Editor',
+  static readonly PROFESSION_DISPLAY_NAMES: Record<string, string> = {
+    Actor: 'Actor',
     Scriptwriter: 'Screenwriter',
-    CptHR: 'Human Resources Executive',
+    Director: 'Director',
+    Producer: 'Producer',
+    Cinematographer: 'Cinematographer',
+    FilmEditor: 'Editor',
+    Composer: 'Composer',
+    Agent: 'Agent',
+    CptHR: 'HR Executive',
     CptLawyer: 'Legal Executive',
     CptFinancier: 'Financial Executive',
-    CptPR: 'Public Relations Executive',
+    CptPR: 'PR Executive',
   };
 
-  static readonly EXECUTIVE_PROFESSIONS = ['Human Resources Executive', 'Legal Executive', 'Financial Executive', 'Public Relations Executive'] as const;
+  static readonly EXECUTIVE_PROFESSIONS = ['CptHR', 'CptLawyer', 'CptFinancier', 'CptPR'] as const;
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Portrait Type
+  // ───────────────────────────────────────────────────────────────────────────
+
+  static getPortraitType(professions: Record<string, unknown> | undefined): PortraitType {
+    const profession = professions ? Object.keys(professions)[0] : null;
+    if (!profession) return 'TALENT';
+    if (profession === 'Agent') return 'AGENT';
+    if (profession.startsWith('Cpt') || profession.startsWith('Lieut')) return 'LIEUT';
+    return 'TALENT';
+  }
 
   // ───────────────────────────────────────────────────────────────────────────
   // State Checks
@@ -56,7 +76,7 @@ export class PersonUtils {
   }
 
   static isExecutive(person: Person): boolean {
-    const profName = PersonUtils.getProfessionName(person);
+    const profName = PersonUtils.getRawProfessionName(person);
     return PersonUtils.EXECUTIVE_PROFESSIONS.includes(profName as typeof PersonUtils.EXECUTIVE_PROFESSIONS[number]);
   }
 

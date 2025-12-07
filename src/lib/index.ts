@@ -29,6 +29,7 @@ export {
   PersonSorter,
   PersonStateUpdater,
   NameSearcher,
+  type PortraitType,
   type FilterConfig,
   type GenderFilter,
   type ShadyFilter,

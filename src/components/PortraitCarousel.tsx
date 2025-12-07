@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PersonUtils } from '@/lib';
 
 interface PortraitCarouselProps {
   professions: { [key: string]: any };
@@ -37,20 +38,6 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
     loadPortraits();
   }, [professions, gender, portraitBaseId]);
 
-  const getProfessionType = (): string => {
-    if (!professions) return 'TALENT';
-    
-    const professionKeys = Object.keys(professions);
-    if (professionKeys.length === 0) return 'TALENT';
-    
-    const profession = professionKeys[0];
-    
-    if (profession === 'Agent') return 'AGENT';
-    if (profession.startsWith('Lieut') || profession.startsWith('Cpt')) return 'LIEUT';
-    
-    return 'TALENT';
-  };
-
   const loadPortraits = async () => {
     if (portraitBaseId === undefined || gender === undefined) {
       setAvailablePortraits([]);
@@ -59,7 +46,7 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
 
     const manifest = await loadManifest();
     
-    const professionType = getProfessionType();
+    const professionType = PersonUtils.getPortraitType(professions);
     const sex = gender === 1 ? 'F' : 'M';
     const key = `${professionType}_${sex}_${portraitBaseId}`;
     

@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { PersonUtils, type PortraitType } from '@/lib';
 
 interface UsedPortrait {
   characterName: string;
@@ -20,6 +21,7 @@ interface PortraitEditorDialogProps {
   currentPortraitId: number;
   usedPortraits: Map<number, UsedPortrait>;
   onSelectPortrait: (portraitId: number) => void;
+  portraitType?: PortraitType;
 }
 
 let manifestCache: Record<string, string[]> | null = null;
@@ -49,15 +51,17 @@ function PortraitThumbnail({
   id, 
   sex, 
   ages,
+  portraitType,
 }: { 
   id: number; 
   sex: string; 
   ages: string[];
+  portraitType: PortraitType;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   
   const getPortraitPath = (age: string) => {
-    return `/portraits/TALENT_${sex}_${age}_${id}.png`;
+    return `/portraits/${portraitType}_${sex}_${age}_${id}.png`;
   };
 
   const handlePrev = (e: React.MouseEvent) => {
@@ -107,6 +111,7 @@ export function PortraitEditorDialog({
   currentPortraitId,
   usedPortraits,
   onSelectPortrait,
+  portraitType = 'TALENT',
 }: PortraitEditorDialogProps) {
   const [allPortraitIds, setAllPortraitIds] = useState<number[]>([]);
   const [portraitAges, setPortraitAges] = useState<Record<number, string[]>>({});
@@ -118,7 +123,7 @@ export function PortraitEditorDialog({
     if (!open) return;
     
     loadManifest().then(manifest => {
-      const prefix = `TALENT_${sex}_`;
+      const prefix = `${portraitType}_${sex}_`;
       const idsWithAges: Record<number, string[]> = {};
       
       Object.entries(manifest).forEach(([key, ages]) => {
@@ -139,7 +144,7 @@ export function PortraitEditorDialog({
         setCurrentPage(0);
       }
     });
-  }, [open, sex, currentPortraitId]);
+  }, [open, sex, currentPortraitId, portraitType]);
 
   const totalPages = Math.ceil(allPortraitIds.length / PORTRAITS_PER_PAGE);
   
@@ -157,12 +162,14 @@ export function PortraitEditorDialog({
     onOpenChange(false);
   };
 
+  const typeLabel = portraitType === 'TALENT' ? 'Talent' : 'Lieutenant';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>
-            Select Portrait ({gender === 1 ? 'Female' : 'Male'}) - {allPortraitIds.length} available
+            Select {typeLabel} Portrait ({gender === 1 ? 'Female' : 'Male'}) - {allPortraitIds.length} available
           </DialogTitle>
         </DialogHeader>
         
@@ -184,7 +191,7 @@ export function PortraitEditorDialog({
                     ${isUsed && !isCurrent ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary/50'}
                   `}
                 >
-                  <PortraitThumbnail id={id} sex={sex} ages={ages} />
+                  <PortraitThumbnail id={id} sex={sex} ages={ages} portraitType={portraitType} />
                   
                   <div className="mt-1 text-xs text-center font-medium">
                     #{id}

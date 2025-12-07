@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
-import { saveManager } from '@/lib';
+import { saveManager, PersonUtils } from '@/lib';
 import appBanner from '@/assets/appBanner.png';
 import { ProfessionTab } from '@/components/ProfessionTab';
 import { ErrorBanner } from '@/components/ErrorBanner';
@@ -46,16 +46,6 @@ const TABS = [
 
 const TALENT_PROFESSIONS = ['Actor', 'Scriptwriter', 'Director', 'Producer', 'Cinematographer', 'FilmEditor', 'Composer'] as const;
 
-const PROFESSION_DISPLAY_NAMES: Record<string, string> = {
-  Actor: 'Actor',
-  Scriptwriter: 'Screenwriter',
-  Director: 'Director',
-  Producer: 'Producer',
-  Cinematographer: 'Cinematographer',
-  FilmEditor: 'Editor',
-  Composer: 'Composer',
-};
-
 function buildPortraitMap(
   persons: Person[],
   profession: string,
@@ -72,7 +62,7 @@ function buildPortraitMap(
     
     portraits.set(person.portraitBaseId, {
       characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
-      profession: PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
+      profession: PersonUtils.PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
     });
   }
   
@@ -92,7 +82,9 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [shadyFilter, setShadyFilter] = useState<'all' | 'shady' | 'notShady'>('all');
-  const [portraitsByProfession, setPortraitsByProfession] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
+  const [talentPortraits, setTalentPortraits] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
+  const [lieutPortraits, setLieutPortraits] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
+  const [agentPortraits, setAgentPortraits] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
   const { loading, error, execute, clearError } = useAsyncAction();
 
   const handleSortChange = useCallback((field: SortField, order: SortOrder) => {
@@ -106,7 +98,11 @@ export default function App() {
     characterName: string,
     profession: string
   ) => {
-    setPortraitsByProfession(prev => {
+    const isExecutive = PersonUtils.EXECUTIVE_PROFESSIONS.includes(profession as typeof PersonUtils.EXECUTIVE_PROFESSIONS[number]);
+    const isAgent = profession === 'Agent';
+    const setPortraits = isAgent ? setAgentPortraits : isExecutive ? setLieutPortraits : setTalentPortraits;
+    
+    setPortraits(prev => {
       const next = new Map(prev);
       const professionPortraits = new Map(next.get(profession) || new Map());
       
@@ -115,7 +111,7 @@ export default function App() {
       }
       professionPortraits.set(newPortraitId, {
         characterName,
-        profession: PROFESSION_DISPLAY_NAMES[profession] || profession,
+        profession: PersonUtils.PROFESSION_DISPLAY_NAMES[profession] || profession,
       });
       
       next.set(profession, professionPortraits);
@@ -123,15 +119,35 @@ export default function App() {
     });
   }, []);
 
-  const combinedUsedPortraits = useMemo(() => {
+  const combinedTalentPortraits = useMemo(() => {
     const combined = new Map<number, UsedPortrait>();
-    portraitsByProfession.forEach(professionPortraits => {
+    talentPortraits.forEach(professionPortraits => {
       professionPortraits.forEach((info, id) => {
         combined.set(id, info);
       });
     });
     return combined;
-  }, [portraitsByProfession]);
+  }, [talentPortraits]);
+
+  const combinedLieutPortraits = useMemo(() => {
+    const combined = new Map<number, UsedPortrait>();
+    lieutPortraits.forEach(professionPortraits => {
+      professionPortraits.forEach((info, id) => {
+        combined.set(id, info);
+      });
+    });
+    return combined;
+  }, [lieutPortraits]);
+
+  const combinedAgentPortraits = useMemo(() => {
+    const combined = new Map<number, UsedPortrait>();
+    agentPortraits.forEach(professionPortraits => {
+      professionPortraits.forEach((info, id) => {
+        combined.set(id, info);
+      });
+    });
+    return combined;
+  }, [agentPortraits]);
 
   const {
     activeTab,
@@ -150,7 +166,9 @@ export default function App() {
     setTimeBonuses({});
     setCompetitors([]);
     setFileKey(null);
-    setPortraitsByProfession(new Map());
+    setTalentPortraits(new Map());
+    setLieutPortraits(new Map());
+    setAgentPortraits(new Map());
   };
 
   const loadSaveData = async (info: SaveInfo, nameStrings: string[]) => {
@@ -159,19 +177,54 @@ export default function App() {
     const tb = await saveManager.getTimeBonuses();
     const comp = await saveManager.getCompetitors();
     
-    const allPortraits = new Map<string, Map<number, UsedPortrait>>();
+    const talentPortraitMap = new Map<string, Map<number, UsedPortrait>>();
     for (const profession of TALENT_PROFESSIONS) {
       const persons = await saveManager.getPersons(profession);
       const portraits = buildPortraitMap(persons, profession, nameStrings);
-      allPortraits.set(profession, portraits);
+      talentPortraitMap.set(profession, portraits);
     }
+
+    const lieutPortraitMap = new Map<string, Map<number, UsedPortrait>>();
+    const executives = await saveManager.getPersons('Executive');
+    for (const person of executives) {
+      if (person.portraitBaseId === undefined) continue;
+      const rawProfName = person.professions ? Object.keys(person.professions)[0] : 'Executive';
+      
+      if (!lieutPortraitMap.has(rawProfName)) {
+        lieutPortraitMap.set(rawProfName, new Map());
+      }
+      
+      const firstName = nameStrings[parseInt(person.firstNameId || '0', 10)] || '';
+      const lastName = nameStrings[parseInt(person.lastNameId || '0', 10)] || '';
+      
+      lieutPortraitMap.get(rawProfName)!.set(person.portraitBaseId, {
+        characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
+        profession: PersonUtils.PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
+      });
+    }
+
+    const agentPortraitMap = new Map<string, Map<number, UsedPortrait>>();
+    const agents = await saveManager.getPersons('Agent');
+    const agentInnerMap = new Map<number, UsedPortrait>();
+    for (const person of agents) {
+      if (person.portraitBaseId === undefined) continue;
+      const firstName = nameStrings[parseInt(person.firstNameId || '0', 10)] || '';
+      const lastName = nameStrings[parseInt(person.lastNameId || '0', 10)] || '';
+      agentInnerMap.set(person.portraitBaseId, {
+        characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
+        profession: 'Agent',
+      });
+    }
+    agentPortraitMap.set('Agent', agentInnerMap);
     
     setSaveInfo(info);
     setResources(res);
     setTitans(tit);
     setTimeBonuses(tb);
     setCompetitors(comp);
-    setPortraitsByProfession(allPortraits);
+    setTalentPortraits(talentPortraitMap);
+    setLieutPortraits(lieutPortraitMap);
+    setAgentPortraits(agentPortraitMap);
     setFileKey(`${saveManager.getCurrentPath()}-${Date.now()}`);
   };
 
@@ -401,7 +454,11 @@ export default function App() {
                     onGenderFilterChange={setGenderFilter}
                     shadyFilter={shadyFilter}
                     onShadyFilterChange={setShadyFilter}
-                    usedPortraits={combinedUsedPortraits}
+                    usedPortraits={
+                      tab.profession === 'Executive' ? combinedLieutPortraits :
+                      tab.profession === 'Agent' ? combinedAgentPortraits :
+                      combinedTalentPortraits
+                    }
                     onPortraitChange={handlePortraitChange}
                   />
                 </div>
