@@ -2,14 +2,14 @@ import { useState, useEffect, memo } from 'react';
 import { Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Studios, type CompetitorStudio } from '@/lib';
+import { ResearchBonusAdjuster } from '@/components/ResearchBonusAdjuster';
+import { GoldIcon } from '@/components/GoldIcon';
+import { Studios, Departments, Formatter, type CompetitorStudio } from '@/lib';
 import budgetIcon from '@/assets/BUDGET.png';
 import cashIcon from '@/assets/CASH.png';
 import reputationIcon from '@/assets/REPUTATION.png';
 import influenceIcon from '@/assets/IP.png';
 import deadIcon from '@/assets/DEAD.png';
-
-const formatDollar = (value: number): string => '$' + value.toLocaleString('en-US');
 
 const LEGAL_GIFTS = [
   { id: 'ALCOHOL', name: 'Whiskey Glennafola 50 Cask Strength' },
@@ -45,7 +45,7 @@ const TITAN_FACTIONS = [
 
 type GiftId = typeof LEGAL_GIFTS[number]['id'] | typeof ILLEGAL_GIFTS[number]['id'];
 type TitanIcon = typeof TITAN_FACTIONS[number]['icon'];
-type ViewMode = '' | 'resources' | 'opponents';
+type ViewMode = '' | 'resources' | 'opponents' | 'departments';
 
 const giftIcons: Record<GiftId, string> = {} as Record<GiftId, string>;
 const importGiftIcon = (name: string) => {
@@ -83,10 +83,12 @@ interface StudioInfoBarProps {
   influence: number;
   resources: Record<string, number>;
   titans: Record<string, number>;
+  timeBonuses: Record<string, number>;
   competitors: CompetitorStudio[];
   onStudioUpdate?: (field: 'budget' | 'cash' | 'reputation' | 'influence', value: number) => void;
   onResourceUpdate?: (resourceId: string, value: number) => void;
   onTitanUpdate?: (titanId: string, value: number) => void;
+  onTimeBonusUpdate?: (department: string, value: number) => void;
   onCompetitorUpdate?: (competitorId: string, field: 'lastBudget' | 'ip' | 'budgetCheatsRemaining', value: number) => void;
 }
 
@@ -100,10 +102,12 @@ export const StudioInfoBar = memo(function StudioInfoBar({
   influence,
   resources,
   titans,
+  timeBonuses,
   competitors,
   onStudioUpdate,
   onResourceUpdate,
   onTitanUpdate,
+  onTimeBonusUpdate,
   onCompetitorUpdate,
 }: StudioInfoBarProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('');
@@ -148,16 +152,18 @@ export const StudioInfoBar = memo(function StudioInfoBar({
               alt="Budget"
               value={budget}
               onChange={(v) => onStudioUpdate?.('budget', v)}
-              formatDisplay={formatDollar}
+              formatDisplay={Formatter.formatDollar}
               width="w-32"
+              goldTint
             />
             <NumericInput
               icon={cashIcon}
               alt="Cash"
               value={cash}
               onChange={(v) => onStudioUpdate?.('cash', v)}
-              formatDisplay={formatDollar}
+              formatDisplay={Formatter.formatDollar}
               width="w-32"
+              goldTint
             />
             <NumericInput
               icon={reputationIcon}
@@ -166,6 +172,7 @@ export const StudioInfoBar = memo(function StudioInfoBar({
               onChange={(v) => onStudioUpdate?.('reputation', v)}
               integer={false}
               width="w-32"
+              goldTint
             />
             <NumericInput
               icon={influenceIcon}
@@ -173,6 +180,7 @@ export const StudioInfoBar = memo(function StudioInfoBar({
               value={influence}
               onChange={(v) => onStudioUpdate?.('influence', v)}
               width="w-32"
+              goldTint
             />
           </div>
           <ToggleGroup
@@ -186,6 +194,9 @@ export const StudioInfoBar = memo(function StudioInfoBar({
             </ToggleGroupItem>
             <ToggleGroupItem value="opponents" className="h-7 px-3 text-xs">
               Opponents
+            </ToggleGroupItem>
+            <ToggleGroupItem value="departments" className="h-7 px-3 text-xs">
+              Departments
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -262,7 +273,13 @@ export const StudioInfoBar = memo(function StudioInfoBar({
                 
                 return (
                   <div key={competitor.id} className="flex items-center gap-3 text-sm">
-                    <img src={studioInfo.icon} alt={studioInfo.name} title={studioInfo.name} className="h-6 w-6" />
+                    <img
+                      src={studioInfo.icon}
+                      alt={studioInfo.name}
+                      title={studioInfo.name}
+                      className="h-6 w-6"
+                      style={{ filter: 'brightness(0) saturate(100%) invert(76%) sepia(29%) saturate(616%) hue-rotate(357deg) brightness(95%) contrast(89%) drop-shadow(0 0 3px rgba(212, 168, 85, 0.8))' }}
+                    />
                     <span className="font-medium w-32">{studioInfo.name}</span>
                     <div className="flex items-center gap-1 w-16">
                       {competitor.is_dead ? (
@@ -278,24 +295,24 @@ export const StudioInfoBar = memo(function StudioInfoBar({
                       )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <img src={budgetIcon} alt="Budget" className="h-4 w-4" />
+                      <GoldIcon src={budgetIcon} alt="Budget" className="h-4 w-4" />
                       <span className="text-muted-foreground text-xs">Current:</span>
-                      <span className="font-mono text-xs w-20 inline-block truncate" title={formatDollar(currentBudget)}>{formatDollar(currentBudget)}</span>
+                      <span className="font-mono text-xs w-20 inline-block truncate" title={Formatter.formatDollar(currentBudget)}>{Formatter.formatDollar(currentBudget)}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <img src={budgetIcon} alt="Budget" className="h-4 w-4" />
+                      <GoldIcon src={budgetIcon} alt="Budget" className="h-4 w-4" />
                       <span className="text-muted-foreground text-xs">Last:</span>
                       <NumericInput
                         alt={`${studioInfo.name} Last Budget`}
                         value={competitor.last_budget}
                         onChange={(v) => onCompetitorUpdate?.(competitor.id, 'lastBudget', v)}
-                        formatDisplay={formatDollar}
+                        formatDisplay={Formatter.formatDollar}
                         width="w-28"
                         inputClassName="text-xs truncate"
                       />
                     </div>
                     <div className="flex items-center gap-1">
-                      <img src={influenceIcon} alt="IP" className="h-4 w-4" />
+                      <GoldIcon src={influenceIcon} alt="IP" className="h-4 w-4" />
                       <NumericInput
                         alt={`${studioInfo.name} IP`}
                         value={competitor.ip}
@@ -320,6 +337,27 @@ export const StudioInfoBar = memo(function StudioInfoBar({
             </div>
           </div>
         </div>
+
+        <div
+          className={`overflow-hidden transition-all duration-200 ease-out ${
+            viewMode === 'departments' ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="pt-2 border-t">
+            <div className="text-xs text-muted-foreground mb-2 font-medium">Department Wide Research Bonus</div>
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm items-center">
+              {Departments.ALL.map((dept) => (
+                <ResearchBonusAdjuster
+                  key={dept.id}
+                  icon={dept.icon}
+                  alt={dept.name}
+                  value={timeBonuses[dept.id] ?? 0}
+                  onChange={(v) => onTimeBonusUpdate?.(dept.id, v)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -334,6 +372,7 @@ interface NumericInputProps {
   integer?: boolean;
   width?: string;
   inputClassName?: string;
+  goldTint?: boolean;
 }
 
 const NumericInput = memo(function NumericInput({
@@ -345,6 +384,7 @@ const NumericInput = memo(function NumericInput({
   integer = true,
   width = 'w-24',
   inputClassName = 'text-sm',
+  goldTint = false,
 }: NumericInputProps) {
   const [localValue, setLocalValue] = useState(formatDisplay(value));
   const [isFocused, setIsFocused] = useState(false);
@@ -386,7 +426,11 @@ const NumericInput = memo(function NumericInput({
 
   return (
     <div className="flex items-center gap-1">
-      <img src={icon} alt={alt} title={alt} className="h-5 w-5" />
+      {goldTint ? (
+        <GoldIcon src={icon} alt={alt} />
+      ) : (
+        <img src={icon} alt={alt} title={alt} className="h-5 w-5" />
+      )}
       {input}
     </div>
   );

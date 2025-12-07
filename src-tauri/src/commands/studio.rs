@@ -6,6 +6,51 @@ use crate::state::AppState;
 use crate::utils::{get_state_json_mut, SaveDataExt};
 
 #[tauri::command]
+pub fn get_time_bonuses(state: State<AppState>) -> Result<HashMap<String, i64>, String> {
+    state.with_save_data(|data| {
+        let state_json = data.state_json()?;
+        let bonuses = state_json
+            .get("timeBonuses")
+            .and_then(|t| t.as_object())
+            .map(|obj| {
+                obj.iter()
+                    .filter_map(|(k, v)| v.as_i64().map(|val| (k.clone(), val)))
+                    .collect()
+            })
+            .unwrap_or_default();
+        Ok(bonuses)
+    })
+}
+
+#[tauri::command]
+pub fn update_time_bonus(
+    department: String,
+    value: i64,
+    state: State<AppState>,
+) -> Result<(), String> {
+    state.with_save_data_mut(|data| {
+        let state_json = get_state_json_mut(data)?;
+
+        if state_json.get("timeBonuses").is_none() {
+            state_json["timeBonuses"] = serde_json::json!({});
+        }
+
+        let bonuses = state_json
+            .get_mut("timeBonuses")
+            .and_then(|t| t.as_object_mut())
+            .ok_or("Failed to access timeBonuses")?;
+
+        if value == 0 {
+            bonuses.remove(&department);
+        } else {
+            bonuses.insert(department, serde_json::json!(value));
+        }
+
+        Ok(())
+    })
+}
+
+#[tauri::command]
 pub fn update_studio(update: StudioUpdate, state: State<AppState>) -> Result<(), String> {
     state.with_save_data_mut(|data| {
         let state_json = get_state_json_mut(data)?;

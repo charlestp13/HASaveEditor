@@ -20,7 +20,7 @@ export function StatusSection({
   onUpdate,
 }: StatusSectionProps) {
   return (
-    <CardSection title="Public Image">
+    <CardSection title="Public Image" collapsible defaultCollapsed>
       <div className="space-y-2">
         {PUBLIC_IMAGE_STATS.map(({ type, label }) => {
           const value = type === 'ART' ? art : com;

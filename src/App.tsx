@@ -82,6 +82,7 @@ export default function App() {
   const [saveInfo, setSaveInfo] = useState<SaveInfo | null>(null);
   const [resources, setResources] = useState<Record<string, number>>({});
   const [titans, setTitans] = useState<Record<string, number>>({});
+  const [timeBonuses, setTimeBonuses] = useState<Record<string, number>>({});
   const [competitors, setCompetitors] = useState<CompetitorStudio[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<typeof LANGUAGES[number]>('ENG');
   const [fileKey, setFileKey] = useState<string | null>(null);
@@ -145,6 +146,7 @@ export default function App() {
     setSaveInfo(null);
     setResources({});
     setTitans({});
+    setTimeBonuses({});
     setCompetitors([]);
     setFileKey(null);
     setPortraitsByProfession(new Map());
@@ -153,6 +155,7 @@ export default function App() {
   const loadSaveData = async (info: SaveInfo, nameStrings: string[]) => {
     const res = await saveManager.getResources();
     const tit = await saveManager.getTitans();
+    const tb = await saveManager.getTimeBonuses();
     const comp = await saveManager.getCompetitors();
     
     const allPortraits = new Map<string, Map<number, UsedPortrait>>();
@@ -165,6 +168,7 @@ export default function App() {
     setSaveInfo(info);
     setResources(res);
     setTitans(tit);
+    setTimeBonuses(tb);
     setCompetitors(comp);
     setPortraitsByProfession(allPortraits);
     setFileKey(`${saveManager.getCurrentPath()}-${Date.now()}`);
@@ -232,6 +236,23 @@ export default function App() {
       ));
     } catch (err) {
       console.error('Failed to update competitor:', err);
+    }
+  };
+
+  const handleTimeBonusUpdate = async (department: string, value: number) => {
+    try {
+      await saveManager.updateTimeBonus(department, value);
+      setTimeBonuses(prev => {
+        const next = { ...prev };
+        if (value === 0) {
+          delete next[department];
+        } else {
+          next[department] = value;
+        }
+        return next;
+      });
+    } catch (err) {
+      console.error('Failed to update time bonus:', err);
     }
   };
 
@@ -317,10 +338,12 @@ export default function App() {
           influence={saveInfo.influence}
           resources={resources}
           titans={titans}
+          timeBonuses={timeBonuses}
           competitors={competitors}
           onStudioUpdate={handleStudioUpdate}
           onResourceUpdate={handleResourceUpdate}
           onTitanUpdate={handleTitanUpdate}
+          onTimeBonusUpdate={handleTimeBonusUpdate}
           onCompetitorUpdate={handleCompetitorUpdate}
         />
       )}

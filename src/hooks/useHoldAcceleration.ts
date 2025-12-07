@@ -1,4 +1,5 @@
 import { useRef, useCallback, useEffect } from 'react';
+import { ValueSteppers } from '@/lib';
 
 export interface AccelerationConfig {
   initialStep: number;
@@ -34,7 +35,7 @@ export function useHoldAcceleration(
     valueRef.current = currentValue;
   }, [currentValue]);
 
-  const clamp = useCallback((val: number) => Math.max(min, Math.min(max, val)), [min, max]);
+  const clamp = useCallback((val: number) => ValueSteppers.clamp(val, min, max), [min, max]);
 
   const snapToGrid = useCallback((val: number, direction: number): number => {
     if (!fullConfig.snapToGrid) return val;

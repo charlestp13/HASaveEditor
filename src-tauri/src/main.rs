@@ -32,6 +32,8 @@ fn main() {
             update_titan,
             get_competitors,
             update_competitor,
+            get_time_bonuses,
+            update_time_bonus,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

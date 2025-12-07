@@ -101,6 +101,14 @@ export class SaveManager {
     await invoke('update_competitor', { competitorId, update });
   }
 
+  async getTimeBonuses(): Promise<Record<string, number>> {
+    return invoke<Record<string, number>>('get_time_bonuses');
+  }
+
+  async updateTimeBonus(department: string, value: number): Promise<void> {
+    await invoke('update_time_bonus', { department, value });
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // Game Data Operations
   // ───────────────────────────────────────────────────────────────────────────

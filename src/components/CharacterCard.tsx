@@ -135,6 +135,7 @@ export const CharacterCard = memo(function CharacterCard({
         <StatsSection
           mood={Number(character.mood ?? 0)}
           attitude={Number(character.attitude ?? 0)}
+          selfEsteem={Number(character.selfEsteem ?? 0)}
           professionValue={professionValue}
           limit={Number(character.limit ?? 1)}
           onUpdate={handleUpdate}
@@ -207,6 +208,7 @@ export const CharacterCard = memo(function CharacterCard({
   if (p.customName !== n.customName) return false;
   if (p.mood !== n.mood) return false;
   if (p.attitude !== n.attitude) return false;
+  if (p.selfEsteem !== n.selfEsteem) return false;
   if (p.limit !== n.limit) return false;
   if (p.portraitBaseId !== n.portraitBaseId) return false;
   

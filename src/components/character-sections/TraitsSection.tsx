@@ -16,6 +16,8 @@ export function TraitsSection({
     <CardSection
       title="Traits"
       action={onEditTraits && <EditButton onClick={onEditTraits}>Traits</EditButton>}
+      collapsible
+      defaultCollapsed
     >
       {displayableTraits.length > 0 ? (
         <div className="flex flex-wrap gap-1">

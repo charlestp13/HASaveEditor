@@ -44,9 +44,11 @@ export {
   Traits,
   Status,
   Studios,
+  Departments,
   type Genre,
   type DisplayableTrait,
   type StatusType,
   type Studio,
   type StudioId,
+  type Department,
 } from './game-data';

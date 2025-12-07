@@ -27,7 +27,7 @@ const gridComponents = {
           padding: '0.5rem',
           ...style,
         }}
-        className="sm:!grid-cols-2 lg:!grid-cols-3 xl:!grid-cols-4"
+        className="sm:grid-cols-2! lg:grid-cols-3! xl:grid-cols-4!"
       >
         {children}
       </div>

@@ -1,9 +1,11 @@
 import { StatAdjuster } from '@/components/StatAdjuster';
 import { SkillAdjuster } from '@/components/SkillAdjuster';
+import { SelfEsteemAdjuster } from '@/components/SelfEsteemAdjuster';
 
 interface StatsSectionProps {
   mood: number;
   attitude: number;
+  selfEsteem: number;
   professionValue: number;
   limit: number;
   onUpdate?: (field: string, value: number | null) => void;
@@ -11,7 +13,8 @@ interface StatsSectionProps {
 
 export function StatsSection({ 
   mood, 
-  attitude, 
+  attitude,
+  selfEsteem,
   professionValue, 
   limit, 
   onUpdate 
@@ -27,6 +30,10 @@ export function StatsSection({
         label="Loyalty"
         value={attitude}
         onChange={(v) => onUpdate?.('attitude', v)}
+      />
+      <SelfEsteemAdjuster
+        value={selfEsteem}
+        onChange={(v) => onUpdate?.('selfEsteem', v)}
       />
       <SkillAdjuster
         skillValue={professionValue}

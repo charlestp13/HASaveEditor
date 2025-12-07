@@ -28,6 +28,10 @@ export class PersonStateUpdater {
         updated.Limit = value ?? 0;
         break;
 
+      case 'selfEsteem':
+        updated.selfEsteem = String(value ?? 0);
+        break;
+
       default:
         if (field.startsWith('whiteTag:')) {
           const tagId = field.split(':')[1];
