@@ -139,7 +139,7 @@ export const CharacterCard = memo(function CharacterCard({
               onPressedChange={(pressed) => handleUpdate('isShady', pressed ? 1 : 0)}
               onClick={(e) => e.stopPropagation()}
             >
-              Shady
+              {character.isShady ? "Shady" : "Clean"}
             </Toggle>
           </div>
           <div className="flex items-center justify-between">
