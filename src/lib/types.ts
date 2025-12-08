@@ -63,6 +63,8 @@ export interface PersonUpdate {
   addGenre?: string;
   removeGenre?: string;
   portraitBaseId?: number;
+  birthYear?: number;
+  isShady?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

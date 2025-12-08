@@ -104,6 +104,9 @@ export const ProfessionTab = memo(function ProfessionTab({
           value === null ? { removeGenre: genre } : { addGenre: genre }
         );
       }
+      if (field === 'isShady') {
+        return saveManager.updatePerson(profession, personId, { isShady: value === 1 });
+      }
       const updateField = PersonStateUpdater.normalizeFieldName(field);
       return saveManager.updatePerson(profession, personId, { [updateField]: value });
     },

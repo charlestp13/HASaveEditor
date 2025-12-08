@@ -20,6 +20,8 @@ export function useCharacterData(character: Person, currentDate: string) {
       ? birthParsed.ageTo(currentParsed)
       : null;
 
+    const birthYear = birthParsed?.year ?? null;
+
     const contractDaysLeft = calculateContractDaysLeft(character, currentParsed);
 
     // ─────────────────────────────────────────────────────────────
@@ -65,6 +67,7 @@ export function useCharacterData(character: Person, currentDate: string) {
 
     return {
       age,
+      birthYear,
       birthParsed,
       deathParsed,
       contractDaysLeft,

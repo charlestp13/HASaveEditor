@@ -20,7 +20,7 @@ export class NameSearcher {
 
     for (let i = 0; i < this.nameArray.length; i++) {
       const name = this.nameArray[i];
-      if (name.toLowerCase().includes(lowerQuery)) {
+      if (name.toLowerCase().startsWith(lowerQuery)) {
         results.push({ name, id: i });
 
         if (results.length > maxResults) {

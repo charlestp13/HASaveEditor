@@ -41,6 +41,7 @@ export function useProfessionData(
   const sortedOrderRef = useRef<number[]>([]);
 
   const professionLower = profession.toLowerCase();
+  const lastSortConfigRef = useRef<{ field: SortField; order: SortOrder } | null>(null);
 
   const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
   const nameSearcher = useMemo(() => new NameSearcher(nameStrings), [nameStrings]);
@@ -100,7 +101,12 @@ export function useProfessionData(
       nameStrings.length > 0 ? nameStrings : undefined
     );
 
+    const sortConfigChanged = 
+      lastSortConfigRef.current?.field !== sortConfig.sortField ||
+      lastSortConfigRef.current?.order !== sortConfig.sortOrder;
+
     const needsSort = sortedOrderRef.current.length === 0 || 
+      sortConfigChanged ||
       !sortedOrderRef.current.every(id => filtered.some(p => p.id === id));
 
     if (needsSort) {
@@ -108,6 +114,7 @@ export function useProfessionData(
         currentDate: sortConfig.currentDate,
       });
       sortedOrderRef.current = sorted.map(p => p.id);
+      lastSortConfigRef.current = { field: sortConfig.sortField, order: sortConfig.sortOrder };
       return sorted;
     }
 

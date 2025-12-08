@@ -87,11 +87,11 @@ export function EditableNameField({
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0"
+          className="h-4 w-4 p-0 [&_svg]:size-3"
           onClick={handleEdit}
           tabIndex={-1}
         >
-          <Pencil className="h-3.5 w-3.5" />
+          <Pencil className="h-3 w-3" />
         </Button>
       </div>
     );

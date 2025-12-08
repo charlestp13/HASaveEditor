@@ -32,6 +32,10 @@ pub struct PersonUpdate {
     pub remove_genre: Option<String>,
     #[serde(rename = "portraitBaseId")]
     pub portrait_base_id: Option<i32>,
+    #[serde(rename = "birthYear")]
+    pub birth_year: Option<i32>,
+    #[serde(rename = "isShady")]
+    pub is_shady: Option<bool>,
 }
 
 const CAPTAIN_PROFESSIONS: [&str; 4] = ["CptHR", "CptLawyer", "CptFinancier", "CptPR"];

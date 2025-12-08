@@ -1,7 +1,9 @@
 import { memo, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Toggle } from '@/components/ui/toggle';
 import { EditableNameField } from '@/components/EditableNameField';
 import { EditableTextField } from '@/components/EditableTextField';
+import { AgeAdjuster } from '@/components/AgeAdjuster';
 import { useCharacterData } from '@/hooks/useCharacterData';
 import {
   StatsSection,
@@ -45,6 +47,7 @@ export const CharacterCard = memo(function CharacterCard({
 }: CharacterCardProps) {
   const {
     age,
+    birthYear,
     birthParsed,
     deathParsed,
     contractDaysLeft,
@@ -101,8 +104,8 @@ export const CharacterCard = memo(function CharacterCard({
       onClick={onClick}
     >
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 space-y-1">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <EditableNameField
                 value={firstName}
@@ -119,16 +122,38 @@ export const CharacterCard = memo(function CharacterCard({
                 placeholder="Search..."
               />
             </div>
+            <div className="text-sm font-mono">ID: {character.id}</div>
+          </div>
+          <div className="flex items-center justify-between gap-2">
             <EditableTextField
               value={character.customName}
               onChange={(value) => handleStringFieldUpdate('customName', value)}
               placeholder="Custom Name"
             />
-            <div className="text-sm text-muted-foreground">{professionName}</div>
+            <Toggle
+              size="sm"
+              variant="outline"
+              pressed={character.isShady === true}
+              onPressedChange={(pressed) => handleUpdate('isShady', pressed ? 1 : 0)}
+              className="text-xs"
+            >
+              Shady
+            </Toggle>
           </div>
-          <div className="text-right text-sm">
-            <div className="font-mono">ID: {character.id}</div>
-            <div className="text-muted-foreground">Age: {age}</div>
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">{professionName}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Age:</span>
+              {age !== null && birthYear !== null ? (
+                <AgeAdjuster
+                  age={age}
+                  birthYear={birthYear}
+                  onBirthYearChange={(year) => handleUpdate('birthYear', year)}
+                />
+              ) : (
+                <span className="text-sm text-muted-foreground">{age ?? 'N/A'}</span>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -216,6 +241,8 @@ export const CharacterCard = memo(function CharacterCard({
   if (p.firstNameId !== n.firstNameId) return false;
   if (p.lastNameId !== n.lastNameId) return false;
   if (p.customName !== n.customName) return false;
+  if (p.birthDate !== n.birthDate) return false;
+  if (p.isShady !== n.isShady) return false;
   if (p.mood !== n.mood) return false;
   if (p.attitude !== n.attitude) return false;
   if (p.selfEsteem !== n.selfEsteem) return false;

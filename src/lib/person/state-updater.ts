@@ -6,6 +6,10 @@ export class PersonStateUpdater {
     const updated = { ...person };
 
     switch (field) {
+      case 'isShady':
+        updated.isShady = value === 1;
+        break;
+        
       case 'mood':
         updated.mood = value ?? 0;
         break;
@@ -30,6 +34,15 @@ export class PersonStateUpdater {
 
       case 'selfEsteem':
         updated.selfEsteem = String(value ?? 0);
+        break;
+
+      case 'birthYear':
+        if (updated.birthDate && value !== null) {
+          const parts = updated.birthDate.split('-');
+          if (parts.length === 3) {
+            updated.birthDate = `${parts[0]}-${parts[1]}-${value}`;
+          }
+        }
         break;
 
       default:

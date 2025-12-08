@@ -116,6 +116,12 @@ fn apply_updates(person: &mut Value, profession: &str, update: &PersonUpdate) {
     if let Some(portrait_base_id) = update.portrait_base_id {
         person["portraitBaseId"] = portrait_base_id.into();
     }
+    if let Some(birth_year) = update.birth_year {
+        update_birth_year(person, birth_year);
+    }
+    if let Some(is_shady) = update.is_shady {
+        person["isShady"] = serde_json::json!(is_shady);
+    }
 }
 
 fn apply_white_tag_update(person: &mut Value, tag_id: &str, value: &Value) {
@@ -125,6 +131,16 @@ fn apply_white_tag_update(person: &mut Value, tag_id: &str, value: &Value) {
         }
     } else if let Some(val) = value.as_f64() {
         upsert_white_tag(person, tag_id, val);
+    }
+}
+
+fn update_birth_year(person: &mut Value, new_year: i32) {
+    if let Some(birth_date) = person.get("birthDate").and_then(|d| d.as_str()) {
+        let parts: Vec<&str> = birth_date.split('-').collect();
+        if parts.len() == 3 {
+            let new_date = format!("{}-{}-{}", parts[0], parts[1], new_year);
+            person["birthDate"] = Value::String(new_date);
+        }
     }
 }
 
