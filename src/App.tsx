@@ -445,6 +445,7 @@ export default function App() {
                     selectedLanguage={selectedLanguage}
                     saveInfo={saveInfo}
                     fileKey={fileKey}
+                    isActive={isActive}
                     selectedFilters={globalFilters}
                     onFiltersChange={setGlobalFilters}
                     sortField={sortField}

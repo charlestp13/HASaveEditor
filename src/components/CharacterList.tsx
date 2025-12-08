@@ -7,6 +7,7 @@ interface CharacterListProps {
   persons: Person[];
   currentDate: string;
   nameSearcher: NameSearcher;
+  isActive?: boolean;
   onUpdate: (personId: string | number, field: string, value: number | null) => void;
   onStringFieldUpdate: (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
   onEditTraits?: (personId: string | number) => void;
@@ -46,6 +47,7 @@ export const CharacterList = memo(function CharacterList({
   persons,
   currentDate,
   nameSearcher,
+  isActive = true,
   onUpdate,
   onStringFieldUpdate,
   onEditTraits,
@@ -59,6 +61,7 @@ export const CharacterList = memo(function CharacterList({
       
       return (
         <CharacterCard
+          key={person.id}
           character={person}
           personId={person.id}
           currentDate={currentDate}
@@ -80,7 +83,7 @@ export const CharacterList = memo(function CharacterList({
   return (
     <VirtuosoGrid
       useWindowScroll
-      totalCount={persons.length}
+      totalCount={isActive ? persons.length : 0}
       overscan={200}
       components={gridComponents}
       itemContent={itemContent}
