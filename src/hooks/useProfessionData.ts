@@ -29,6 +29,7 @@ interface SortConfig {
 
 export function useProfessionData(
   profession: string,
+  label: string,
   fileKey: string | null,
   selectedLanguage: string,
   filterConfig: FilterConfig,
@@ -40,7 +41,7 @@ export function useProfessionData(
   const [refreshKey, setRefreshKey] = useState(0);
   const sortedOrderRef = useRef<number[]>([]);
 
-  const professionLower = profession.toLowerCase();
+  const labelLower = label.toLowerCase();
   const lastSortConfigRef = useRef<{ field: SortField; order: SortOrder } | null>(null);
 
   const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
@@ -60,11 +61,11 @@ export function useProfessionData(
       setAllPersons(data);
       sortedOrderRef.current = [];
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to load ${professionLower}s`);
+      setError(err instanceof Error ? err.message : `Failed to load ${labelLower}`);
     } finally {
       setLoading(false);
     }
-  }, [profession, professionLower]);
+  }, [profession, labelLower]);
 
   useEffect(() => {
     if (fileKey) loadPersons();

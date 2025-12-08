@@ -47,9 +47,26 @@ export class PersonUtils {
     CptLawyer: 'Legal Executive',
     CptFinancier: 'Financial Executive',
     CptPR: 'PR Executive',
+    LieutScript: 'Scriptwriting Head',
+    LieutPrep: 'Pre-Production Head',
+    LieutProd: 'Production Head',
+    LieutPost: 'Post-Production Head',
+    LieutRelease: 'Distribution Head',
+    LieutSecurity: 'Security Head',
+    LieutProducers: 'Producers Office Head',
+    LieutInfrastructure: 'Maintenance Head',
+    LieutTech: 'Engineering Head',
+    LieutMuseum: 'Museum Head',
+    LieutEscort: 'Services Head',
   };
 
   static readonly EXECUTIVE_PROFESSIONS = ['CptHR', 'CptLawyer', 'CptFinancier', 'CptPR'] as const;
+
+  static readonly LIEUTENANT_PROFESSIONS = [
+    'LieutScript', 'LieutPrep', 'LieutProd', 'LieutPost', 'LieutRelease',
+    'LieutSecurity', 'LieutProducers', 'LieutInfrastructure', 'LieutTech',
+    'LieutMuseum', 'LieutEscort'
+  ] as const;
 
   // ───────────────────────────────────────────────────────────────────────────
   // Portrait Type
@@ -78,6 +95,11 @@ export class PersonUtils {
   static isExecutive(person: Person): boolean {
     const profName = PersonUtils.getRawProfessionName(person);
     return PersonUtils.EXECUTIVE_PROFESSIONS.includes(profName as typeof PersonUtils.EXECUTIVE_PROFESSIONS[number]);
+  }
+
+  static isDeptHead(person: Person): boolean {
+    const profName = PersonUtils.getRawProfessionName(person);
+    return PersonUtils.LIEUTENANT_PROFESSIONS.includes(profName as typeof PersonUtils.LIEUTENANT_PROFESSIONS[number]);
   }
 
   static isBusy(person: Person): boolean {

@@ -12,6 +12,7 @@ pub struct SaveInfo {
     pub composers_count: usize,
     pub cinematographers_count: usize,
     pub agents_count: usize,
+    pub dept_heads_count: usize,
     pub executives_count: usize,
     pub movies_count: usize,
     pub studios_count: usize,

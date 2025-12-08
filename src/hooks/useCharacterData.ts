@@ -60,10 +60,11 @@ export function useCharacterData(character: Person, currentDate: string) {
     // Edit Permissions (based on profession)
     // ─────────────────────────────────────────────────────────────
     const isExecutive = PersonUtils.isExecutive(character);
+    const isDeptHead = PersonUtils.isDeptHead(character);
     const canEditStatus = professionName === 'Actor' || professionName === 'Director';
     const canEditSettings = professionName === 'Cinematographer';
     const canEditGenres = ['Screenwriter', 'Producer', 'Director', 'Actor'].includes(professionName);
-    const canEditTraits = professionName !== 'Agent' && !isExecutive;
+    const canEditTraits = professionName !== 'Agent' && !isExecutive && !isDeptHead;
 
     return {
       age,
@@ -74,6 +75,7 @@ export function useCharacterData(character: Person, currentDate: string) {
       isDead,
       isBusy,
       isExecutive,
+      isDeptHead,
       professionName,
       professionValue,
       art,

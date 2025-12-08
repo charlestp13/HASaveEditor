@@ -32,6 +32,7 @@ interface UsedPortrait {
 
 interface ProfessionTabProps {
   profession: string;
+  label: string;
   selectedLanguage: string;
   saveInfo: SaveInfo | null;
   fileKey: string | null;
@@ -51,6 +52,7 @@ interface ProfessionTabProps {
 
 export const ProfessionTab = memo(function ProfessionTab({
   profession,
+  label,
   selectedLanguage,
   saveInfo,
   fileKey,
@@ -73,7 +75,7 @@ export const ProfessionTab = memo(function ProfessionTab({
   const [editingGenresPersonId, setEditingGenresPersonId] = useState<string | number | null>(null);
 
   const currentDate = saveInfo?.current_date ?? '';
-  const professionLower = profession.toLowerCase();
+  const labelLower = label.toLowerCase();
 
   const {
     allPersons,
@@ -92,6 +94,7 @@ export const ProfessionTab = memo(function ProfessionTab({
     handlePortraitUpdate,
   } = useProfessionData(
     profession,
+    label,
     fileKey,
     selectedLanguage,
     { selectedFilters, search, genderFilter, shadyFilter },
@@ -192,8 +195,8 @@ export const ProfessionTab = memo(function ProfessionTab({
 
   const hasFilters = search || selectedFilters.length > 0;
   const emptyMessage = hasFilters
-    ? `No ${professionLower}s found${search ? ` matching "${search}"` : ''}`
-    : `No ${professionLower}s in this save file`;
+    ? `No ${labelLower} found${search ? ` matching "${search}"` : ''}`
+    : `No ${labelLower} in this save file`;
 
   if (!saveInfo) {
     return <EmptyState message="No save file loaded" />;
@@ -202,7 +205,7 @@ export const ProfessionTab = memo(function ProfessionTab({
   if (error) {
     return (
       <ErrorState
-        title={isGamePathError ? 'Game Installation Not Found' : `Failed to load ${professionLower}s`}
+        title={isGamePathError ? 'Game Installation Not Found' : `Failed to load ${labelLower}`}
         message={error}
         onRetry={loadPersons}
         onBrowse={isGamePathError ? handleSelectGamePath : undefined}
@@ -216,7 +219,7 @@ export const ProfessionTab = memo(function ProfessionTab({
       <Toolbar
         search={search}
         onSearchChange={setSearch}
-        professionLower={professionLower}
+        labelLower={labelLower}
         loading={loading}
         personCount={persons.length}
         sortField={sortField}
@@ -235,7 +238,7 @@ export const ProfessionTab = memo(function ProfessionTab({
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <LoadingSpinner message={`Loading ${professionLower}s...`} />
+          <LoadingSpinner message={`Loading ${labelLower}...`} />
         </div>
       ) : persons.length === 0 ? (
         <EmptyState message={emptyMessage} />
@@ -292,7 +295,7 @@ export const ProfessionTab = memo(function ProfessionTab({
 interface ToolbarProps {
   search: string;
   onSearchChange: (value: string) => void;
-  professionLower: string;
+  labelLower: string;
   loading: boolean;
   personCount: number;
   sortField: SortField;
@@ -312,7 +315,7 @@ interface ToolbarProps {
 const Toolbar = memo(function Toolbar({
   search,
   onSearchChange,
-  professionLower,
+  labelLower,
   loading,
   personCount,
   sortField,
@@ -332,7 +335,7 @@ const Toolbar = memo(function Toolbar({
     <div className="flex items-center gap-4">
       <Input
         type="text"
-        placeholder={`Search ${professionLower}s...`}
+        placeholder={`Search ${labelLower}...`}
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         className="max-w-sm"
@@ -345,7 +348,7 @@ const Toolbar = memo(function Toolbar({
         ) : (
           <>
             Found: <span className="font-semibold text-foreground">{personCount}</span>{' '}
-            {professionLower}{personCount !== 1 ? 's' : ''}
+            {labelLower}
           </>
         )}
       </div>

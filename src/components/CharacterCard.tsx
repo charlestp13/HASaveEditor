@@ -8,6 +8,7 @@ import { useCharacterData } from '@/hooks/useCharacterData';
 import {
   StatsSection,
   ExecutiveStatsSection,
+  DeptHeadStatsSection,
   InfoSection,
   TraitsSection,
   StatusSection,
@@ -54,6 +55,7 @@ export const CharacterCard = memo(function CharacterCard({
     isDead,
     isBusy,
     isExecutive,
+    isDeptHead,
     professionName,
     professionValue,
     art,
@@ -135,7 +137,7 @@ export const CharacterCard = memo(function CharacterCard({
               variant="outline"
               pressed={character.isShady === true}
               onPressedChange={(pressed) => handleUpdate('isShady', pressed ? 1 : 0)}
-              className="text-xs"
+              onClick={(e) => e.stopPropagation()}
             >
               Shady
             </Toggle>
@@ -163,6 +165,13 @@ export const CharacterCard = memo(function CharacterCard({
           <ExecutiveStatsSection
             selfEsteem={Number(character.selfEsteem ?? 0)}
             seniority={professionValue}
+            onUpdate={handleUpdate}
+          />
+        ) : isDeptHead ? (
+          <DeptHeadStatsSection
+            selfEsteem={Number(character.selfEsteem ?? 0)}
+            bonusCardMoney={character.BonusCardMoney ?? 0}
+            bonusCardInfluencePoints={character.BonusCardInfluencePoints ?? 0}
             onUpdate={handleUpdate}
           />
         ) : (
@@ -248,6 +257,8 @@ export const CharacterCard = memo(function CharacterCard({
   if (p.selfEsteem !== n.selfEsteem) return false;
   if (p.limit !== n.limit) return false;
   if (p.portraitBaseId !== n.portraitBaseId) return false;
+  if (p.BonusCardMoney !== n.BonusCardMoney) return false;
+  if (p.BonusCardInfluencePoints !== n.BonusCardInfluencePoints) return false;
   
   const pProf = p.professions ? Object.values(p.professions)[0] : null;
   const nProf = n.professions ? Object.values(n.professions)[0] : null;

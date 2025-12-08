@@ -53,7 +53,7 @@ export function SkillAdjuster({
   const { startHold: startLimitHold, stopHold: stopLimitHold } = useHoldAcceleration(
     limitDisplay,
     handleLimitChange,
-    { initialStep: 1, acceleratedStep: 10, snapToGrid: true, gridSize: 10 },
+    { initialStep: 10, acceleratedStep: 10 },
     0,
     100
   );
@@ -105,9 +105,9 @@ export function SkillAdjuster({
         <div className="text-muted-foreground text-sm">Skill Limit</div>
         <Adjuster
           value={ValueSteppers.formatScaled(limitValue, 10)}
-          onDecreaseMouseDown={() => startLimitHold(-1)}
+          onDecreaseMouseDown={() => startLimitHold(-10)}
           onDecreaseMouseUp={stopLimitHold}
-          onIncreaseMouseDown={() => startLimitHold(1)}
+          onIncreaseMouseDown={() => startLimitHold(10)}
           onIncreaseMouseUp={stopLimitHold}
           decreaseDisabled={limitValue <= 0}
           increaseDisabled={limitValue >= 1}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export type TabId = 'actors' | 'screenwriters' | 'directors' | 'producers' | 'cinematographers' | 'editors' | 'composers' | 'agents' | 'executives';
+export type TabId = 'actors' | 'screenwriters' | 'directors' | 'producers' | 'cinematographers' | 'editors' | 'composers' | 'agents' | 'deptHeads' | 'executives';
 
 interface UseTabStateOptions {
   initialTab?: TabId;

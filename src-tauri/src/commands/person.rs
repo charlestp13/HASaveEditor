@@ -122,6 +122,14 @@ fn apply_updates(person: &mut Value, profession: &str, update: &PersonUpdate) {
     if let Some(is_shady) = update.is_shady {
         person["isShady"] = serde_json::json!(is_shady);
     }
+    if let Some(value) = update.bonus_card_money {
+        person["BonusCardMoney"] = value.into();
+        update_bonus_cards_index(person, 0, value);
+    }
+    if let Some(value) = update.bonus_card_influence_points {
+        person["BonusCardInfluencePoints"] = value.into();
+        update_bonus_cards_index(person, 1, value);
+    }
 }
 
 fn apply_white_tag_update(person: &mut Value, tag_id: &str, value: &Value) {
@@ -140,6 +148,14 @@ fn update_birth_year(person: &mut Value, new_year: i32) {
         if parts.len() == 3 {
             let new_date = format!("{}-{}-{}", parts[0], parts[1], new_year);
             person["birthDate"] = Value::String(new_date);
+        }
+    }
+}
+
+fn update_bonus_cards_index(person: &mut Value, index: usize, value: i32) {
+    if let Some(arr) = person.get_mut("bonusCards").and_then(|b| b.as_array_mut()) {
+        if index < arr.len() {
+            arr[index] = value.into();
         }
     }
 }

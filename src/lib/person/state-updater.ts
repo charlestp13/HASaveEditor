@@ -6,10 +6,6 @@ export class PersonStateUpdater {
     const updated = { ...person };
 
     switch (field) {
-      case 'isShady':
-        updated.isShady = value === 1;
-        break;
-        
       case 'mood':
         updated.mood = value ?? 0;
         break;
@@ -43,6 +39,18 @@ export class PersonStateUpdater {
             updated.birthDate = `${parts[0]}-${parts[1]}-${value}`;
           }
         }
+        break;
+
+      case 'isShady':
+        updated.isShady = value === 1;
+        break;
+
+      case 'bonusCardMoney':
+        updated.BonusCardMoney = value ?? 0;
+        break;
+
+      case 'bonusCardInfluencePoints':
+        updated.BonusCardInfluencePoints = value ?? 0;
         break;
 
       default:

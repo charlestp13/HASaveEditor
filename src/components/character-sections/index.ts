@@ -1,5 +1,6 @@
 export { StatsSection } from './StatsSection';
 export { ExecutiveStatsSection } from './ExecutiveStatsSection';
+export { DeptHeadStatsSection } from './DeptHeadStatsSection';
 export { InfoSection } from './InfoSection';
 export { TraitsSection } from './TraitsSection';
 export { StatusSection } from './StatusSection';

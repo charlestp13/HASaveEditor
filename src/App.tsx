@@ -41,6 +41,7 @@ const TABS = [
   { id: 'editors', label: 'Editors', profession: 'FilmEditor', countKey: 'editors_count' },
   { id: 'composers', label: 'Composers', profession: 'Composer', countKey: 'composers_count' },
   { id: 'agents', label: 'Agents', profession: 'Agent', countKey: 'agents_count' },
+  { id: 'deptHeads', label: 'Department Heads', profession: 'DepartmentHead', countKey: 'dept_heads_count' },
   { id: 'executives', label: 'Executives', profession: 'Executive', countKey: 'executives_count' },
 ] as const;
 
@@ -442,6 +443,7 @@ export default function App() {
                 >
                   <ProfessionTab
                     profession={tab.profession}
+                    label={tab.label}
                     selectedLanguage={selectedLanguage}
                     saveInfo={saveInfo}
                     fileKey={fileKey}
@@ -456,7 +458,7 @@ export default function App() {
                     shadyFilter={shadyFilter}
                     onShadyFilterChange={setShadyFilter}
                     usedPortraits={
-                      tab.profession === 'Executive' ? combinedLieutPortraits :
+                      tab.profession === 'Executive' || tab.profession === 'DepartmentHead' ? combinedLieutPortraits :
                       tab.profession === 'Agent' ? combinedAgentPortraits :
                       combinedTalentPortraits
                     }

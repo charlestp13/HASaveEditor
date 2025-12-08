@@ -31,6 +31,8 @@ export interface Person {
   isOnTheHook?: boolean;
   mayHaveSins?: boolean | null;
   prefIlGift?: number;
+  BonusCardMoney?: number;
+  BonusCardInfluencePoints?: number;
 }
 
 export interface PersonContract {
@@ -65,6 +67,8 @@ export interface PersonUpdate {
   portraitBaseId?: number;
   birthYear?: number;
   isShady?: boolean;
+  bonusCardMoney?: number;
+  bonusCardInfluencePoints?: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -102,6 +106,7 @@ export interface SaveInfo {
   composers_count: number;
   cinematographers_count: number;
   agents_count: number;
+  dept_heads_count: number;
   executives_count: number;
   movies_count: number;
   studios_count: number;

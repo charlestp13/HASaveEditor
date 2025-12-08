@@ -8,7 +8,7 @@ interface SelfEsteemAdjusterProps {
 
 export function SelfEsteemAdjuster({ value, onChange }: SelfEsteemAdjusterProps) {
   const displayValue = Math.round(value * 100);
-  const min = -100;
+  const min = -99;
   const max = 200;
 
   const handleChange = (newDisplayValue: number) => {

@@ -36,9 +36,19 @@ pub struct PersonUpdate {
     pub birth_year: Option<i32>,
     #[serde(rename = "isShady")]
     pub is_shady: Option<bool>,
+    #[serde(rename = "bonusCardMoney")]
+    pub bonus_card_money: Option<i32>,
+    #[serde(rename = "bonusCardInfluencePoints")]
+    pub bonus_card_influence_points: Option<i32>,
 }
 
 const CAPTAIN_PROFESSIONS: [&str; 4] = ["CptHR", "CptLawyer", "CptFinancier", "CptPR"];
+
+const LIEUTENANT_PROFESSIONS: [&str; 11] = [
+    "LieutScript", "LieutPrep", "LieutProd", "LieutPost", "LieutRelease",
+    "LieutSecurity", "LieutProducers", "LieutInfrastructure", "LieutTech",
+    "LieutMuseum", "LieutEscort"
+];
 
 pub fn has_profession(character: &Value, profession: &str) -> bool {
     character
@@ -47,6 +57,8 @@ pub fn has_profession(character: &Value, profession: &str) -> bool {
         .is_some_and(|map| {
             if profession == "Executive" {
                 CAPTAIN_PROFESSIONS.iter().any(|cpt| map.contains_key(*cpt))
+            } else if profession == "DepartmentHead" {
+                LIEUTENANT_PROFESSIONS.iter().any(|lt| map.contains_key(*lt))
             } else {
                 map.contains_key(profession)
             }
