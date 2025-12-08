@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { PersonUtils, type PortraitType } from '@/lib';
+import { type PortraitType } from '@/lib';
 
 interface UsedPortrait {
   characterName: string;
