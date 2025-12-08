@@ -163,12 +163,16 @@ export const CharacterCard = memo(function CharacterCard({
       <CardContent className="space-y-4">
         {isExecutive ? (
           <ExecutiveStatsSection
+            mood={Number(character.mood ?? 0)}
+            attitude={Number(character.attitude ?? 0)}
             selfEsteem={Number(character.selfEsteem ?? 0)}
             seniority={professionValue}
             onUpdate={handleUpdate}
           />
         ) : isDeptHead ? (
           <DeptHeadStatsSection
+            mood={Number(character.mood ?? 0)}
+            attitude={Number(character.attitude ?? 0)}
             selfEsteem={Number(character.selfEsteem ?? 0)}
             bonusCardMoney={character.BonusCardMoney ?? 0}
             bonusCardInfluencePoints={character.BonusCardInfluencePoints ?? 0}

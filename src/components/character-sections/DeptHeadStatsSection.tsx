@@ -1,8 +1,11 @@
 import { Adjuster } from '@/components/Adjuster';
+import { StatAdjuster } from '@/components/StatAdjuster';
 import { SelfEsteemAdjuster } from '@/components/SelfEsteemAdjuster';
 import { useHoldAcceleration } from '@/hooks/useHoldAcceleration';
 
 interface DeptHeadStatsSectionProps {
+  mood: number;
+  attitude: number;
   selfEsteem: number;
   bonusCardMoney: number;
   bonusCardInfluencePoints: number;
@@ -10,6 +13,8 @@ interface DeptHeadStatsSectionProps {
 }
 
 export function DeptHeadStatsSection({
+  mood,
+  attitude,
   selfEsteem,
   bonusCardMoney,
   bonusCardInfluencePoints,
@@ -33,6 +38,16 @@ export function DeptHeadStatsSection({
 
   return (
     <div className="space-y-2">
+      <StatAdjuster
+        label="Happiness"
+        value={mood}
+        onChange={(v) => onUpdate?.('mood', v)}
+      />
+      <StatAdjuster
+        label="Loyalty"
+        value={attitude}
+        onChange={(v) => onUpdate?.('attitude', v)}
+      />
       <SelfEsteemAdjuster
         value={selfEsteem}
         onChange={(v) => onUpdate?.('selfEsteem', v)}

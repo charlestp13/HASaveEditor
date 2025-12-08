@@ -1,14 +1,19 @@
 import { Adjuster } from '@/components/Adjuster';
+import { StatAdjuster } from '@/components/StatAdjuster';
 import { SelfEsteemAdjuster } from '@/components/SelfEsteemAdjuster';
 import { useHoldAcceleration } from '@/hooks/useHoldAcceleration';
 
 interface ExecutiveStatsSectionProps {
+  mood: number;
+  attitude: number;
   selfEsteem: number;
   seniority: number;
   onUpdate?: (field: string, value: number | null) => void;
 }
 
 export function ExecutiveStatsSection({
+  mood,
+  attitude,
   selfEsteem,
   seniority,
   onUpdate,
@@ -33,6 +38,16 @@ export function ExecutiveStatsSection({
 
   return (
     <div className="space-y-2">
+      <StatAdjuster
+        label="Happiness"
+        value={mood}
+        onChange={(v) => onUpdate?.('mood', v)}
+      />
+      <StatAdjuster
+        label="Loyalty"
+        value={attitude}
+        onChange={(v) => onUpdate?.('attitude', v)}
+      />
       <SelfEsteemAdjuster
         value={selfEsteem}
         onChange={(v) => onUpdate?.('selfEsteem', v)}

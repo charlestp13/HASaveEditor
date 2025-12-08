@@ -22,28 +22,34 @@ export function Adjuster({
   increaseDisabled = false,
 }: AdjusterProps) {
   return (
-    <div className="flex items-center rounded-md border border-border overflow-hidden w-[88px]">
-      <button
-        className="w-7 h-7 flex items-center justify-center hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed border-r border-border"
-        onMouseDown={onDecreaseMouseDown}
-        onMouseUp={onDecreaseMouseUp}
-        onMouseLeave={onDecreaseMouseUp}
-        onClick={onDecreaseClick}
-        disabled={decreaseDisabled}
-      >
-        -
-      </button>
-      <span className="font-mono flex-1 text-center text-xs">{value}</span>
-      <button
-        className="w-7 h-7 flex items-center justify-center hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed border-l border-border"
-        onMouseDown={onIncreaseMouseDown}
-        onMouseUp={onIncreaseMouseUp}
-        onMouseLeave={onIncreaseMouseUp}
-        onClick={onIncreaseClick}
-        disabled={increaseDisabled}
-      >
-        +
-      </button>
+    <div className="flex items-center w-[88px]">
+      {decreaseDisabled ? (
+        <span className="w-7 h-7 flex items-center justify-center text-xs">Min</span>
+      ) : (
+        <button
+          className="w-7 h-7 flex items-center justify-center hover:bg-muted rounded-l-md border-l border-t border-b border-border"
+          onMouseDown={onDecreaseMouseDown}
+          onMouseUp={onDecreaseMouseUp}
+          onMouseLeave={onDecreaseMouseUp}
+          onClick={onDecreaseClick}
+        >
+          -
+        </button>
+      )}
+      <span className="font-mono w-8 h-7 flex items-center justify-center text-xs border border-border">{value}</span>
+      {increaseDisabled ? (
+        <span className="w-7 h-7 flex items-center justify-center text-xs">Max</span>
+      ) : (
+        <button
+          className="w-7 h-7 flex items-center justify-center hover:bg-muted rounded-r-md border-r border-t border-b border-border"
+          onMouseDown={onIncreaseMouseDown}
+          onMouseUp={onIncreaseMouseUp}
+          onMouseLeave={onIncreaseMouseUp}
+          onClick={onIncreaseClick}
+        >
+          +
+        </button>
+      )}
     </div>
   );
 }
