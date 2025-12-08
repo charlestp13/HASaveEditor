@@ -36,7 +36,6 @@ interface ProfessionTabProps {
   selectedLanguage: string;
   saveInfo: SaveInfo | null;
   fileKey: string | null;
-  isActive?: boolean;
   selectedFilters: string[];
   onFiltersChange: (filters: string[]) => void;
   sortField: SortField;
@@ -56,7 +55,6 @@ export const ProfessionTab = memo(function ProfessionTab({
   selectedLanguage,
   saveInfo,
   fileKey,
-  isActive = true,
   selectedFilters,
   onFiltersChange,
   sortField,
@@ -247,7 +245,6 @@ export const ProfessionTab = memo(function ProfessionTab({
           persons={persons}
           currentDate={currentDate}
           nameSearcher={nameSearcher}
-          isActive={isActive}
           onUpdate={handlePersonUpdate}
           onStringFieldUpdate={handleStringFieldUpdate}
           onEditTraits={openTraitsEditor}

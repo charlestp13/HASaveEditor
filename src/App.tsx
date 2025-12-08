@@ -152,7 +152,6 @@ export default function App() {
 
   const {
     activeTab,
-    visitedTabs,
     handleTabClick,
   } = useTabState({
     initialTab: 'actors',
@@ -424,47 +423,32 @@ export default function App() {
 
           <main className="container mx-auto px-4 py-6 relative">
             {TABS.map(tab => {
-              const isVisited = visitedTabs.has(tab.id);
-              if (!isVisited) return null;
-              
-              const isActive = activeTab === tab.id;
+              if (activeTab !== tab.id) return null;
               
               return (
-                <div
+                <ProfessionTab
                   key={tab.id}
-                  style={isActive ? undefined : {
-                    position: 'absolute',
-                    opacity: 0,
-                    pointerEvents: 'none',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                  }}
-                >
-                  <ProfessionTab
-                    profession={tab.profession}
-                    label={tab.label}
-                    selectedLanguage={selectedLanguage}
-                    saveInfo={saveInfo}
-                    fileKey={fileKey}
-                    isActive={isActive}
-                    selectedFilters={globalFilters}
-                    onFiltersChange={setGlobalFilters}
-                    sortField={sortField}
-                    sortOrder={sortOrder}
-                    onSortChange={handleSortChange}
-                    genderFilter={genderFilter}
-                    onGenderFilterChange={setGenderFilter}
-                    shadyFilter={shadyFilter}
-                    onShadyFilterChange={setShadyFilter}
-                    usedPortraits={
-                      tab.profession === 'Executive' || tab.profession === 'DepartmentHead' ? combinedLieutPortraits :
-                      tab.profession === 'Agent' ? combinedAgentPortraits :
-                      combinedTalentPortraits
-                    }
-                    onPortraitChange={handlePortraitChange}
-                  />
-                </div>
+                  profession={tab.profession}
+                  label={tab.label}
+                  selectedLanguage={selectedLanguage}
+                  saveInfo={saveInfo}
+                  fileKey={fileKey}
+                  selectedFilters={globalFilters}
+                  onFiltersChange={setGlobalFilters}
+                  sortField={sortField}
+                  sortOrder={sortOrder}
+                  onSortChange={handleSortChange}
+                  genderFilter={genderFilter}
+                  onGenderFilterChange={setGenderFilter}
+                  shadyFilter={shadyFilter}
+                  onShadyFilterChange={setShadyFilter}
+                  usedPortraits={
+                    tab.profession === 'Executive' || tab.profession === 'DepartmentHead' ? combinedLieutPortraits :
+                    tab.profession === 'Agent' ? combinedAgentPortraits :
+                    combinedTalentPortraits
+                  }
+                  onPortraitChange={handlePortraitChange}
+                />
               );
             })}
           </main>
