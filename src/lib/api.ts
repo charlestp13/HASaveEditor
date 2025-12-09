@@ -69,6 +69,15 @@ export class SaveManager {
     });
   }
 
+  async updatePeople(profession: string, studioId: string, field: string, value: number): Promise<number> {
+    return invoke<number>('update_people', {
+      profession,
+      studioId,
+      field,
+      value,
+    });
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // Studio Operations
   // ───────────────────────────────────────────────────────────────────────────

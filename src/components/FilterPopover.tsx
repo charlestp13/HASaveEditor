@@ -2,6 +2,7 @@ import { useState, useMemo, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { GoldIcon } from '@/components/GoldIcon';
 import { Filter } from 'lucide-react';
 import { Formatter, Studios } from '@/lib';
 import deadIcon from '@/assets/DEAD.png';
@@ -23,7 +24,6 @@ interface FilterOption {
   id: string;
   label: string;
   icon: string;
-  isDynamic?: boolean;
   isSpecial?: boolean;
 }
 
@@ -79,7 +79,7 @@ const ToggleFilterSection = memo(function ToggleFilterSection({
             value={option.value} 
             className={option.value === 'all' ? 'flex-1' : 'gap-2'}
           >
-            {option.icon && <img src={option.icon} alt={option.label} className="w-4 h-4" />}
+            {option.icon && <GoldIcon src={option.icon} alt={option.label} className="w-4 h-4" />}
             {option.label}
           </ToggleGroupItem>
         ))}
@@ -113,7 +113,7 @@ export const FilterPopover = memo(function FilterPopover({
     const playerIcon = Studios.getPlayerLogoIcon(playerLogoId);
     
     const options: FilterOption[] = [
-      { id: 'PL', label: Formatter.toTitleCase(playerStudioName), icon: playerIcon, isDynamic: true },
+      { id: 'PL', label: Formatter.toTitleCase(playerStudioName), icon: playerIcon },
       { id: 'Unemployed', label: 'Unemployed', icon: unemployedIcon },
     ];
     
@@ -259,17 +259,7 @@ const FilterOptionItem = memo(function FilterOptionItem({ option, isSelected, on
       style={isSelected ? { borderLeftColor: SELECTED_BORDER_COLOR } : undefined}
     >
       <div className="w-6 h-6 shrink-0 flex items-center justify-center">
-        <img
-          src={option.icon}
-          alt={option.label}
-          className="w-6 h-6 object-contain"
-          onError={(e) => {
-            if (option.isDynamic) {
-              const img = e.target as HTMLImageElement;
-              img.src = '/src/assets/PL0.png';
-            }
-          }}
-        />
+        <GoldIcon src={option.icon} alt={option.label} className="w-6 h-6" />
       </div>
       <span className="flex-1 text-left text-sm">{option.label}</span>
     </button>

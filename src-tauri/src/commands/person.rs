@@ -51,6 +51,41 @@ pub fn update_person(
     })
 }
 
+#[tauri::command]
+pub fn update_people(
+    profession: String,
+    studio_id: String,
+    field: String,
+    value: f64,
+    state: State<AppState>,
+) -> Result<usize, String> {
+    state.with_save_data_mut(|data| {
+        let characters = data.characters_mut()?;
+        let mut count = 0;
+
+        for person in characters.iter_mut() {
+            if !has_profession(person, &profession) {
+                continue;
+            }
+            
+            let person_studio = person.get("studioId").and_then(|s| s.as_str()).unwrap_or("");
+            if person_studio != studio_id {
+                continue;
+            }
+
+            match field.as_str() {
+                "mood" => person["mood"] = serde_json::json!(value),
+                "attitude" => person["attitude"] = serde_json::json!(value),
+                "selfEsteem" => person["selfEsteem"] = serde_json::json!(value),
+                _ => continue,
+            }
+            count += 1;
+        }
+
+        Ok(count)
+    })
+}
+
 fn apply_updates(person: &mut Value, profession: &str, update: &PersonUpdate) {
     if let Some(first_name_id) = &update.first_name_id {
         person["firstNameId"] = Value::String(first_name_id.clone());

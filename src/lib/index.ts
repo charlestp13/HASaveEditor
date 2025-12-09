@@ -46,10 +46,12 @@ export {
   Status,
   Studios,
   Departments,
+  Stats,
   type Genre,
   type DisplayableTrait,
   type StatusType,
   type Studio,
   type StudioId,
   type Department,
+  type StatConfig,
 } from './game-data';

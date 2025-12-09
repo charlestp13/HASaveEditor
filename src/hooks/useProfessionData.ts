@@ -216,6 +216,30 @@ export function useProfessionData(
     [profession, updatePersonLocal]
   );
 
+  const handleBatchUpdate = useCallback(
+    async (studioId: string, field: string, value: number) => {
+      // Update local state directly
+      setAllPersons(prev => prev.map(person => {
+        if (person.studioId !== studioId) return person;
+        // selfEsteem is stored as string in Person type
+        const actualValue = field === 'selfEsteem' ? String(value) : value;
+        return { ...person, [field]: actualValue };
+      }));
+
+      // Persist to backend
+      try {
+        const count = await saveManager.updatePeople(profession, studioId, field, value);
+        return count;
+      } catch (err) {
+        console.error('Batch update failed:', err);
+        // Reload on error to resync
+        loadPersons();
+        return 0;
+      }
+    },
+    [profession, loadPersons]
+  );
+
   return {
     allPersons,
     persons,
@@ -231,5 +255,6 @@ export function useProfessionData(
     handleTraitAdd,
     handleTraitRemove,
     handlePortraitUpdate,
+    handleBatchUpdate,
   };
 }

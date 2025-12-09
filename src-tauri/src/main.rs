@@ -21,6 +21,7 @@ fn main() {
             save_save_file,
             get_persons,
             update_person,
+            update_people,
             update_studio,
             get_current_date,
             get_language_strings,

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FilterPopover } from '@/components/FilterPopover';
 import { SortPopover } from '@/components/SortPopover';
+import { BatchPopover } from '@/components/BatchPopover';
 import { CharacterList } from '@/components/CharacterList';
 import { PortraitEditorDialog } from '@/components/PortraitEditorDialog';
 import { TraitAdjuster } from '@/components/TraitAdjuster';
@@ -90,6 +91,7 @@ export const ProfessionTab = memo(function ProfessionTab({
     handleTraitAdd,
     handleTraitRemove,
     handlePortraitUpdate,
+    handleBatchUpdate,
   } = useProfessionData(
     profession,
     label,
@@ -232,6 +234,7 @@ export const ProfessionTab = memo(function ProfessionTab({
         onGenderFilterChange={onGenderFilterChange}
         shadyFilter={shadyFilter}
         onShadyFilterChange={onShadyFilterChange}
+        onBatchUpdate={handleBatchUpdate}
       />
 
       {loading ? (
@@ -307,6 +310,7 @@ interface ToolbarProps {
   onGenderFilterChange: (filter: GenderFilter) => void;
   shadyFilter: ShadyFilter;
   onShadyFilterChange: (filter: ShadyFilter) => void;
+  onBatchUpdate: (studioId: string, field: string, value: number) => void;
 }
 
 const Toolbar = memo(function Toolbar({
@@ -327,6 +331,7 @@ const Toolbar = memo(function Toolbar({
   onGenderFilterChange,
   shadyFilter,
   onShadyFilterChange,
+  onBatchUpdate,
 }: ToolbarProps) {
   return (
     <div className="flex items-center gap-4">
@@ -351,6 +356,13 @@ const Toolbar = memo(function Toolbar({
       </div>
       
       <div className="ml-auto flex gap-2">
+        <BatchPopover
+          playerStudioName={saveInfo.player_studio_name}
+          playerLogoId={saveInfo.studio_logo_id}
+          availableStudios={availableStudios}
+          onBatchUpdate={onBatchUpdate}
+        />
+        
         <div className="flex">
           <SortPopover
             sortField={sortField}

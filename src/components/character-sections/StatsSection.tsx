@@ -1,6 +1,5 @@
 import { StatAdjuster } from '@/components/StatAdjuster';
 import { SkillAdjuster } from '@/components/SkillAdjuster';
-import { SelfEsteemAdjuster } from '@/components/SelfEsteemAdjuster';
 
 interface StatsSectionProps {
   mood: number;
@@ -22,16 +21,17 @@ export function StatsSection({
   return (
     <div className="space-y-2">
       <StatAdjuster
-        label="Happiness"
+        statId="mood"
         value={mood}
         onChange={(v) => onUpdate?.('mood', v)}
       />
       <StatAdjuster
-        label="Loyalty"
+        statId="attitude"
         value={attitude}
         onChange={(v) => onUpdate?.('attitude', v)}
       />
-      <SelfEsteemAdjuster
+      <StatAdjuster
+        statId="selfEsteem"
         value={selfEsteem}
         onChange={(v) => onUpdate?.('selfEsteem', v)}
       />
