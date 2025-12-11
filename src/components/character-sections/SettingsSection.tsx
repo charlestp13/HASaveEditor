@@ -13,7 +13,7 @@ export function SettingsSection({
   onUpdate,
 }: SettingsSectionProps) {
   return (
-    <CardSection title="Settings">
+    <CardSection title="Settings" collapsible defaultCollapsed>
       <SettingsAdjuster
         outdoorValue={outdoor}
         indoorValue={indoor}
