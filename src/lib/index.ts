@@ -13,6 +13,7 @@ export type {
   StudioUpdate,
   CompetitorStudio,
   CompetitorUpdate,
+  UsedPortrait,
 } from './types';
 
 // API

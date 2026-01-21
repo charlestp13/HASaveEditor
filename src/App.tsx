@@ -10,12 +10,7 @@ import { useTabState } from '@/hooks/useTabState';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SortField, SortOrder, SaveInfo, CompetitorStudio, Person } from '@/lib';
-
-interface UsedPortrait {
-  characterName: string;
-  profession: string;
-}
+import type { SortField, SortOrder, SaveInfo, CompetitorStudio, Person, UsedPortrait } from '@/lib';
 
 const LANGUAGES = ['ENG', 'SPA', 'GER', 'FRE', 'PTB', 'RUS', 'CHN', 'JAP', 'BEL', 'UKR'] as const;
 
@@ -193,14 +188,17 @@ export default function App() {
       if (!lieutPortraitMap.has(rawProfName)) {
         lieutPortraitMap.set(rawProfName, new Map());
       }
-      
+
       const firstName = nameStrings[parseInt(person.firstNameId || '0', 10)] || '';
       const lastName = nameStrings[parseInt(person.lastNameId || '0', 10)] || '';
-      
-      lieutPortraitMap.get(rawProfName)!.set(person.portraitBaseId, {
-        characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
-        profession: PersonUtils.PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
-      });
+
+      const portraits = lieutPortraitMap.get(rawProfName);
+      if (portraits) {
+        portraits.set(person.portraitBaseId, {
+          characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
+          profession: PersonUtils.PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
+        });
+      }
     }
 
     const agentPortraitMap = new Map<string, Map<number, UsedPortrait>>();

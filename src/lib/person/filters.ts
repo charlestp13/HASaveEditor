@@ -20,9 +20,10 @@ export class PersonFilters {
     let filtered = persons;
 
     if (filters.excludeStudios && filters.excludeStudios.length > 0) {
+      const excludeStudios = filters.excludeStudios;
       filtered = filtered.filter((person) => {
         const studioId = StudioUtils.normalizeId(person.studioId);
-        return !filters.excludeStudios!.includes(studioId);
+        return !excludeStudios.includes(studioId);
       });
     }
 

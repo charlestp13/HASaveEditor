@@ -142,3 +142,12 @@ export interface CompetitorUpdate {
   ip?: number;
   budgetCheatsRemaining?: number;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Portrait Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface UsedPortrait {
+  characterName: string;
+  profession: string;
+}

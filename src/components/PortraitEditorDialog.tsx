@@ -7,12 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { type PortraitType } from '@/lib';
-
-interface UsedPortrait {
-  characterName: string;
-  profession: string;
-}
+import { type PortraitType, type UsedPortrait } from '@/lib';
+import { loadPortraitManifest } from '@/lib/portrait-manifest';
 
 interface PortraitEditorDialogProps {
   open: boolean;
@@ -24,42 +20,21 @@ interface PortraitEditorDialogProps {
   portraitType?: PortraitType;
 }
 
-let manifestCache: Record<string, string[]> | null = null;
-let manifestPromise: Promise<Record<string, string[]>> | null = null;
-
-async function loadManifest(): Promise<Record<string, string[]>> {
-  if (manifestCache) return manifestCache;
-  if (manifestPromise) return manifestPromise;
-  
-  manifestPromise = fetch('/media-manifest.json')
-    .then(r => r.json())
-    .then(data => {
-      manifestCache = data.portraits;
-      return data.portraits;
-    })
-    .catch(err => {
-      console.warn('Failed to load portrait manifest:', err);
-      return {};
-    });
-  
-  return manifestPromise;
-}
-
 const PORTRAITS_PER_PAGE = 9;
 
-function PortraitThumbnail({ 
-  id, 
-  sex, 
+function PortraitThumbnail({
+  id,
+  sex,
   ages,
   portraitType,
-}: { 
-  id: number; 
-  sex: string; 
+}: {
+  id: number;
+  sex: string;
   ages: string[];
   portraitType: PortraitType;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  
+
   const getPortraitPath = (age: string) => {
     return `/portraits/${portraitType}_${sex}_${age}_${id}.png`;
   };
@@ -121,33 +96,34 @@ export function PortraitEditorDialog({
 
   useEffect(() => {
     if (!open) return;
-    
-    loadManifest().then(manifest => {
+
+    (async () => {
+      const manifest = await loadPortraitManifest();
       const prefix = `${portraitType}_${sex}_`;
       const idsWithAges: Record<number, string[]> = {};
-      
-      Object.entries(manifest).forEach(([key, ages]) => {
+
+      for (const [key, ages] of Object.entries(manifest)) {
         if (key.startsWith(prefix)) {
           const id = parseInt(key.replace(prefix, ''), 10);
           idsWithAges[id] = ages;
         }
-      });
-      
+      }
+
       const ids = Object.keys(idsWithAges).map(Number).sort((a, b) => a - b);
       setAllPortraitIds(ids);
       setPortraitAges(idsWithAges);
-      
+
       const currentIndex = ids.indexOf(currentPortraitId);
       if (currentIndex >= 0) {
         setCurrentPage(Math.floor(currentIndex / PORTRAITS_PER_PAGE));
       } else {
         setCurrentPage(0);
       }
-    });
+    })();
   }, [open, sex, currentPortraitId, portraitType]);
 
   const totalPages = Math.ceil(allPortraitIds.length / PORTRAITS_PER_PAGE);
-  
+
   const visiblePortraits = useMemo(() => {
     const start = currentPage * PORTRAITS_PER_PAGE;
     return allPortraitIds.slice(start, start + PORTRAITS_PER_PAGE);
@@ -172,7 +148,7 @@ export function PortraitEditorDialog({
             Select {typeLabel} Portrait ({gender === 1 ? 'Female' : 'Male'}) - {allPortraitIds.length} available
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-3 gap-4 p-2">
             {visiblePortraits.map(id => {
@@ -180,7 +156,7 @@ export function PortraitEditorDialog({
               const isCurrent = id === currentPortraitId;
               const usedBy = usedPortraits.get(id);
               const ages = portraitAges[id] || ['Y', 'M', 'O'];
-              
+
               return (
                 <div
                   key={id}
@@ -192,11 +168,11 @@ export function PortraitEditorDialog({
                   `}
                 >
                   <PortraitThumbnail id={id} sex={sex} ages={ages} portraitType={portraitType} />
-                  
+
                   <div className="mt-1 text-xs text-center font-medium">
                     #{id}
                   </div>
-                  
+
                   {isUsed && !isCurrent && usedBy && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-lg">
                       <div className="text-white text-xs text-center px-2">
@@ -205,7 +181,7 @@ export function PortraitEditorDialog({
                       </div>
                     </div>
                   )}
-                  
+
                   {isCurrent && (
                     <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded">
                       Current
@@ -227,11 +203,11 @@ export function PortraitEditorDialog({
             <ChevronLeft className="h-4 w-4 mr-1" />
             Previous
           </Button>
-          
+
           <span className="text-sm text-muted-foreground">
             Page {currentPage + 1} of {totalPages}
           </span>
-          
+
           <Button
             variant="outline"
             size="sm"

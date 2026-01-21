@@ -10,7 +10,7 @@ interface InfoSectionProps {
   birthParsed: DateUtils | null;
   isDead: boolean;
   deathParsed: DateUtils | null;
-  professions: { [key: string]: any };
+  professions: Record<string, string | number | undefined>;
   portraitBaseId: number | undefined;
   onEditPortrait?: () => void;
 }

@@ -122,16 +122,8 @@ export class SaveManager {
   // Game Data Operations
   // ───────────────────────────────────────────────────────────────────────────
 
-  async getCurrentDate(): Promise<string> {
-    return invoke<string>('get_current_date');
-  }
-
   async getLanguageStrings(languageCode: string): Promise<string[]> {
     return invoke<string[]>('get_language_strings', { languageCode });
-  }
-
-  async getGamePath(): Promise<string | null> {
-    return invoke<string | null>('get_game_path');
   }
 
   async setGamePath(path: string): Promise<void> {

@@ -24,12 +24,8 @@ import {
   type GenderFilter,
   type ShadyFilter,
   type SaveInfo,
+  type UsedPortrait,
 } from '@/lib';
-
-interface UsedPortrait {
-  characterName: string;
-  profession: string;
-}
 
 interface ProfessionTabProps {
   profession: string;

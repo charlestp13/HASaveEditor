@@ -21,16 +21,4 @@ export class WhiteTagFactory {
       ],
     };
   }
-
-  static getValue(tag: WhiteTag | undefined): number {
-    if (!tag) return 0;
-    return typeof tag.value === 'string' ? parseFloat(tag.value) : tag.value;
-  }
-
-  static updateValue(tag: WhiteTag, value: number): WhiteTag {
-    return {
-      ...tag,
-      value: value.toFixed(3),
-    };
-  }
 }

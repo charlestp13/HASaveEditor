@@ -2,32 +2,12 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PersonUtils } from '@/lib';
+import { loadPortraitManifest } from '@/lib/portrait-manifest';
 
 interface PortraitCarouselProps {
-  professions: { [key: string]: any };
+  professions: Record<string, string | number | undefined>;
   gender: number | undefined;
   portraitBaseId: number | undefined;
-}
-
-let manifestCache: Record<string, string[]> | null = null;
-let manifestPromise: Promise<Record<string, string[]>> | null = null;
-
-async function loadManifest(): Promise<Record<string, string[]>> {
-  if (manifestCache) return manifestCache;
-  if (manifestPromise) return manifestPromise;
-  
-  manifestPromise = fetch('/media-manifest.json')
-    .then(r => r.json())
-    .then(data => {
-      manifestCache = data.portraits;
-      return data.portraits;
-    })
-    .catch(err => {
-      console.warn('Failed to load portrait manifest:', err);
-      return {};
-    });
-  
-  return manifestPromise;
 }
 
 export function PortraitCarousel({ professions, gender, portraitBaseId }: PortraitCarouselProps) {
@@ -44,17 +24,17 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
       return;
     }
 
-    const manifest = await loadManifest();
-    
+    const manifest = await loadPortraitManifest();
+
     const professionType = PersonUtils.getPortraitType(professions);
     const sex = gender === 1 ? 'F' : 'M';
     const key = `${professionType}_${sex}_${portraitBaseId}`;
-    
+
     const ageVariants = manifest[key] || [];
-    const portraits = ageVariants.map(age => 
+    const portraits = ageVariants.map(age =>
       `/portraits/${professionType}_${sex}_${age}_${portraitBaseId}.png`
     );
-    
+
     setAvailablePortraits(portraits);
     setCurrentIndex(0);
   };
@@ -79,7 +59,7 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
         className="object-contain rounded max-h-16 mx-auto"
         style={{ transform: 'scaleX(-1)' }}
       />
-      
+
       {availablePortraits.length > 1 && (
         <>
           <Button
@@ -93,7 +73,7 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
