@@ -38,6 +38,7 @@ const gridComponents = {
       {children}
     </div>
   ),
+  Footer: () => <div style={{ height: 100 }} />,
 };
 
 gridComponents.List.displayName = 'GridList';
