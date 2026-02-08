@@ -36,7 +36,7 @@ export class PersonSorter {
         return parseFloat(prof);
       }
       case 'selfEsteem': {
-        return parseFloat(person.selfEsteem || '0');
+        return person.selfEsteem ?? 0;
       }
       case 'age': {
         if (!person.birthDate || !context.currentDate) return 0;

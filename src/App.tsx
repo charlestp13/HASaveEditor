@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { open } from '@tauri-apps/plugin-dialog';
 import { saveManager, PersonUtils } from '@/lib';
 import appBanner from '@/assets/appBanner.png';
 import { ProfessionTab } from '@/components/ProfessionTab';
@@ -41,6 +42,11 @@ const TABS = [
 ] as const;
 
 const TALENT_PROFESSIONS = ['Actor', 'Scriptwriter', 'Director', 'Producer', 'Cinematographer', 'FilmEditor', 'Composer'] as const;
+
+function isGamePathError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes('Game installation not found');
+}
 
 function buildPortraitMap(
   persons: Person[],
@@ -175,45 +181,16 @@ export default function App() {
     const talentPortraitMap = new Map<string, Map<number, UsedPortrait>>();
     for (const profession of TALENT_PROFESSIONS) {
       const persons = await saveManager.getPersons(profession);
-      const portraits = buildPortraitMap(persons, profession, nameStrings);
-      talentPortraitMap.set(profession, portraits);
+      talentPortraitMap.set(profession, buildPortraitMap(persons, profession, nameStrings));
     }
 
     const lieutPortraitMap = new Map<string, Map<number, UsedPortrait>>();
     const executives = await saveManager.getPersons('Executive');
-    for (const person of executives) {
-      if (person.portraitBaseId === undefined) continue;
-      const rawProfName = person.professions ? Object.keys(person.professions)[0] : 'Executive';
-      
-      if (!lieutPortraitMap.has(rawProfName)) {
-        lieutPortraitMap.set(rawProfName, new Map());
-      }
-
-      const firstName = nameStrings[parseInt(person.firstNameId || '0', 10)] || '';
-      const lastName = nameStrings[parseInt(person.lastNameId || '0', 10)] || '';
-
-      const portraits = lieutPortraitMap.get(rawProfName);
-      if (portraits) {
-        portraits.set(person.portraitBaseId, {
-          characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
-          profession: PersonUtils.PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
-        });
-      }
-    }
+    lieutPortraitMap.set('Executive', buildPortraitMap(executives, 'Executive', nameStrings));
 
     const agentPortraitMap = new Map<string, Map<number, UsedPortrait>>();
     const agents = await saveManager.getPersons('Agent');
-    const agentInnerMap = new Map<number, UsedPortrait>();
-    for (const person of agents) {
-      if (person.portraitBaseId === undefined) continue;
-      const firstName = nameStrings[parseInt(person.firstNameId || '0', 10)] || '';
-      const lastName = nameStrings[parseInt(person.lastNameId || '0', 10)] || '';
-      agentInnerMap.set(person.portraitBaseId, {
-        characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
-        profession: 'Agent',
-      });
-    }
-    agentPortraitMap.set('Agent', agentInnerMap);
+    agentPortraitMap.set('Agent', buildPortraitMap(agents, 'Agent', nameStrings));
     
     setSaveInfo(info);
     setResources(res);
@@ -243,6 +220,21 @@ export default function App() {
       await loadSaveData(result.info, nameStrings);
     }
   });
+
+  const handleBrowseGamePath = async () => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      title: 'Select Hollywood Animal Installation Folder',
+    });
+    if (selected && typeof selected === 'string') {
+      await saveManager.setGamePath(selected);
+      clearError();
+      if (saveManager.isLoaded()) {
+        handleRefresh();
+      }
+    }
+  };
 
   const handleSaveFile = () => execute(() => saveManager.saveSaveFile());
   const handleSaveFileAs = () => execute(() => saveManager.saveSaveFileAs());
@@ -377,7 +369,13 @@ export default function App() {
         </div>
       </header>
 
-      {error && <ErrorBanner message={error} onDismiss={clearError} />}
+      {error && (
+        <ErrorBanner
+          message={error}
+          onDismiss={clearError}
+          onBrowse={isGamePathError(error) ? handleBrowseGamePath : undefined}
+        />
+      )}
 
       {saveInfo && (
         <StudioInfoBar

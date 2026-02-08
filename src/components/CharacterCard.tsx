@@ -21,25 +21,21 @@ import type { Person, NameSearcher } from '@/lib';
 
 interface CharacterCardProps {
   character: Person;
-  personId: string | number;
+  personId: number;
   currentDate: string;
   nameSearcher: NameSearcher;
-  onClick?: () => void;
-  isSelected?: boolean;
-  onUpdate?: (personId: string | number, field: string, value: number | null) => void;
-  onStringFieldUpdate?: (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
-  onEditTraits?: (personId: string | number) => void;
-  onEditGenres?: (personId: string | number) => void;
-  onEditPortrait?: (personId: string | number) => void;
+  onUpdate?: (personId: number, field: string, value: number | null) => void;
+  onStringFieldUpdate?: (personId: number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
+  onEditTraits?: (personId: number) => void;
+  onEditGenres?: (personId: number) => void;
+  onEditPortrait?: (personId: number) => void;
 }
 
-export const CharacterCard = memo(function CharacterCard({ 
+export const CharacterCard = memo(function CharacterCard({
   character,
   personId,
-  currentDate, 
+  currentDate,
   nameSearcher,
-  onClick,
-  isSelected = false,
   onUpdate,
   onStringFieldUpdate,
   onEditTraits,
@@ -99,12 +95,7 @@ export const CharacterCard = memo(function CharacterCard({
   );
 
   return (
-    <Card 
-      className={`transition-colors ${
-        isSelected ? 'ring-2 ring-primary' : ''
-      } ${isDead ? 'opacity-60' : ''}`}
-      onClick={onClick}
-    >
+    <Card className={`transition-colors ${isDead ? 'opacity-60' : ''}`}>
       <CardHeader className="pb-3">
         <div className="space-y-1">
           <div className="flex items-center justify-between">
@@ -165,7 +156,7 @@ export const CharacterCard = memo(function CharacterCard({
           <ExecutiveStatsSection
             mood={Number(character.mood ?? 0)}
             attitude={Number(character.attitude ?? 0)}
-            selfEsteem={Number(character.selfEsteem ?? 0)}
+            selfEsteem={character.selfEsteem ?? 0}
             seniority={professionValue}
             onUpdate={handleUpdate}
           />
@@ -173,7 +164,7 @@ export const CharacterCard = memo(function CharacterCard({
           <DeptHeadStatsSection
             mood={Number(character.mood ?? 0)}
             attitude={Number(character.attitude ?? 0)}
-            selfEsteem={Number(character.selfEsteem ?? 0)}
+            selfEsteem={character.selfEsteem ?? 0}
             bonusCardMoney={character.BonusCardMoney ?? 0}
             bonusCardInfluencePoints={character.BonusCardInfluencePoints ?? 0}
             onUpdate={handleUpdate}
@@ -182,7 +173,7 @@ export const CharacterCard = memo(function CharacterCard({
           <StatsSection
             mood={Number(character.mood ?? 0)}
             attitude={Number(character.attitude ?? 0)}
-            selfEsteem={Number(character.selfEsteem ?? 0)}
+            selfEsteem={character.selfEsteem ?? 0}
             professionValue={professionValue}
             limit={Number(character.limit ?? 1)}
             onUpdate={handleUpdate}
@@ -245,7 +236,6 @@ export const CharacterCard = memo(function CharacterCard({
     </Card>
   );
 }, (prev, next) => {
-  if (prev.isSelected !== next.isSelected) return false;
   if (prev.personId !== next.personId) return false;
   
   const p = prev.character;

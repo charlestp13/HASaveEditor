@@ -25,7 +25,7 @@ export function useAsyncAction(): UseAsyncActionReturn {
     } catch (err) {
       setState({
         loading: false,
-        error: err instanceof Error ? err.message : 'An error occurred',
+        error: err instanceof Error ? err.message : typeof err === 'string' ? err : 'An error occurred',
       });
       return undefined;
     }

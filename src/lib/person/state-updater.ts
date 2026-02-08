@@ -29,7 +29,7 @@ export class PersonStateUpdater {
         break;
 
       case 'selfEsteem':
-        updated.selfEsteem = String(value ?? 0);
+        updated.selfEsteem = value ?? 0;
         break;
 
       case 'birthYear':

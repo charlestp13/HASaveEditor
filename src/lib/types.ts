@@ -15,10 +15,10 @@ export interface Person {
   portraitBaseId?: number;
   mood?: number;
   attitude?: number;
-  selfEsteem?: string;
+  selfEsteem?: number;
   readiness?: number;
   limit?: number;
-  Limit?: number;
+  Limit?: number; // game bug: save file uses both casings
   state?: number;
   professions?: Record<string, string>;
   skill?: number;

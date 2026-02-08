@@ -7,11 +7,11 @@ interface CharacterListProps {
   persons: Person[];
   currentDate: string;
   nameSearcher: NameSearcher;
-  onUpdate: (personId: string | number, field: string, value: number | null) => void;
-  onStringFieldUpdate: (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
-  onEditTraits?: (personId: string | number) => void;
-  onEditGenres?: (personId: string | number) => void;
-  onEditPortrait?: (personId: string | number) => void;
+  onUpdate: (personId: number, field: string, value: number | null) => void;
+  onStringFieldUpdate: (personId: number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => void;
+  onEditTraits?: (personId: number) => void;
+  onEditGenres?: (personId: number) => void;
+  onEditPortrait?: (personId: number) => void;
 }
 
 const gridComponents = {

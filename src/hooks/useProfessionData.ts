@@ -14,7 +14,7 @@ import {
 } from '@/lib';
 import { useNameTranslation } from './useNameTranslation';
 
-interface FilterConfig {
+interface FilterParams {
   selectedFilters: string[];
   search: string;
   genderFilter: GenderFilter;
@@ -32,7 +32,7 @@ export function useProfessionData(
   label: string,
   fileKey: string | null,
   selectedLanguage: string,
-  filterConfig: FilterConfig,
+  filterConfig: FilterParams,
   sortConfig: SortConfig
 ) {
   const [allPersons, setAllPersons] = useState<Person[]>([]);
@@ -44,8 +44,13 @@ export function useProfessionData(
   const labelLower = label.toLowerCase();
   const lastSortConfigRef = useRef<{ field: SortField; order: SortOrder } | null>(null);
 
-  const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
+  const { nameStrings, reload: reloadNames } = useNameTranslation(selectedLanguage);
   const nameSearcher = useMemo(() => new NameSearcher(nameStrings), [nameStrings]);
+
+  // Retry name translation when file is reloaded (e.g. after setting game path)
+  useEffect(() => {
+    if (fileKey && nameStrings.length === 0) reloadNames();
+  }, [fileKey, reloadNames]);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Data Loading
@@ -158,21 +163,21 @@ export function useProfessionData(
   // ─────────────────────────────────────────────────────────────────────────────
 
   const updatePersonLocal = useCallback(
-    (personId: string | number, updater: (person: Person) => Person) => {
+    (personId: number, updater: (person: Person) => Person) => {
       setAllPersons(prev => prev.map(p => (p.id === personId ? updater(p) : p)));
     },
     []
   );
 
   const handlePersonUpdate = useCallback(
-    (personId: string | number, field: string, value: number | null) => {
+    (personId: number, field: string, value: number | null) => {
       updatePersonLocal(personId, p => PersonStateUpdater.updateField(p, field, value));
     },
     [updatePersonLocal]
   );
 
   const handleStringFieldUpdate = useCallback(
-    (personId: string | number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => {
+    (personId: number, field: 'firstNameId' | 'lastNameId' | 'customName', value: string | null) => {
       updatePersonLocal(personId, p => PersonStateUpdater.updateStringField(p, field, value));
 
       const updateValue = field === 'customName' ? (value ?? '') : value;
@@ -184,7 +189,7 @@ export function useProfessionData(
   );
 
   const handleTraitAdd = useCallback(
-    (personId: string | number, trait: string) => {
+    (personId: number, trait: string) => {
       updatePersonLocal(personId, p => PersonStateUpdater.addTrait(p, trait));
 
       saveManager
@@ -195,7 +200,7 @@ export function useProfessionData(
   );
 
   const handleTraitRemove = useCallback(
-    (personId: string | number, trait: string) => {
+    (personId: number, trait: string) => {
       updatePersonLocal(personId, p => PersonStateUpdater.removeTrait(p, trait));
 
       saveManager
@@ -206,7 +211,7 @@ export function useProfessionData(
   );
 
   const handlePortraitUpdate = useCallback(
-    (personId: string | number, portraitId: number) => {
+    (personId: number, portraitId: number) => {
       updatePersonLocal(personId, p => ({ ...p, portraitBaseId: portraitId }));
 
       saveManager
@@ -221,9 +226,7 @@ export function useProfessionData(
       // Update local state directly
       setAllPersons(prev => prev.map(person => {
         if (person.studioId !== studioId) return person;
-        // selfEsteem is stored as string in Person type
-        const actualValue = field === 'selfEsteem' ? String(value) : value;
-        return { ...person, [field]: actualValue };
+        return { ...person, [field]: value };
       }));
 
       // Persist to backend
@@ -244,10 +247,9 @@ export function useProfessionData(
     allPersons,
     persons,
     loading,
-    error: error || nameError,
+    error,
     nameSearcher,
     availableStudios,
-    reloadNames,
     loadPersons,
     refresh,
     handlePersonUpdate,

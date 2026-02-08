@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, memo } from 'react';
-import { open } from '@tauri-apps/plugin-dialog';
 import { RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -65,9 +64,9 @@ export const ProfessionTab = memo(function ProfessionTab({
   onPortraitChange,
 }: ProfessionTabProps) {
   const [search, setSearch] = useState('');
-  const [editingPortraitPersonId, setEditingPortraitPersonId] = useState<string | number | null>(null);
-  const [editingTraitsPersonId, setEditingTraitsPersonId] = useState<string | number | null>(null);
-  const [editingGenresPersonId, setEditingGenresPersonId] = useState<string | number | null>(null);
+  const [editingPortraitPersonId, setEditingPortraitPersonId] = useState<number | null>(null);
+  const [editingTraitsPersonId, setEditingTraitsPersonId] = useState<number | null>(null);
+  const [editingGenresPersonId, setEditingGenresPersonId] = useState<number | null>(null);
 
   const currentDate = saveInfo?.current_date ?? '';
   const labelLower = label.toLowerCase();
@@ -79,7 +78,6 @@ export const ProfessionTab = memo(function ProfessionTab({
     error,
     nameSearcher,
     availableStudios,
-    reloadNames,
     loadPersons,
     refresh,
     handlePersonUpdate: handlePersonUpdateBase,
@@ -117,7 +115,7 @@ export const ProfessionTab = memo(function ProfessionTab({
   const { debouncedSave } = useDebouncedSave(savePerson, 300);
 
   const handlePersonUpdate = useCallback(
-    (personId: string | number, field: string, value: number | null) => {
+    (personId: number, field: string, value: number | null) => {
       handlePersonUpdateBase(personId, field, value);
       debouncedSave(`${personId}-${field}`, String(personId), field, value);
     },
@@ -125,7 +123,7 @@ export const ProfessionTab = memo(function ProfessionTab({
   );
 
   const handlePortraitChange = useCallback(
-    (personId: string | number, portraitId: number) => {
+    (personId: number, portraitId: number) => {
       const person = allPersons.find(p => p.id === personId);
       if (person) {
         const firstName = nameSearcher.getNameById(parseInt(person.firstNameId || '0', 10)) || '';
@@ -140,35 +138,19 @@ export const ProfessionTab = memo(function ProfessionTab({
   );
 
   const openTraitsEditor = useCallback(
-    (personId: string | number) => setEditingTraitsPersonId(personId),
+    (personId: number) => setEditingTraitsPersonId(personId),
     []
   );
 
   const openGenresEditor = useCallback(
-    (personId: string | number) => setEditingGenresPersonId(personId),
+    (personId: number) => setEditingGenresPersonId(personId),
     []
   );
 
   const openPortraitEditor = useCallback(
-    (personId: string | number) => setEditingPortraitPersonId(personId),
+    (personId: number) => setEditingPortraitPersonId(personId),
     []
   );
-
-  const handleSelectGamePath = useCallback(async () => {
-    try {
-      const selected = await open({
-        directory: true,
-        multiple: false,
-        title: 'Select Hollywood Animal Installation Folder',
-      });
-      if (selected && typeof selected === 'string') {
-        await saveManager.setGamePath(selected);
-        reloadNames();
-      }
-    } catch (err) {
-      console.error('Failed to set game path:', err);
-    }
-  }, [reloadNames]);
 
   const editingPerson = useMemo(
     () => (editingPortraitPersonId ? allPersons.find(p => p.id === editingPortraitPersonId) ?? null : null),
@@ -185,10 +167,6 @@ export const ProfessionTab = memo(function ProfessionTab({
     [editingGenresPersonId, allPersons]
   );
 
-  const isGamePathError = error?.includes('Game installation not found') ||
-    error?.includes('Browse for Game Folder') ||
-    error?.includes('verify the game installation path');
-
   const hasFilters = search || selectedFilters.length > 0;
   const emptyMessage = hasFilters
     ? `No ${labelLower} found${search ? ` matching "${search}"` : ''}`
@@ -201,11 +179,9 @@ export const ProfessionTab = memo(function ProfessionTab({
   if (error) {
     return (
       <ErrorState
-        title={isGamePathError ? 'Game Installation Not Found' : `Failed to load ${labelLower}`}
+        title={`Failed to load ${labelLower}`}
         message={error}
         onRetry={loadPersons}
-        onBrowse={isGamePathError ? handleSelectGamePath : undefined}
-        browseLabel="Browse for Game Folder"
       />
     );
   }

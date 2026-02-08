@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use crate::utils::paths;
 
 const ERR_NO_SAVE_LOADED: &str = "No save file loaded";
-const ERR_GAME_NOT_FOUND: &str = "Game installation not found. Please click 'Browse for Game Folder' and select your Hollywood Animal installation directory.";
+const ERR_GAME_NOT_FOUND: &str = "Game installation not found";
 
 #[derive(Default)]
 pub struct AppState {
