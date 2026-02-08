@@ -134,9 +134,9 @@ export const CharacterCard = memo(function CharacterCard({
             </Toggle>
           </div>
           <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">{professionName}</div>
+            <div className="text-label">{professionName}</div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Age:</span>
+              <span className="text-label">Age:</span>
               {age !== null && birthYear !== null ? (
                 <AgeAdjuster
                   age={age}
@@ -144,7 +144,7 @@ export const CharacterCard = memo(function CharacterCard({
                   onBirthYearChange={(year) => handleUpdate('birthYear', year)}
                 />
               ) : (
-                <span className="text-sm text-muted-foreground">{age ?? 'N/A'}</span>
+                <span className="text-label">{age ?? 'N/A'}</span>
               )}
             </div>
           </div>

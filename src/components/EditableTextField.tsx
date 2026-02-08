@@ -60,7 +60,7 @@ export function EditableTextField({
   if (!isEditing) {
     return (
       <div className={`flex items-center gap-1 ${className}`} onClick={(e) => e.stopPropagation()}>
-        <span className="text-sm text-muted-foreground select-none pointer-events-none">
+        <span className="text-label select-none pointer-events-none">
           {value || placeholder}
         </span>
         <Button

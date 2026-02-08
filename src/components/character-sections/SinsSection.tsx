@@ -8,7 +8,7 @@ interface SinsSectionProps {
 export function SinsSection({ aSins }: SinsSectionProps) {
   return (
     <CardSection title="Sins" collapsible defaultCollapsed>
-      <div className="flex flex-wrap gap-1">
+      <div className="tag-list">
         {aSins.map((sin) => (
           <SimpleBadge key={sin} label={sin} />
         ))}

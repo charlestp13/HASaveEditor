@@ -1,7 +1,7 @@
 export class Formatter {
   static toTitleCase(str: string): string {
     return str
-      .replace(/_/g, ' ')
+      .replaceAll('_', ' ')
       .toLowerCase()
       .replace(/\b\w/g, (c) => c.toUpperCase());
   }

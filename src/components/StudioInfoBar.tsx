@@ -202,7 +202,7 @@ export const StudioInfoBar = memo(function StudioInfoBar({
         </div>
 
         <div
-          className={`overflow-hidden transition-all duration-200 ease-out ${
+          className={`collapsible ${
             viewMode === 'resources' ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
@@ -260,7 +260,7 @@ export const StudioInfoBar = memo(function StudioInfoBar({
         </div>
 
         <div
-          className={`overflow-hidden transition-all duration-200 ease-out ${
+          className={`collapsible ${
             viewMode === 'opponents' ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
@@ -339,7 +339,7 @@ export const StudioInfoBar = memo(function StudioInfoBar({
         </div>
 
         <div
-          className={`overflow-hidden transition-all duration-200 ease-out ${
+          className={`collapsible ${
             viewMode === 'departments' ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >

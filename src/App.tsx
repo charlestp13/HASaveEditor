@@ -300,7 +300,7 @@ export default function App() {
   const getFileName = (): string => {
     const path = saveManager.getCurrentPath();
     if (!path) return '';
-    const parts = path.replace(/\\/g, '/').split('/');
+    const parts = path.replaceAll('\\', '/').split('/');
     return parts[parts.length - 1] || '';
   };
 

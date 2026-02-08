@@ -30,7 +30,7 @@ export function IconButton({
       disabled={!isClickable}
       className={`flex items-center gap-2 px-3 py-2 rounded border bg-card hover:bg-accent transition-colors text-sm font-medium ${textAlignClass} ${
         isSelected ? 'border-l-4' : ''
-      } ${!isClickable ? 'opacity-50 cursor-not-allowed' : ''}`}
+      } ${!isClickable ? 'state-disabled' : ''}`}
       style={isSelected ? selectedBorderStyle : undefined}
     >
       {icon && (

@@ -164,7 +164,7 @@ export function PortraitEditorDialog({
                   className={`
                     relative rounded-lg overflow-hidden border-2 transition-all p-2 bg-muted/30 cursor-pointer
                     ${isCurrent ? 'border-primary ring-2 ring-primary/50' : 'border-transparent'}
-                    ${isUsed && !isCurrent ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary/50'}
+                    ${isUsed && !isCurrent ? 'state-disabled' : 'hover:border-primary/50'}
                   `}
                 >
                   <PortraitThumbnail id={id} sex={sex} ages={ages} portraitType={portraitType} />
@@ -204,7 +204,7 @@ export function PortraitEditorDialog({
             Previous
           </Button>
 
-          <span className="text-sm text-muted-foreground">
+          <span className="text-label">
             Page {currentPage + 1} of {totalPages}
           </span>
 

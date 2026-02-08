@@ -108,7 +108,7 @@ export const BatchPopover = memo(function BatchPopover({
         <div className="space-y-3">
           <div>
             <h4 className="font-medium text-sm mb-2">Select Studio</h4>
-            <div className="flex flex-wrap gap-1">
+            <div className="tag-list">
               {studioOptions.map((studio) => (
                 <StudioButton
                   key={studio.id}

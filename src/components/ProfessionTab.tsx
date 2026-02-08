@@ -321,7 +321,7 @@ const Toolbar = memo(function Toolbar({
         disabled={loading}
       />
       
-      <div className="text-sm text-muted-foreground">
+      <div className="text-label">
         {loading ? (
           <>Loading...</>
         ) : (

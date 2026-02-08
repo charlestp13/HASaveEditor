@@ -20,7 +20,7 @@ export function TraitsSection({
       defaultCollapsed
     >
       {displayableTraits.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
+        <div className="tag-list">
           {displayableTraits.map((trait) => (
             <TraitBadge key={trait} trait={trait} />
           ))}

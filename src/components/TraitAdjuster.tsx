@@ -100,7 +100,7 @@ export function TraitAdjuster({ open, onOpenChange, traits, onAdd, onRemove }: T
                 </div>
               ))
             ) : (
-              <div className="text-sm text-muted-foreground text-center py-8">
+              <div className="text-label text-center py-8">
                 No conflicting traits available
               </div>
             )}
@@ -120,7 +120,7 @@ export function TraitAdjuster({ open, onOpenChange, traits, onAdd, onRemove }: T
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-muted-foreground text-center py-8">
+              <div className="text-label text-center py-8">
                 No non-conflicting traits available
               </div>
             )}

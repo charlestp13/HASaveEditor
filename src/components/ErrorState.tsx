@@ -17,7 +17,7 @@ export function ErrorState({
         <div className="text-destructive text-5xl">⚠</div>
         <div>
           <p className="font-semibold text-destructive">{title}</p>
-          <p className="text-sm text-muted-foreground mt-2">{message}</p>
+          <p className="text-label mt-2">{message}</p>
         </div>
         {onRetry && (
           <Button onClick={onRetry} variant="outline" size="sm">

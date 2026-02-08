@@ -16,7 +16,7 @@ export function GenresSection({ genres, onEditGenres }: GenresSectionProps) {
       defaultCollapsed
     >
       {genres.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
+        <div className="tag-list">
           {genres.map((genre) => (
             <GenreBadge key={genre.id} genre={genre.id} value={genre.value} />
           ))}
