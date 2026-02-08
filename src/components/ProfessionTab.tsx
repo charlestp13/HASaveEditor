@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,7 @@ interface ProfessionTabProps {
   onShadyFilterChange: (filter: ShadyFilter) => void;
   usedPortraits: Map<number, UsedPortrait>;
   onPortraitChange?: (oldPortraitId: number | undefined, newPortraitId: number, characterName: string, profession: string) => void;
+  onGamePathError?: (error: string) => void;
 }
 
 export const ProfessionTab = memo(function ProfessionTab({
@@ -62,6 +63,7 @@ export const ProfessionTab = memo(function ProfessionTab({
   onShadyFilterChange,
   usedPortraits,
   onPortraitChange,
+  onGamePathError,
 }: ProfessionTabProps) {
   const [search, setSearch] = useState('');
   const [editingPortraitPersonId, setEditingPortraitPersonId] = useState<number | null>(null);
@@ -76,10 +78,11 @@ export const ProfessionTab = memo(function ProfessionTab({
     persons,
     loading,
     error,
+    gamePathError,
     nameSearcher,
     availableStudios,
     loadPersons,
-    refresh,
+    reload,
     handlePersonUpdate: handlePersonUpdateBase,
     handleStringFieldUpdate,
     handleTraitAdd,
@@ -94,6 +97,10 @@ export const ProfessionTab = memo(function ProfessionTab({
     { selectedFilters, search, genderFilter, shadyFilter },
     { sortField, sortOrder, currentDate }
   );
+
+  useEffect(() => {
+    if (gamePathError) onGamePathError?.(gamePathError);
+  }, [gamePathError, onGamePathError]);
 
   const savePerson = useCallback(
     (personId: string, field: string, value: number | null) => {
@@ -126,9 +133,7 @@ export const ProfessionTab = memo(function ProfessionTab({
     (personId: number, portraitId: number) => {
       const person = allPersons.find(p => p.id === personId);
       if (person) {
-        const firstName = nameSearcher.getNameById(parseInt(person.firstNameId || '0', 10)) || '';
-        const lastName = nameSearcher.getNameById(parseInt(person.lastNameId || '0', 10)) || '';
-        const characterName = `${firstName} ${lastName}`.trim() || `ID ${person.id}`;
+        const characterName = PersonUtils.getFullName(person, nameSearcher.names);
         onPortraitChange?.(person.portraitBaseId, portraitId, characterName, profession);
       }
       handlePortraitUpdate(personId, portraitId);
@@ -197,7 +202,7 @@ export const ProfessionTab = memo(function ProfessionTab({
         sortField={sortField}
         sortOrder={sortOrder}
         onSortChange={onSortChange}
-        onRefresh={refresh}
+        onRefresh={reload}
         saveInfo={saveInfo}
         availableStudios={availableStudios}
         selectedFilters={selectedFilters}

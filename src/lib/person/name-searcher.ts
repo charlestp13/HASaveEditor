@@ -36,6 +36,10 @@ export class NameSearcher {
     return this.nameArray[id];
   }
 
+  get names(): string[] {
+    return this.nameArray;
+  }
+
   get length(): number {
     return this.nameArray.length;
   }

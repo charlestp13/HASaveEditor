@@ -119,8 +119,14 @@ pub fn get_language_strings(
     let game_path = state.ensure_game_path()?;
     let file_path = paths::language_file_path(&game_path, &language_code);
 
-    let content = fs::read_to_string(&file_path)
-        .map_err(|e| format!("Failed to read language file at '{}': {}", file_path, e))?;
+    let content = fs::read_to_string(&file_path).map_err(|_| {
+        if !paths::validate_game_path(&game_path) {
+            state.clear_game_path();
+            "Game installation not found".to_string()
+        } else {
+            format!("Failed to read language file at '{}'", file_path)
+        }
+    })?;
 
     let data: Value = serde_json::from_str(&content)
         .map_err(|e| format!("Failed to parse language file: {}", e))?;

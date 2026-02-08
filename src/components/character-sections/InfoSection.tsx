@@ -55,7 +55,7 @@ export function InfoSection({
           </div>
           {gender !== undefined && (
             <div className="text-xs text-muted-foreground">
-              Gender: {gender === 1 ? 'Female' : 'Male'}
+              Gender: {PersonUtils.getGenderLabel(gender)}
             </div>
           )}
           {birthParsed && (

@@ -69,7 +69,7 @@ export class Studios {
     return OPPONENT_STUDIOS.find((s) => s.id === studioId);
   }
 
-  static isValidId(value: string): value is StudioId {
+  static isValid(value: string): value is StudioId {
     return (ALL_STUDIO_IDS as readonly string[]).includes(value);
   }
 

@@ -1,5 +1,6 @@
 import type { Person, WhiteTag } from '../types';
 import { WhiteTagFactory } from '../white-tags';
+import { PersonUtils } from './person-utils';
 
 export class PersonStateUpdater {
   static updateField(person: Person, field: string, value: number | null): Person {
@@ -14,14 +15,13 @@ export class PersonStateUpdater {
         updated.attitude = value ?? 0;
         break;
 
-      case 'skill':
-        if (updated.professions) {
-          const profName = Object.keys(updated.professions)[0];
-          if (profName) {
-            updated.professions = { ...updated.professions, [profName]: String(value ?? 0) };
-          }
+      case 'skill': {
+        const profName = PersonUtils.getProfessionName(updated);
+        if (profName !== 'Unknown') {
+          updated.professions = { ...updated.professions, [profName]: String(value ?? 0) };
         }
         break;
+      }
 
       case 'limit':
         updated.limit = value ?? 0;

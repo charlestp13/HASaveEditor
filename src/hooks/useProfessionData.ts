@@ -44,7 +44,8 @@ export function useProfessionData(
   const labelLower = label.toLowerCase();
   const lastSortConfigRef = useRef<{ field: SortField; order: SortOrder } | null>(null);
 
-  const { nameStrings, reload: reloadNames } = useNameTranslation(selectedLanguage);
+  const { nameStrings, error: nameError, reload: reloadNames } = useNameTranslation(selectedLanguage);
+  const gamePathError = nameError?.includes('Game installation not found') ? nameError : null;
   const nameSearcher = useMemo(() => new NameSearcher(nameStrings), [nameStrings]);
 
   // Retry name translation when file is reloaded (e.g. after setting game path)
@@ -153,7 +154,7 @@ export function useProfessionData(
     refreshKey
   ]);
 
-  const refresh = useCallback(() => {
+  const reload = useCallback(() => {
     sortedOrderRef.current = [];
     setRefreshKey(k => k + 1);
   }, []);
@@ -248,10 +249,11 @@ export function useProfessionData(
     persons,
     loading,
     error,
+    gamePathError,
     nameSearcher,
     availableStudios,
     loadPersons,
-    refresh,
+    reload,
     handlePersonUpdate,
     handleStringFieldUpdate,
     handleTraitAdd,

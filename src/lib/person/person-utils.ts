@@ -93,12 +93,12 @@ export class PersonUtils {
   }
 
   static isExecutive(person: Person): boolean {
-    const profName = PersonUtils.getRawProfessionName(person);
+    const profName = PersonUtils.getProfessionName(person);
     return PersonUtils.EXECUTIVE_PROFESSIONS.includes(profName as typeof PersonUtils.EXECUTIVE_PROFESSIONS[number]);
   }
 
   static isDeptHead(person: Person): boolean {
-    const profName = PersonUtils.getRawProfessionName(person);
+    const profName = PersonUtils.getProfessionName(person);
     return PersonUtils.LIEUTENANT_PROFESSIONS.includes(profName as typeof PersonUtils.LIEUTENANT_PROFESSIONS[number]);
   }
 
@@ -133,6 +133,34 @@ export class PersonUtils {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
+  // Gender Helpers
+  // ───────────────────────────────────────────────────────────────────────────
+
+  static getGenderLabel(gender: number | undefined): string {
+    return gender === 1 ? 'Female' : 'Male';
+  }
+
+  static getGenderCode(gender: number | undefined): string {
+    return gender === 1 ? 'F' : 'M';
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Name Helpers
+  // ───────────────────────────────────────────────────────────────────────────
+
+  static getNames(person: Person, nameStrings: string[]): { firstName: string; lastName: string } {
+    return {
+      firstName: nameStrings[parseInt(person.firstNameId || '0', 10)] || '',
+      lastName: nameStrings[parseInt(person.lastNameId || '0', 10)] || '',
+    };
+  }
+
+  static getFullName(person: Person, nameStrings: string[]): string {
+    const { firstName, lastName } = PersonUtils.getNames(person, nameStrings);
+    return `${firstName} ${lastName}`.trim() || `ID ${person.id}`;
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
   // Display Helpers
   // ───────────────────────────────────────────────────────────────────────────
 
@@ -140,8 +168,7 @@ export class PersonUtils {
     if (person.customName) return person.customName;
 
     if (nameStrings && person.firstNameId && person.lastNameId) {
-      const firstName = nameStrings[parseInt(person.firstNameId, 10)] || person.firstNameId;
-      const lastName = nameStrings[parseInt(person.lastNameId, 10)] || person.lastNameId;
+      const { firstName, lastName } = PersonUtils.getNames(person, nameStrings);
       return `${firstName} ${lastName}`;
     }
 
@@ -158,20 +185,20 @@ export class PersonUtils {
   // Profession Helpers
   // ───────────────────────────────────────────────────────────────────────────
 
-  static getRawProfessionName(person: Person): string {
+  static getProfessionName(person: Person): string {
     if (!person.professions) return 'Unknown';
     const keys = Object.keys(person.professions);
     return keys.length > 0 ? keys[0] : 'Unknown';
   }
 
-  static getProfessionName(person: Person): string {
-    const rawName = PersonUtils.getRawProfessionName(person);
-    if (rawName === 'Unknown') return rawName;
-    return PersonUtils.PROFESSION_DISPLAY_NAMES[rawName] || rawName;
+  static getProfessionDisplayName(person: Person): string {
+    const name = PersonUtils.getProfessionName(person);
+    if (name === 'Unknown') return name;
+    return PersonUtils.PROFESSION_DISPLAY_NAMES[name] || name;
   }
 
   static getProfessionValue(person: Person): number {
-    const profession = PersonUtils.getRawProfessionName(person);
+    const profession = PersonUtils.getProfessionName(person);
     const value = person.professions?.[profession];
     if (!value) return 0;
     return typeof value === 'string' ? parseFloat(value) : value;

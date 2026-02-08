@@ -7,6 +7,7 @@ interface AsyncActionState {
 
 interface UseAsyncActionReturn extends AsyncActionState {
   execute: <T>(action: () => Promise<T>) => Promise<T | undefined>;
+  setError: (error: string) => void;
   clearError: () => void;
 }
 
@@ -31,9 +32,13 @@ export function useAsyncAction(): UseAsyncActionReturn {
     }
   }, []);
 
+  const setError = useCallback((error: string) => {
+    setState(s => ({ ...s, error }));
+  }, []);
+
   const clearError = useCallback(() => {
     setState(s => ({ ...s, error: null }));
   }, []);
 
-  return { ...state, execute, clearError };
+  return { ...state, execute, setError, clearError };
 }

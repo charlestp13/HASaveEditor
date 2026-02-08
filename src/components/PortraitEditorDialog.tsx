@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { type PortraitType, type UsedPortrait } from '@/lib';
+import { PersonUtils, type PortraitType, type UsedPortrait } from '@/lib';
 import { loadPortraitManifest } from '@/lib/portrait-manifest';
 
 interface PortraitEditorDialogProps {
@@ -92,7 +92,7 @@ export function PortraitEditorDialog({
   const [portraitAges, setPortraitAges] = useState<Record<number, string[]>>({});
   const [currentPage, setCurrentPage] = useState(0);
 
-  const sex = gender === 1 ? 'F' : 'M';
+  const sex = PersonUtils.getGenderCode(gender);
 
   useEffect(() => {
     if (!open) return;
@@ -145,7 +145,7 @@ export function PortraitEditorDialog({
       <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>
-            Select {typeLabel} Portrait ({gender === 1 ? 'Female' : 'Male'}) - {allPortraitIds.length} available
+            Select {typeLabel} Portrait ({PersonUtils.getGenderLabel(gender)}) - {allPortraitIds.length} available
           </DialogTitle>
         </DialogHeader>
 

@@ -18,6 +18,7 @@ import {
   SinsSection,
 } from '@/components/character-sections';
 import type { Person, NameSearcher } from '@/lib';
+import { PersonUtils } from '@/lib';
 
 interface CharacterCardProps {
   character: Person;
@@ -66,8 +67,7 @@ export const CharacterCard = memo(function CharacterCard({
     canEditTraits,
   } = useCharacterData(character, currentDate);
 
-  const firstName = nameSearcher.getNameById(parseInt(character.firstNameId || '0', 10)) || character.firstNameId || '';
-  const lastName = nameSearcher.getNameById(parseInt(character.lastNameId || '0', 10)) || character.lastNameId || '';
+  const { firstName, lastName } = PersonUtils.getNames(character, nameSearcher.names);
 
   const handleUpdate = useCallback(
     (field: string, value: number | null) => onUpdate?.(personId, field, value),

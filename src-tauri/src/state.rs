@@ -52,4 +52,8 @@ impl AppState {
     pub fn set_game_path(&self, path: String) {
         *self.game_path.lock().unwrap() = Some(path);
     }
+
+    pub fn clear_game_path(&self) {
+        *self.game_path.lock().unwrap() = None;
+    }
 }

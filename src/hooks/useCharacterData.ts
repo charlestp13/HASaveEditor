@@ -33,7 +33,7 @@ export function useCharacterData(character: Person, currentDate: string) {
     // ─────────────────────────────────────────────────────────────
     // Profession Info
     // ─────────────────────────────────────────────────────────────
-    const professionName = PersonUtils.getProfessionName(character);
+    const professionName = PersonUtils.getProfessionDisplayName(character);
     const professionValue = PersonUtils.getProfessionValue(character);
 
     // ─────────────────────────────────────────────────────────────

@@ -50,21 +50,18 @@ function isGamePathError(err: unknown): boolean {
 
 function buildPortraitMap(
   persons: Person[],
-  profession: string,
   nameStrings: string[]
 ): Map<number, UsedPortrait> {
   const portraits = new Map<number, UsedPortrait>();
   
   for (const person of persons) {
     if (person.portraitBaseId === undefined) continue;
-    
-    const firstName = nameStrings[parseInt(person.firstNameId || '0', 10)] || '';
-    const lastName = nameStrings[parseInt(person.lastNameId || '0', 10)] || '';
-    const rawProfName = person.professions ? Object.keys(person.professions)[0] : profession;
-    
+
+    const profName = PersonUtils.getProfessionName(person);
+
     portraits.set(person.portraitBaseId, {
-      characterName: `${firstName} ${lastName}`.trim() || `ID ${person.id}`,
-      profession: PersonUtils.PROFESSION_DISPLAY_NAMES[rawProfName] || rawProfName,
+      characterName: PersonUtils.getFullName(person, nameStrings),
+      profession: PersonUtils.PROFESSION_DISPLAY_NAMES[profName] || profName,
     });
   }
   
@@ -87,7 +84,7 @@ export default function App() {
   const [talentPortraits, setTalentPortraits] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
   const [lieutPortraits, setLieutPortraits] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
   const [agentPortraits, setAgentPortraits] = useState<Map<string, Map<number, UsedPortrait>>>(new Map());
-  const { loading, error, execute, clearError } = useAsyncAction();
+  const { loading, error, execute, setError, clearError } = useAsyncAction();
 
   const handleSortChange = useCallback((field: SortField, order: SortOrder) => {
     setSortField(field);
@@ -181,16 +178,16 @@ export default function App() {
     const talentPortraitMap = new Map<string, Map<number, UsedPortrait>>();
     for (const profession of TALENT_PROFESSIONS) {
       const persons = await saveManager.getPersons(profession);
-      talentPortraitMap.set(profession, buildPortraitMap(persons, profession, nameStrings));
+      talentPortraitMap.set(profession, buildPortraitMap(persons, nameStrings));
     }
 
     const lieutPortraitMap = new Map<string, Map<number, UsedPortrait>>();
     const executives = await saveManager.getPersons('Executive');
-    lieutPortraitMap.set('Executive', buildPortraitMap(executives, 'Executive', nameStrings));
+    lieutPortraitMap.set('Executive', buildPortraitMap(executives, nameStrings));
 
     const agentPortraitMap = new Map<string, Map<number, UsedPortrait>>();
     const agents = await saveManager.getPersons('Agent');
-    agentPortraitMap.set('Agent', buildPortraitMap(agents, 'Agent', nameStrings));
+    agentPortraitMap.set('Agent', buildPortraitMap(agents, nameStrings));
     
     setSaveInfo(info);
     setResources(res);
@@ -444,6 +441,7 @@ export default function App() {
                     combinedTalentPortraits
                   }
                   onPortraitChange={handlePortraitChange}
+                  onGamePathError={setError}
                 />
               );
             })}

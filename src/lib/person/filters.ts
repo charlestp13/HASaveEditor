@@ -41,8 +41,7 @@ export class PersonFilters {
 
     if (filters.gender && filters.gender !== 'all') {
       filtered = filtered.filter((person) => {
-        const personGender = person.gender === 1 ? 'female' : 'male';
-        return personGender === filters.gender;
+        return filters.gender === 'female' ? person.gender === 1 : person.gender !== 1;
       });
     }
 
@@ -64,7 +63,7 @@ export class PersonFilters {
   }
 
   static parseSelectedFilters(selectedFilters: string[]): FilterConfig {
-    const studioFilters = selectedFilters.filter((f) => Studios.isValidId(f));
+    const studioFilters = selectedFilters.filter((f) => Studios.isValid(f));
 
     return {
       excludeStudios: studioFilters.length > 0 ? studioFilters : undefined,

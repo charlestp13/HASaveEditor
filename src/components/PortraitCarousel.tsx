@@ -27,7 +27,7 @@ export function PortraitCarousel({ professions, gender, portraitBaseId }: Portra
     const manifest = await loadPortraitManifest();
 
     const professionType = PersonUtils.getPortraitType(professions);
-    const sex = gender === 1 ? 'F' : 'M';
+    const sex = PersonUtils.getGenderCode(gender);
     const key = `${professionType}_${sex}_${portraitBaseId}`;
 
     const ageVariants = manifest[key] || [];
